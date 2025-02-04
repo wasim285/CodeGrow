@@ -1,0 +1,99 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: white;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    width: 380px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+.login-box h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: black;
+    font-weight: bold;
+}
+
+.login-box input {
+    width: 85%;
+    padding: 12px;
+    margin: 12px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    color: black;
+    background: white;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login-box button {
+    width: 85%;
+    padding: 12px;
+    background: #0057ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background 0.3s;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15px;
+}
+
+.login-box button:hover {
+    background: #003bb5;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.login-box p {
+    margin-top: 20px;
+    color: black;
+    font-size: 15px;
+}
+
+.login-box a {
+    color: #0057ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-box a:hover {
+    text-decoration: underline;
+}
+
+.auth-navbar {
+    background: #1a1a2e;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+.auth-navbar .navbar-logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #4caf50;
+    text-decoration: none;
+}

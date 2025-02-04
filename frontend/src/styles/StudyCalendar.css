@@ -1,0 +1,191 @@
+body {
+    background-color: #0f0f1a !important;
+    color: white;
+}
+
+.study-calendar-container {
+    max-width: 75%;
+    margin: auto;
+    text-align: center;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    margin-top: 80px;
+    transition: all 0.3s ease-in-out;
+}
+
+.fc {
+    background: white !important;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.study-calendar-container h2, 
+.calendar-subtitle {
+    color: black !important;
+}
+
+.fc th, 
+.fc td, 
+.fc-daygrid-day-number, 
+.fc-toolbar-title {
+    color: black !important;
+    font-weight: bold;
+}
+
+.fc-daygrid-day {
+    transition: 0.3s;
+    cursor: pointer;
+    font-size: 14px;
+    color: black;
+}
+
+.fc-daygrid-day:hover {
+    background: rgba(46, 204, 113, 0.25);
+    border-radius: 5px;
+}
+
+.fc-event {
+    background: #007bff !important;
+    color: white !important;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.fc-event:hover {
+    background: #0056b3 !important;
+    transform: scale(1.05);
+}
+
+.fc-toolbar {
+    color: black !important; 
+    font-weight: bold;
+}
+
+.fc-button {
+    background-color: #4caf50 !important;
+    color: white !important;
+    border: none;
+}
+
+.fc-button:hover {
+    background-color: #388e3c !important;
+}
+
+.success-alert {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #32CD32;
+    color: black;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    animation: fadeOut 3s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.modal {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2c3e50;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    width: 400px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.modal h3 {
+    font-size: 22px;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.modal select {
+    width: 90%;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+}
+
+.modal button {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 45%;
+}
+
+.modal button.confirm {
+    background: #27ae60;
+    color: white;
+}
+
+.modal button.confirm:hover {
+    background: #2ecc71;
+    transform: scale(1.05);
+}
+
+.modal button.cancel {
+    background: #e74c3c;
+    color: white;
+}
+
+.modal button.cancel:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+.modal-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}

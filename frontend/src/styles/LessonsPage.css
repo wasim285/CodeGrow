@@ -1,0 +1,67 @@
+.lessons-page {
+    background-color: #0f172a;
+    color: white;
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+.lessons-container {
+    width: 80%;
+    margin: auto;
+    text-align: center;
+}
+
+.lessons-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #facc15;
+    margin-bottom: 20px;
+}
+
+.lessons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.lesson-card {
+    background-color: #1e293b;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+    text-align: left;
+    transition: transform 0.2s ease-in-out;
+}
+
+.lesson-card:hover {
+    transform: translateY(-5px);
+}
+
+.lesson-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: #f8fafc;
+}
+
+.lesson-card p {
+    font-size: 1rem;
+    color: #cbd5e1;
+    margin-bottom: 15px;
+}
+
+.lesson-btn {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 1rem;
+    color: white;
+    background-color: #22c55e;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.2s;
+}
+
+.lesson-btn:hover {
+    background-color: #16a34a;
+}

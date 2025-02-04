@@ -1,0 +1,168 @@
+.lesson-page {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+    font-family: "Poppins", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 80px;
+}
+
+.lesson-container {
+    display: flex;
+    width: 90%;
+    max-width: 1100px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 20px;
+}
+
+.lesson-content {
+    flex: 1;
+    padding: 20px;
+    text-align: left;
+}
+
+.lesson-content h1 {
+    font-size: 32px;
+    font-weight: bold;
+    color: #4caf50;
+    margin-bottom: 15px;
+}
+
+.lesson-content p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #b2b2b2;
+    margin-bottom: 20px;
+}
+
+.lesson-code {
+    flex: 1;
+    padding: 20px;
+    text-align: left;
+}
+
+.code-editor {
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.cm-editor {
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.run-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.run-btn:hover {
+    background: #388e3c;
+    transform: scale(1.05);
+}
+
+.output {
+    background: #262626;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-family: "Courier New", monospace;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.next-lesson {
+    margin-top: 25px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+}
+
+.next-lesson h3 {
+    font-size: 22px;
+    color: #f4f4f4;
+    margin-bottom: 10px;
+}
+
+.next-lesson p {
+    font-size: 18px;
+    color: #b2b2b2;
+}
+
+.next-lesson button {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.next-lesson button:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+.ai-recommendation {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.ai-recommendation h3 {
+    font-size: 22px;
+    color: #00bcd4;
+    margin-bottom: 10px;
+}
+
+.ai-recommendation p {
+    font-size: 18px;
+    color: #b2b2b2;
+}
+
+@media (max-width: 768px) {
+    .lesson-container {
+        flex-direction: column;
+        width: 95%;
+        padding: 20px;
+    }
+
+    .lesson-content, .lesson-code {
+        width: 100%;
+    }
+
+    .lesson-content h1 {
+        font-size: 26px;
+    }
+
+    .lesson-content p {
+        font-size: 16px;
+    }
+
+    .run-btn {
+        width: 100%;
+    }
+
+    .output {
+        font-size: 14px;
+    }
+}

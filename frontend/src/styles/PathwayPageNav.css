@@ -1,0 +1,36 @@
+.navbar {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar .logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: #4caf50;
+    text-decoration: none;
+}
+
+.navbar .logo a {
+    color: #4caf50;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar .logo a:hover {
+    color: #66bb6a;
+    transform: scale(1.05);
+}
+
+.pathways-navbar {
+    justify-content: flex-start;
+    background: rgba(10, 10, 20, 0.95);
+    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+}
