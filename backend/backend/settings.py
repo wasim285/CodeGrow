@@ -109,12 +109,10 @@ if DEBUG:
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-# Collect static files here when running collectstatic
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ✅ Correct
 
-# Additional static files (especially for admin panel)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),  # ✅ Correct
+    os.path.join(BASE_DIR, 'backend', 'static'),  # ✅ This should be your actual static folder
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
