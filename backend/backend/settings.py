@@ -61,7 +61,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {
     'default': dj_database_url.config(
         default="postgres://codegrow_user:wasim@localhost:5432/codegrow_db",
-        conn_max_age=600, ssl_require=True
+        conn_max_age=600, ssl_require=False
     )
 }
 
