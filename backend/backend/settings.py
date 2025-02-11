@@ -114,7 +114,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Additional static files (especially for admin panel)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "backend", "staticfiles"),  # Add this line
+    os.path.join(BASE_DIR, "static"),  # ✅ Correct
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
