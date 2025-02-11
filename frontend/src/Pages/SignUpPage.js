@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SignUpPage.css";
+import { registerUser } from "../utils/api";
 
 const SignUpPage = () => {
     const [formData, setFormData] = useState({ 
@@ -26,11 +27,7 @@ const SignUpPage = () => {
         setSuccessMessage("");
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/accounts/register/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+            const response = await registerUser(formData);
 
             const responseData = await response.json();
 

@@ -1,5 +1,10 @@
-import axios from "axios"; 
-const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
+import axios from "axios";
+
+// Automatically switch between local and deployed backend
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://codegrow-backend.onrender.com/api/accounts/"
+    : "http://127.0.0.1:8000/api/accounts/";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -29,25 +34,6 @@ export const getStudySessions = async (token) => {
   return await api.get("study-sessions/", {
     headers: { Authorization: `Token ${token}` },
   });
-};
-
-export const fetchRecommendations = async (token, setRecommendedLessons, setError, setLoadingRecommendations) => {
-  try {
-    setLoadingRecommendations(true);
-
-    const response = await api.get("recommended-lessons/", {
-      headers: { Authorization: `Token ${token}` },
-    });
-
-    if (!response.data) throw new Error("Failed to fetch recommendations.");
-
-    setRecommendedLessons(response.data.recommended_lessons || []);
-  } catch (err) {
-    console.error("Recommendation Fetch Error:", err);
-    setError("Failed to load recommended lessons.");
-  } finally {
-    setLoadingRecommendations(false);
-  }
 };
 
 export const logoutUser = async (token) => {
