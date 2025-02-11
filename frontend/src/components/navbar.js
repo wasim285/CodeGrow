@@ -39,6 +39,7 @@ const Navbar = () => {
             <div className="nav-links">
                 <Link to="/dashboard">Home</Link>
                 <Link to="/lessons">Lessons</Link>
+                <Link to="/pathways">Pathway</Link> {/* ✅ Added Pathway Link */}
                 <Link to="/study-sessions">Study Sessions</Link>
             </div>
 

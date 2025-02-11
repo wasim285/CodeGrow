@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Authcontext";
 import "../styles/LessonPage.css";
@@ -18,6 +18,8 @@ const LessonPage = () => {
     const [userCode, setUserCode] = useState(""); 
     const [output, setOutput] = useState(""); 
     const [running, setRunning] = useState(false); 
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [step, setStep] = useState(1); 
 
     useEffect(() => {
         if (!user) {
@@ -38,13 +40,11 @@ const LessonPage = () => {
                     headers: { Authorization: `Token ${token}` },
                 });
 
-                if (!response.ok) {
-                    throw new Error("Lesson not found.");
-                }
+                if (!response.ok) throw new Error("Lesson not found.");
 
                 const data = await response.json();
                 setLesson(data);
-                setUserCode(data.code_snippet || ""); 
+                setUserCode(step === 2 ? (data.code_snippet || "") : ""); 
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -53,35 +53,62 @@ const LessonPage = () => {
         };
 
         fetchLesson();
-    }, [user, lessonId, navigate]);
+    }, [user, lessonId, navigate, step]);
 
+    const markAsCompleted = async () => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/api/accounts/complete-lesson/${lessonId}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Token ${localStorage.getItem("token")}`
+                }
+            });
+    
+            if (response.ok) {
+                setIsCompleted(true);
+                window.dispatchEvent(new Event("lessonCompleted"));  
+            }
+        } catch (error) {
+            console.error("Error completing lesson:", error);
+        }
+    };
+    
     const runCode = async () => {
         if (running) return;
         setRunning(true);
         setOutput("Running...");
-
+    
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/accounts/run-code/", { 
+            const token = localStorage.getItem("token");
+
+            const response = await fetch("http://127.0.0.1:8000/api/accounts/run-code/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Token ${localStorage.getItem("token")}`,
+                    Authorization: `Token ${token}`,
                 },
                 body: JSON.stringify({
-                    code: userCode,
-                    lesson_id: lessonId  
+                    code: userCode.trim(), 
+                    lesson_id: lessonId,
                 }),
             });
 
             const result = await response.json();
-            setOutput(result.output || result.error || "No output");
+
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to execute code.");
+            }
+
+            setOutput(result.output || "No output.");
         } catch (error) {
             setOutput("Error running code.");
+            console.error("Run Code Error:", error);
         } finally {
             setRunning(false);
         }
     };
-
+    
     if (loading) return <TreeLoader />;
     if (error) return <p className="error-message">{error}</p>;
 
@@ -90,46 +117,84 @@ const LessonPage = () => {
             <Navbar />
             <div className="lesson-container">
                 <div className="lesson-content">
-                    {lesson ? (
+                    {lesson && (
                         <>
                             <h1>{lesson.title}</h1>
                             <p className="lesson-description">{lesson.description}</p>
-
-                            <div className="lesson-details">
-                                <h3>Lesson Overview</h3>
-                                {lesson.content ? (
-                                    <div dangerouslySetInnerHTML={{ __html: lesson.content.replace(/\n/g, "<br>") }} />
-                                ) : (
-                                    <p className="error-message">No content available.</p>
+                            
+                            {step === 1 && (
+                                <div>
+                                    <h3>Step 1: Introduction</h3>
+                                    <p>{lesson.step1_content}</p>
+                                </div>
+                            )}
+                            {step === 2 && (
+                                <div>
+                                    <h3>Step 2: Guided Code Example</h3>
+                                    <p>{lesson.step2_content}</p>
+                                    <div className="code-editor">
+                                        <CodeMirror
+                                            value={userCode}
+                                            height="250px"
+                                            extensions={[python()]}
+                                            theme="dark"
+                                            onChange={(value) => setUserCode(value)}
+                                        />
+                                    </div>
+                                    <button className="run-btn" onClick={runCode} disabled={running}>
+                                        {running ? "Running..." : "Run Code"}
+                                    </button>
+                                    <div className="output">
+                                        <h3>Output:</h3>
+                                        <pre>{output}</pre>
+                                    </div>
+                                </div>
+                            )}
+                            {step === 3 && (
+                                <div className="mini-challenge">
+                                    <h3>Step 3: Mini Challenge</h3>
+                                    {lesson.step3_challenge ? (
+                                        <>
+                                            <p>{lesson.step3_challenge}</p>
+                                            <div className="code-editor">
+                                                <CodeMirror
+                                                    value={userCode}
+                                                    height="250px"
+                                                    extensions={[python()]}
+                                                    theme="dark"
+                                                    onChange={(value) => setUserCode(value)}
+                                                />
+                                            </div>
+                                            <button className="run-btn" onClick={runCode} disabled={running}>
+                                                {running ? "Running..." : "Run Code"}
+                                            </button>
+                                            <div className="output">
+                                                <h3>Output:</h3>
+                                                <pre>{output}</pre>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <p className="error-message">No challenge available for this lesson.</p>
+                                    )}
+                                </div>
+                            )}
+                            
+                            <div className="step-navigation">
+                                {step > 1 && (
+                                    <button className="previous-btn" onClick={() => setStep(step - 1)}>Previous</button>
                                 )}
-                            </div>
-                        </>
-                    ) : (
-                        <p className="error-message">No lesson available.</p>
-                    )}
-                </div>
-
-                <div className="lesson-code">
-                    {lesson && (
-                        <>
-                            <h3>Try it out:</h3>
-                            <div className="code-editor">
-                                <CodeMirror
-                                    value={userCode}
-                                    height="250px"
-                                    extensions={[python()]}
-                                    theme="dark"
-                                    onChange={(value) => setUserCode(value)}
-                                />
-                            </div>
-
-                            <button className="run-btn" onClick={runCode} disabled={running}>
-                                {running ? "Running..." : "Run Code"}
-                            </button>
-
-                            <div className="output">
-                                <h3>Output:</h3>
-                                <pre>{output}</pre>
+                                {step < 3 && (
+                                    <button className="next-btn" onClick={() => setStep(step + 1)}>Next</button>
+                                )}
+                                {step === 3 && (
+                                    <button 
+                                        className={`mark-btn ${isCompleted ? "completed" : ""}`} 
+                                        onClick={markAsCompleted} 
+                                        disabled={isCompleted}
+                                    >
+                                        {isCompleted ? "Completed ✅" : "Mark as Completed"}
+                                    </button>
+                                )}
                             </div>
                         </>
                     )}

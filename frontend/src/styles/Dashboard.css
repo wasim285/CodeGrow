@@ -103,15 +103,16 @@
 }
 
 .study-sessions-box li {
-    background: #2c3e50;
-    color: #ecf0f1;
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 16px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    background: #2c3e50;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .study-sessions-box li .session-time,
@@ -140,6 +141,20 @@
 .study-sessions-box li .session-time, .study-sessions-box li .lesson-title {
     display: block;
     line-height: 1.5;
+}
+
+.remove-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.remove-btn:hover {
+    background: darkred;
 }
 
 .recommendations-box {
@@ -218,4 +233,72 @@ input[type="number"]::-webkit-outer-spin-button {
 .study-session-item .date-time .start-time,
 .study-session-item .date-time .end-time {
     margin-top: 5px;
+}
+
+.session-item {
+    background: #1f1f2e;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+.session-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.session-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.session-actions {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.session-item.expanded .session-actions {
+    opacity: 1;
+    max-height: 50px;
+}
+
+.cancel-btn {
+    background: gray;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.cancel-btn:hover {
+    background: darkgray;
+}
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #2c3e50;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.15);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #81c784);
+    color: white;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+    transition: width 0.5s ease-in-out;
 }

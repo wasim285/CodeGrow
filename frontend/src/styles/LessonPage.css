@@ -7,6 +7,7 @@
     flex-direction: column;
     align-items: center;
     padding-top: 80px;
+    justify-content: center;
 }
 
 .lesson-container {
@@ -165,4 +166,154 @@
     .output {
         font-size: 14px;
     }
+}
+
+.mark-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+}
+
+.mark-btn:hover {
+    background: #388e3c;
+    transform: scale(1.05);
+}
+
+.mark-btn.completed {
+    background: #777;
+    cursor: not-allowed;
+}
+
+.next-btn {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    display: block;
+}
+
+.next-btn:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.previous-btn, .next-btn, .mark-btn {
+    flex: 1;
+    margin: 0 10px;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease, transform 0.2s ease;
+    text-align: center;
+}
+
+.previous-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+}
+
+.previous-btn:hover {
+    background: #d32f2f;
+    transform: scale(1.05);
+}
+
+.next-btn {
+    background: #ff9800;
+    color: white;
+    border: none;
+}
+
+.next-btn:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+.mark-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    display: block;
+}
+
+.mark-btn:hover {
+    background: #388e3c;
+    transform: scale(1.05);
+}
+
+.previous-btn {
+    --color: 255, 0, 0;
+}
+
+.next-btn, .mark-btn {
+    --color: 0, 255, 0;
+}
+
+.previous-btn, .next-btn, .mark-btn {
+    border-radius: .5em;
+    transition: .3s;
+    background-color: rgba(var(--color), .2);
+    color: rgb(var(--color));
+    fill: rgb(var(--color));
+    font-family: monospace;
+    font-weight: bolder;
+    font-size: x-large;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border: 2px solid rgb(var(--color));
+    box-shadow: 0 0 10px rgba(var(--color), .4);
+    outline: none;
+    display: flex;
+    align-items: center;
+    padding: .5em 1em;
+}
+
+.previous-btn:hover, .next-btn:hover, .mark-btn:hover {
+    box-shadow: 0 0 0 5px rgba(var(--color), .5);
+}
+
+.previous-btn span, .next-btn span, .mark-btn span {
+    transform: scale(.8);
+    transition: .3s;
+}
+
+.previous-btn:hover span, .next-btn:hover span, .mark-btn:hover span {
+    transform: scale(1);
 }

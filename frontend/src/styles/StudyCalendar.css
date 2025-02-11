@@ -1,10 +1,13 @@
+/* 🔹 General Page Styles */
 body {
     background-color: #0f0f1a !important;
     color: white;
+    font-family: Arial, sans-serif;
 }
 
+/* 🔹 Study Calendar Container */
 .study-calendar-container {
-    max-width: 75%;
+    max-width: 65%;  /* Reduce width for better fit */
     margin: auto;
     text-align: center;
     padding: 30px;
@@ -16,31 +19,35 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
+.study-calendar-container h2,
+.calendar-subtitle {
+    color: black !important;
+}
+
+/* 🔹 Full Calendar Styling */
 .fc {
     background: white !important;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    height: 700px; /* Increase vertical height */
+    max-height: 80vh; /* Ensure it does not overflow */
+    overflow: hidden;
 }
 
-.study-calendar-container h2, 
-.calendar-subtitle {
-    color: black !important;
-}
-
-.fc th, 
-.fc td, 
-.fc-daygrid-day-number, 
+.fc th,
+.fc td,
+.fc-daygrid-day-number,
 .fc-toolbar-title {
     color: black !important;
     font-weight: bold;
 }
 
 .fc-daygrid-day {
+    height: 100px; /* Increase row height */
+    font-size: 16px;
     transition: 0.3s;
     cursor: pointer;
-    font-size: 14px;
-    color: black;
 }
 
 .fc-daygrid-day:hover {
@@ -48,6 +55,7 @@ body {
     border-radius: 5px;
 }
 
+/* 🔹 Study Session Event */
 .fc-event {
     background: #007bff !important;
     color: white !important;
@@ -65,8 +73,9 @@ body {
     transform: scale(1.05);
 }
 
+/* 🔹 Calendar Toolbar */
 .fc-toolbar {
-    color: black !important; 
+    color: black !important;
     font-weight: bold;
 }
 
@@ -80,30 +89,24 @@ body {
     background-color: #388e3c !important;
 }
 
-.success-alert {
+/* 🔹 Modal Styling */
+.modal-overlay {
+    display: block;
     position: fixed;
-    top: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #32CD32;
-    color: black;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 16px;
-    text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    animation: fadeOut 3s forwards;
-}
-
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; }
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
 }
 
 .modal {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center aligns all fields */
+    justify-content: center;
+    gap: 10px;
     position: fixed;
     top: 50%;
     left: 50%;
@@ -135,57 +138,128 @@ body {
     margin-bottom: 10px;
 }
 
-.modal select {
-    width: 90%;
-    padding: 8px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* 🔹 Input Fields Styling */
+.modal label {
+    width: 100%;
+    text-align: left;
+    font-weight: bold;
+    color: white;
+    margin-top: 8px;
 }
 
+.modal select,
+.modal input[type="time"] {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #222831;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* 🔹 Time Picker Customization */
+.modal input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.modal input[type="time"]:focus,
+.modal select:focus {
+    border-color: #00a8e8;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 168, 232, 0.6);
+}
+
+/* 🔹 Modal Buttons */
 .modal-buttons {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between; /* Evenly distributes buttons */
+    width: 100%;
     margin-top: 15px;
 }
 
-.modal button {
-    border: none;
+.modal-buttons button {
+    flex: 1; /* Makes buttons take equal space */
     padding: 10px 15px;
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s;
-    width: 45%;
+    margin: 5px;
+    text-align: center;
 }
 
-.modal button.confirm {
+.modal-buttons button.confirm {
     background: #27ae60;
     color: white;
 }
 
-.modal button.confirm:hover {
+.modal-buttons button.confirm:hover {
     background: #2ecc71;
     transform: scale(1.05);
 }
 
-.modal button.cancel {
+.modal-buttons button.cancel {
     background: #e74c3c;
     color: white;
 }
 
-.modal button.cancel:hover {
+.modal-buttons button.cancel:hover {
     background: #c0392b;
     transform: scale(1.05);
 }
 
-.modal-overlay {
-    display: block;
+/* 🔹 Success Alert */
+.success-alert {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #32CD32;
+    color: black;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    animation: fadeOut 3s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* 🔹 Study Sessions Box */
+.study-sessions-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.study-sessions-box li {
+    background: #2c3e50;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.session-title {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.session-time {
+    font-size: 14px;
+    color: #d1d1d1;
 }
