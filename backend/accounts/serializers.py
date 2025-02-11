@@ -65,39 +65,29 @@ class ProfileSerializer(serializers.ModelSerializer):
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "content", "difficulty_level", "learning_goal", "code_snippet"]
+        fields = ["id", "title", "description", "step1_content", "step2_content", "step3_challenge", "code_snippet"]
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
-    next_lesson = serializers.SerializerMethodField()
+    """Updated serializer to include completed lessons count correctly."""
+    total_lessons_completed = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProgress
-        fields = ["streak", "lessons_completed", "last_active", "next_lesson"]
+        fields = ["streak", "total_lessons_completed", "last_active"]
 
-    def get_next_lesson(self, obj):
-        if not obj.user.learning_goal or not obj.user.difficulty_level:
-            return None
-
-        next_lesson = (
-            Lesson.objects.filter(
-                learning_goal=obj.user.learning_goal,
-                difficulty_level=obj.user.difficulty_level
-            )
-            .exclude(id__in=obj.completed_lessons.values_list("id", flat=True))
-            .order_by("order")
-            .first()
-        )
-
-        return LessonSerializer(next_lesson).data if next_lesson else None
+    def get_total_lessons_completed(self, obj):
+        """Returns the total number of lessons the user has completed."""
+        return obj.completed_lessons.count()
 
 
 class StudySessionSerializer(serializers.ModelSerializer):
-    lesson_title = serializers.CharField(source="lesson.title", read_only=True)
+    id = serializers.IntegerField(read_only=True)  # ✅ Ensure ID is included in responses
+    lesson_title = serializers.CharField(source="lesson.title", read_only=True)  # ✅ Fix lesson title retrieval
 
     class Meta:
         model = StudySession
-        fields = ['lesson', 'lesson_title', 'date', 'start_time', 'end_time']
+        fields = ['id', 'lesson', 'lesson_title', 'date', 'start_time', 'end_time']
 
     def validate(self, data):
         if data["end_time"] <= data["start_time"]:

@@ -33,7 +33,9 @@ class CustomUser(AbstractUser):
 class Lesson(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    content = models.TextField(blank=True, null=True)
+    step1_content = models.TextField(blank=True, null=True)  # Step 1: Introduction
+    step2_content = models.TextField(blank=True, null=True)  # Step 2: Guided Code Example
+    step3_challenge = models.TextField(blank=True, null=True)  # Step 3: Mini Challenge
     difficulty_level = models.CharField(max_length=50, choices=CustomUser.DIFFICULTY_LEVELS)
     learning_goal = models.CharField(max_length=50, choices=CustomUser.LEARNING_GOALS)
     order = models.PositiveIntegerField()
@@ -57,48 +59,20 @@ class Lesson(models.Model):
                     {
                         "title": "Introduction to Python",
                         "description": "Learn Python basics.",
-                        "content": "<h3>What is Python?</h3><p>Python is a beginner-friendly programming language.</p>",
+                        "step1_content": "<h3>What is Python?</h3><p>Python is a beginner-friendly programming language.</p>",
+                        "step2_content": "<h3>Basic Syntax</h3><p>Let's write a simple Python program.</p>",
+                        "step3_challenge": "<h3>Mini Challenge</h3><p>Write a Python program that prints 'Hello, World!'.</p>",
                         "order": 1,
                         "code_snippet": "print('Hello, Python!')",
                     },
                     {
                         "title": "Variables & Data Types",
                         "description": "Learn about variables and data types.",
-                        "content": "<h3>Understanding Variables</h3><p>Variables store data in Python.</p>",
+                        "step1_content": "<h3>Understanding Variables</h3><p>Variables store data in Python.</p>",
+                        "step2_content": "<h3>Working with Variables</h3><p>Define a variable and assign a value.</p>",
+                        "step3_challenge": "<h3>Mini Challenge</h3><p>Declare a variable 'name' and assign your name to it.</p>",
                         "order": 2,
                         "code_snippet": "age = 25\nname = 'John'",
-                    },
-                ],
-                "Intermediate": [
-                    {
-                        "title": "Functions & Loops",
-                        "description": "Master functions and loops.",
-                        "content": "<h3>Understanding Functions</h3><p>Functions help you write reusable code.</p>",
-                        "order": 3,
-                        "code_snippet": "def greet():\n    print('Hello!')\ngreet()",
-                    },
-                    {
-                        "title": "Data Structures",
-                        "description": "Learn about Lists, Tuples, and Dictionaries.",
-                        "content": "<h3>Data Structures</h3><p>Python provides different ways to store and manage data.</p>",
-                        "order": 4,
-                        "code_snippet": "students = {'Alice': 90, 'Bob': 85}",
-                    },
-                ],
-                "Advanced": [
-                    {
-                        "title": "Object-Oriented Programming (OOP)",
-                        "description": "Understand classes and objects in Python.",
-                        "content": "<h3>What is OOP?</h3><p>OOP is a programming paradigm that uses objects and classes.</p>",
-                        "order": 5,
-                        "code_snippet": "class Car:\n    def __init__(self, brand):\n        self.brand = brand\n\nmy_car = Car('Toyota')",
-                    },
-                    {
-                        "title": "File Handling",
-                        "description": "Learn how to read and write files in Python.",
-                        "content": "<h3>Working with Files</h3><p>Python allows reading and writing files using open().</p>",
-                        "order": 6,
-                        "code_snippet": "with open('data.txt', 'w') as f:\n    f.write('Hello, World!')",
                     },
                 ],
             },
@@ -116,22 +90,56 @@ class Lesson(models.Model):
                 difficulty_level=user.difficulty_level,
                 defaults={
                     "description": lesson_data["description"],
-                    "content": lesson_data["content"],
+                    "step1_content": lesson_data["step1_content"],
+                    "step2_content": lesson_data["step2_content"],
+                    "step3_challenge": lesson_data["step3_challenge"],
                     "order": lesson_data["order"],
                     "code_snippet": lesson_data["code_snippet"],
                 },
             )
 
 
+from datetime import timedelta, date
+
 class UserProgress(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=CASCADE, related_name="progress")
-    streak = models.PositiveIntegerField(default=0)
+    streak = models.PositiveIntegerField(default=0)  # 🔥 Learning Streak
     lessons_completed = models.PositiveIntegerField(default=0)
     last_active = models.DateField(auto_now=True)
     completed_lessons = models.ManyToManyField(Lesson, blank=True)
 
     def __str__(self):
         return f"Progress for {self.user.username}"
+
+    def mark_lesson_completed(self, lesson):
+        """Marks a lesson as completed, unlocks the next lesson, and updates progress."""
+
+        # ✅ Ensure the lesson isn't already marked as completed
+        if lesson not in self.completed_lessons.all():
+            self.completed_lessons.add(lesson)
+            self.lessons_completed += 1
+
+            # ✅ Update Learning Streak
+            today = date.today()
+            if self.last_active == today - timedelta(days=1):  # Was active yesterday
+                self.streak += 1
+            elif self.last_active != today:  # Missed a day
+                self.streak = 1
+
+            self.last_active = today
+            self.save()
+
+        return self.unlock_next_lesson(lesson)
+
+    def unlock_next_lesson(self, lesson):
+        """Finds and unlocks the next lesson if available."""
+        next_lesson = Lesson.objects.filter(
+            learning_goal=self.user.learning_goal,
+            difficulty_level=self.user.difficulty_level,
+            order__gt=lesson.order  # Get next lesson in sequence
+        ).order_by("order").first()
+
+        return next_lesson.id if next_lesson else None
 
 
 class StudySession(models.Model):
@@ -145,13 +153,16 @@ class StudySession(models.Model):
     def __str__(self):
         return f"Study Session for {self.user.username} on {self.lesson.title}"
 
+    def delete(self, *args, **kwargs):
+        """Ensure lesson removal from study sessions correctly reflects in the UI"""
+        print(f"🟢 Deleting Study Session: {self.id} for {self.user.username}")
+        super().delete(*args, **kwargs)
+
 
 @receiver(post_save, sender=CustomUser)
 def assign_lessons_on_signup(sender, instance, created, **kwargs):
     if created:
-        from .models import UserProgress
         UserProgress.objects.get_or_create(user=instance)
 
     if instance.learning_goal and instance.difficulty_level:
-        from .models import Lesson
         Lesson.create_default_lessons(instance)

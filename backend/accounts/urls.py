@@ -13,7 +13,11 @@ urlpatterns = [
     path("study-sessions/<int:pk>/", views.StudySessionDetailView.as_view(), name="study-session-detail"),
     path("run-code/", views.RunCodeView.as_view(), name="run-code"),
     path("all-lessons/", views.all_lessons, name="all-lessons"),
-
- 
-    path("recommended-lessons/", views.RecommendedLessonsView.as_view(), name="recommended-lessons"),
+    
+    # ✅ REPLACED AI RECOMMENDATION: Fetching recommended lessons without AI
+    path("recommended-lessons/", views.AllLessonsView.as_view(), name="recommended-lessons"),  
+    
+    path("complete_lesson/", views.complete_lesson, name="complete_lesson"),
+    path("complete-lesson/<int:lesson_id>/", views.complete_lesson, name="complete-lesson"),
+    path("check-lesson-completion/<int:lesson_id>/", views.check_lesson_completion, name="check-lesson-completion"),
 ]

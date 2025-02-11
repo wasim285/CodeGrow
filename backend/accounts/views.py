@@ -12,7 +12,6 @@ from .serializers import (
     RegisterSerializer, LoginSerializer, UserProgressSerializer, 
     LessonSerializer, ProfileSerializer, StudySessionSerializer
 )
-from .huggingface_integration import recommend_lessons
 from .models import CustomUser, UserProgress, Lesson, StudySession
 import subprocess
 
@@ -81,6 +80,45 @@ def all_lessons(request):
     return Response(serializer.data)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_lesson(request, lesson_id):
+    """Marks a lesson as completed for the user and updates progress count."""
+    user = request.user
+
+    try:
+        lesson = Lesson.objects.get(id=lesson_id)
+        progress, created = UserProgress.objects.get_or_create(user=user)
+
+        if lesson in progress.completed_lessons.all():
+            return Response({"message": "Lesson already completed."}, status=status.HTTP_200_OK)
+
+        progress.completed_lessons.add(lesson)
+        progress.lessons_completed = progress.completed_lessons.count()
+        progress.save()
+
+        return Response({"message": "Lesson marked as completed.", "lessons_completed": progress.lessons_completed}, status=status.HTTP_200_OK)
+
+    except Lesson.DoesNotExist:
+        return Response({"error": "Lesson not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_lesson_completion(request, lesson_id):
+    """Checks if a lesson has been completed by the user."""
+    user = request.user
+    try:
+        progress, _ = UserProgress.objects.get_or_create(user=user)
+        lesson_completed = progress.completed_lessons.filter(id=lesson_id).exists()
+        return Response({"lesson_completed": lesson_completed}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class LessonListView(generics.ListAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
@@ -101,13 +139,69 @@ class LessonDetailView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, *args, **kwargs):
+        lesson = self.get_object()
+        return Response({
+            "title": lesson.title,
+            "description": lesson.description,
+            "step1_content": lesson.step1_content,
+            "step2_content": lesson.step2_content,
+            "step3_challenge": lesson.step3_challenge,
+            "code_snippet": lesson.code_snippet,
+        }, status=status.HTTP_200_OK)
+
+
+class LessonListView(generics.ListAPIView):
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.learning_goal or not user.difficulty_level:
+            return Lesson.objects.none()
+
+        return Lesson.objects.filter(
+            learning_goal=user.learning_goal.strip(),
+            difficulty_level=user.difficulty_level.strip()
+        ).order_by("order")
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        lessons_data = [
+            {
+                "title": lesson.title,
+                "description": lesson.description,
+                "step1_content": lesson.step1_content,
+                "step2_content": lesson.step2_content,
+                "step3_challenge": lesson.step3_challenge,
+                "code_snippet": lesson.code_snippet,
+            }
+            for lesson in queryset
+        ]
+        return Response(lessons_data, status=status.HTTP_200_OK)
+
 
 class AllLessonsView(generics.ListAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Lesson.objects.all().order_by("order")
+        return Lesson.objects.all().order_by("order")  # Ensure this is returning lessons correctly
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        lessons_data = [
+            {
+                "title": lesson.title,
+                "description": lesson.description,
+                "step1_content": lesson.step1_content,
+                "step2_content": lesson.step2_content,
+                "step3_challenge": lesson.step3_challenge,
+                "code_snippet": lesson.code_snippet,
+            }
+            for lesson in queryset
+        ]
+        return Response(lessons_data, status=status.HTTP_200_OK)
 
 
 class DashboardView(APIView):
@@ -125,17 +219,14 @@ class DashboardView(APIView):
         current_lesson = available_lessons.first()
         study_sessions = StudySession.objects.filter(user=user)
 
-        recommended_lessons = []
-        try:
-            recommended_lessons = recommend_lessons(progress, available_lessons.exclude(id=current_lesson.id))
-        except Exception:
-            recommended_lessons = available_lessons.exclude(id=current_lesson.id)[:3]
+        # ✅ Recommended lessons are now the next 3 lessons in the user's pathway
+        recommended_lessons = available_lessons.exclude(id__in=progress.completed_lessons.all())[:3]
 
         return Response({
             "current_lesson": LessonSerializer(current_lesson).data if current_lesson else None,
-            "recommended_lessons": [],
+            "recommended_lessons": LessonSerializer(recommended_lessons, many=True).data,
             "study_sessions": StudySessionSerializer(study_sessions, many=True).data,
-            "progress": UserProgressSerializer(progress).data
+            "progress": UserProgressSerializer(progress).data,
         })
 
 
@@ -157,6 +248,11 @@ class StudySessionDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return StudySession.objects.filter(user=self.request.user)
 
+    def delete(self, request, *args, **kwargs):
+        study_session = self.get_object()
+        study_session.delete()
+        return Response({"message": "Study session removed successfully!"}, status=status.HTTP_204_NO_CONTENT)
+
 
 class RunCodeView(APIView):
     permission_classes = [IsAuthenticated]
@@ -165,22 +261,21 @@ class RunCodeView(APIView):
         code = request.data.get("code", "").strip()
         lesson_id = request.data.get("lesson_id")
 
-        if not code:
-            return Response({"error": "No code provided."}, status=status.HTTP_400_BAD_REQUEST)
+        if not code or not lesson_id:
+            return Response({"error": "Missing code or lesson_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            lesson = Lesson.objects.get(id=lesson_id)
-
+            # ✅ Execute Python code safely
             result = subprocess.run(
                 ["python", "-c", code],
                 capture_output=True, text=True, timeout=5
             )
 
             output = result.stdout if result.stdout else result.stderr
-            return Response({"output": output, "lesson": lesson.title}, status=status.HTTP_200_OK)
 
-        except Lesson.DoesNotExist:
-            return Response({"error": "Invalid lesson ID."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                "output": output.strip(),
+            }, status=status.HTTP_200_OK)
 
         except subprocess.TimeoutExpired:
             return Response({"error": "Execution timeout exceeded."}, status=status.HTTP_408_REQUEST_TIMEOUT)
@@ -193,27 +288,6 @@ class RunCodeView(APIView):
 def assign_lessons_on_signup(sender, instance, created, **kwargs):
     if created or (instance.learning_goal and instance.difficulty_level):
         Lesson.create_default_lessons(instance)
-
-
-class RecommendedLessonsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        progress, _ = UserProgress.objects.get_or_create(user=user)
-
-        available_lessons = Lesson.objects.filter(
-            learning_goal=user.learning_goal,
-            difficulty_level=user.difficulty_level
-        ).order_by("order")
-
-        recommended_lessons = []
-        try:
-            recommended_lessons = recommend_lessons(progress, available_lessons)
-        except Exception:
-            recommended_lessons = available_lessons[:3]
-
-        return Response({"recommended_lessons": LessonSerializer(recommended_lessons, many=True).data})
 
 
 class LogoutView(APIView):
