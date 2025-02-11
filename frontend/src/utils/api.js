@@ -1,7 +1,5 @@
 import axios from "axios"; 
-
-// ✅ Change this to the deployed backend URL
-const API_BASE_URL = "https://codegrow-backend.onrender.com/api/";
+const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
