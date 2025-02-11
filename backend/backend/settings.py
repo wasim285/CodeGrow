@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")
 
 DEBUG = False
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = ["codegrow-backend.onrender.com", "localhost", "127.0.0.1"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -28,7 +28,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ Add this for static files
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ For static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,7 +57,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-
 # ✅ PostgreSQL Database Configuration
 DATABASES = {
     'default': dj_database_url.config(
@@ -78,10 +77,21 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# ✅ Static and Media Files Configuration
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ✅ Collects all static files here
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # ✅ Development static files
+]
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# ✅ Use WhiteNoise for static file compression in production
+if not DEBUG:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -99,24 +109,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
-
-# Allow static files to be served in development (Optional)
-if DEBUG:
-    import mimetypes
-    mimetypes.add_type("text/css", ".css", True)
-
-# Static Files Settings
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ✅ Correct
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'backend', 'static'),  # ✅ This should be your actual static folder
-]
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Ensure static files load correctly in production
-if not DEBUG:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
