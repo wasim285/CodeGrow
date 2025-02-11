@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/",
   "dependencies": {
     "@codemirror/lang-python": "^6.1.7",
     "@fullcalendar/daygrid": "^6.1.15",
