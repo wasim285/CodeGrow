@@ -17,8 +17,7 @@ urlpatterns = [
     # ✅ Updated AI Recommendation Endpoint
     path("recommended-lessons/", views.AllLessonsView.as_view(), name="recommended-lessons"),  
     
-    
+    path("complete_lesson/", views.complete_lesson, name="complete_lesson"),
     path("complete-lesson/<int:lesson_id>/", views.complete_lesson, name="complete-lesson"),
-
     path("check-lesson-completion/<int:lesson_id>/", views.check_lesson_completion, name="check-lesson-completion"),
 ]

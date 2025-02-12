@@ -6,7 +6,10 @@ import Navbar from "../components/navbar";
 import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
-import api from "../utils/api"; // ✅ Use API helper
+import axios from "axios";
+
+// ✅ Correct API Base URL
+const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const LessonPage = () => {
     const { user } = useContext(AuthContext);
@@ -36,29 +39,35 @@ const LessonPage = () => {
                     return;
                 }
 
-                const response = await api.get(`lessons/${lessonId}/`, {
+                const response = await axios.get(`${API_BASE_URL}lessons/${lessonId}/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
 
                 setLesson(response.data);
-                if (response.data.code_snippet) {
+
+                // ✅ Pre-fill code editor only if it's Step 2 and lesson has a code snippet
+                if (response.data.code_snippet && step === 2) {
                     setUserCode(response.data.code_snippet);
                 }
             } catch (error) {
-                setError("Lesson not found.");
+                setError(error.response?.data?.error || "Lesson not found.");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchLesson();
-    }, [user, lessonId, navigate]); // ✅ Added `user` to dependencies
+    }, [user, lessonId, navigate]);
 
     const markAsCompleted = async () => {
         try {
-            const response = await api.post(`complete-lesson/${lessonId}/`, {}, {
-                headers: { Authorization: `Token ${localStorage.getItem("token")}` },
-            });
+            const response = await axios.post(
+                `${API_BASE_URL}complete-lesson/${lessonId}/`,
+                {},
+                {
+                    headers: { Authorization: `Token ${localStorage.getItem("token")}` },
+                }
+            );
 
             if (response.status === 200) {
                 setIsCompleted(true);
@@ -78,12 +87,11 @@ const LessonPage = () => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("User not authenticated.");
 
-            const response = await api.post("run-code/", { 
-                code: userCode.trim(), 
-                lesson_id: lessonId 
-            }, { 
-                headers: { Authorization: `Token ${token}` } 
-            });
+            const response = await axios.post(
+                `${API_BASE_URL}run-code/`,
+                { code: userCode.trim(), lesson_id: lessonId },
+                { headers: { Authorization: `Token ${token}` } }
+            );
 
             setOutput(response.data.output || "No output.");
         } catch (error) {
