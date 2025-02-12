@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SignUpPage.css";
-import { registerUser } from "../utils/api";
+import { registerUser } from "../utils/api"; // ✅ Importing API call correctly
 
 const SignUpPage = () => {
     const [formData, setFormData] = useState({ 
@@ -27,15 +27,15 @@ const SignUpPage = () => {
         setSuccessMessage("");
 
         try {
-            const response = await registerUser(formData);
-
-            const responseData = await response.json();
-
-            if (response.ok) {
-                setSuccessMessage("Signup successful! Redirecting to login...");
+            const response = await registerUser(formData); // ✅ Call API directly
+            
+            if (response.status === 201) { // ✅ Check correct success status
+                setSuccessMessage("✅ Signup successful! Redirecting to login...");
                 setTimeout(() => navigate("/login"), 2000);
             } else {
-                let errorMsg = "Signup failed. Please check your details.";
+                const responseData = response.data || {};
+                let errorMsg = "⚠️ Signup failed. Please check your details.";
+
                 if (responseData.username) {
                     errorMsg = `⚠️ ${responseData.username[0]}`;
                 } else if (responseData.email) {
@@ -43,10 +43,11 @@ const SignUpPage = () => {
                 } else if (responseData.password) {
                     errorMsg = `⚠️ ${responseData.password[0]}`;
                 }
+
                 setError(errorMsg);
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Signup Error:", error.response?.data || error.message);
             setError("❌ Network error. Please try again.");
         }
     };
