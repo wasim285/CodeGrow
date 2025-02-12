@@ -45,7 +45,7 @@ const DifficultyPage = () => {
 
             // ✅ FIXED: Corrected the API endpoint (removed `/accounts/`)
             const updateResponse = await fetch(
-                "https://codegrow-backend.onrender.com/api/profile/",
+                "https://codegrow-backend.onrender.com/api/accounts/profile/",
                 {
                     method: "PATCH",
                     headers: {
