@@ -1,9 +1,12 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/Authcontext";
 import { Link } from "react-router-dom";
-import { getAllLessons } from "../utils/api"; // ✅ Import API function
+import axios from "axios"; // ✅ Directly using axios for better control
 import "../styles/LessonsPage.css";
 import Navbar from "../components/navbar";
+
+// ✅ Correct API Base URL
+const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const LessonsPage = () => {
     const { user } = useContext(AuthContext);
@@ -16,20 +19,24 @@ const LessonsPage = () => {
             try {
                 const token = localStorage.getItem("token");
                 if (!token) {
-                    setError("User not authenticated");
+                    setError("User not authenticated. Please log in.");
                     setLoading(false);
                     return;
                 }
 
-                const response = await getAllLessons(token); // ✅ Use API helper function
+                // ✅ Fetch lessons directly with axios
+                const response = await axios.get(`${API_BASE_URL}all-lessons/`, {
+                    headers: { Authorization: `Token ${token}` },
+                });
 
-                if (response.status !== 200) {
-                    throw new Error("Failed to fetch lessons");
+                if (!response.data || response.data.length === 0) {
+                    setError("No lessons available.");
+                } else {
+                    setLessons(response.data);
                 }
-
-                setLessons(response.data);
             } catch (error) {
-                setError(error.message);
+                console.error("Lessons Fetch Error:", error.response?.data || error.message);
+                setError(error.response?.data?.error || "Failed to fetch lessons.");
             } finally {
                 setLoading(false);
             }
