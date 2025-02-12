@@ -96,14 +96,18 @@ def complete_lesson(request, lesson_id):
             return Response({"message": "Lesson already completed."}, status=status.HTTP_200_OK)
 
         progress.completed_lessons.add(lesson)
+
+        # ✅ Ensure progress is correctly updated
         progress.lessons_completed = progress.completed_lessons.count()
         progress.save()
 
-        return Response({"message": "Lesson marked as completed.", "lessons_completed": progress.lessons_completed}, status=status.HTTP_200_OK)
+        return Response({
+            "message": "Lesson marked as completed.",
+            "lessons_completed": progress.lessons_completed
+        }, status=status.HTTP_200_OK)
 
     except Lesson.DoesNotExist:
         return Response({"error": "Lesson not found."}, status=status.HTTP_404_NOT_FOUND)
-
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
