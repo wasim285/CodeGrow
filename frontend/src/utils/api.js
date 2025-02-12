@@ -3,8 +3,8 @@ import axios from "axios";
 // ✅ Automatically switch between local and deployed backend
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "https://codegrow-backend.onrender.com/api/"  // ✅ Removed extra `/accounts/`
-    : "http://127.0.0.1:8000/api/";
+    ? "https://codegrow-backend.onrender.com/api/accounts/"  // ✅ Ensure `/accounts/` is included
+    : "http://127.0.0.1:8000/api/accounts/";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -45,7 +45,7 @@ export const getProfile = async (token) => {
 // ✅ Fetch All Lessons
 export const getAllLessons = async (token) => {
   try {
-    return await api.get("lessons/", {
+    return await api.get("all-lessons/", {  // ✅ Use "all-lessons/" instead of "lessons/"
       headers: { Authorization: `Token ${token}` },
     });
   } catch (error) {
