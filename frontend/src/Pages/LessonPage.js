@@ -6,20 +6,23 @@ import Navbar from "../components/navbar";
 import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
+import axios from "axios";
+
+const API_BASE_URL = "https://codegrow-backend.onrender.com/api/";
 
 const LessonPage = () => {
     const { user } = useContext(AuthContext);
     const { lessonId } = useParams();
     const navigate = useNavigate();
-    
+
     const [lesson, setLesson] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [userCode, setUserCode] = useState(""); 
-    const [output, setOutput] = useState(""); 
-    const [running, setRunning] = useState(false); 
+    const [userCode, setUserCode] = useState("");
+    const [output, setOutput] = useState("");
+    const [running, setRunning] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
-    const [step, setStep] = useState(1); 
+    const [step, setStep] = useState(1);
 
     useEffect(() => {
         if (!user) {
@@ -35,7 +38,7 @@ const LessonPage = () => {
                     return;
                 }
 
-                const response = await fetch(`https://codegrow-backend.onrender.com/api/lessons/${lessonId}/`, {  
+                const response = await fetch(`${API_BASE_URL}lessons/${lessonId}/`, {
                     method: "GET",
                     headers: { Authorization: `Token ${token}` },
                 });
@@ -44,7 +47,7 @@ const LessonPage = () => {
 
                 const data = await response.json();
                 setLesson(data);
-                setUserCode(step === 2 ? (data.code_snippet || "") : ""); 
+                setUserCode(step === 2 ? (data.code_snippet || "") : "");
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -57,58 +60,47 @@ const LessonPage = () => {
 
     const markAsCompleted = async () => {
         try {
-            const response = await fetch(`https://codegrow-backend.onrender.com/api/accounts/complete-lesson/${lessonId}/`, {
+            const response = await fetch(`${API_BASE_URL}complete-lesson/${lessonId}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Token ${localStorage.getItem("token")}`
-                }
+                    Authorization: `Token ${localStorage.getItem("token")}`,
+                },
             });
-    
+
             if (response.ok) {
                 setIsCompleted(true);
-                window.dispatchEvent(new Event("lessonCompleted"));  
+                window.dispatchEvent(new Event("lessonCompleted"));
             }
         } catch (error) {
             console.error("Error completing lesson:", error);
         }
     };
-    
+
     const runCode = async () => {
         if (running) return;
         setRunning(true);
         setOutput("Running...");
-    
+
         try {
             const token = localStorage.getItem("token");
+            if (!token) throw new Error("User not authenticated.");
 
-            const response = await fetch("https://codegrow-backend.onrender.com/api/accounts/run-code/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Token ${token}`,
-                },
-                body: JSON.stringify({
-                    code: userCode.trim(), 
-                    lesson_id: lessonId,
-                }),
-            });
+            const response = await axios.post(
+                `${API_BASE_URL}run-code/`,
+                { code: userCode.trim(), lesson_id: lessonId },
+                { headers: { Authorization: `Token ${token}` } }
+            );
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || "Failed to execute code.");
-            }
-
-            setOutput(result.output || "No output.");
+            setOutput(response.data.output || "No output.");
         } catch (error) {
-            setOutput("Error running code.");
-            console.error("Run Code Error:", error);
+            console.error("Run Code API Error:", error.response?.data || error.message);
+            setOutput("Error executing code.");
         } finally {
             setRunning(false);
         }
     };
-    
+
     if (loading) return <TreeLoader />;
     if (error) return <p className="error-message">{error}</p>;
 
@@ -121,17 +113,17 @@ const LessonPage = () => {
                         <>
                             <h1>{lesson.title}</h1>
                             <p className="lesson-description">{lesson.description}</p>
-                            
+
                             {step === 1 && (
                                 <div>
                                     <h3>Step 1: Introduction</h3>
-                                    <p>{lesson.step1_content}</p>
+                                    <p dangerouslySetInnerHTML={{ __html: lesson.step1_content }}></p>
                                 </div>
                             )}
                             {step === 2 && (
                                 <div>
                                     <h3>Step 2: Guided Code Example</h3>
-                                    <p>{lesson.step2_content}</p>
+                                    <p dangerouslySetInnerHTML={{ __html: lesson.step2_content }}></p>
                                     <div className="code-editor">
                                         <CodeMirror
                                             value={userCode}
@@ -155,7 +147,7 @@ const LessonPage = () => {
                                     <h3>Step 3: Mini Challenge</h3>
                                     {lesson.step3_challenge ? (
                                         <>
-                                            <p>{lesson.step3_challenge}</p>
+                                            <p dangerouslySetInnerHTML={{ __html: lesson.step3_challenge }}></p>
                                             <div className="code-editor">
                                                 <CodeMirror
                                                     value={userCode}
@@ -178,7 +170,7 @@ const LessonPage = () => {
                                     )}
                                 </div>
                             )}
-                            
+
                             <div className="step-navigation">
                                 {step > 1 && (
                                     <button className="previous-btn" onClick={() => setStep(step - 1)}>Previous</button>
@@ -187,9 +179,9 @@ const LessonPage = () => {
                                     <button className="next-btn" onClick={() => setStep(step + 1)}>Next</button>
                                 )}
                                 {step === 3 && (
-                                    <button 
-                                        className={`mark-btn ${isCompleted ? "completed" : ""}`} 
-                                        onClick={markAsCompleted} 
+                                    <button
+                                        className={`mark-btn ${isCompleted ? "completed" : ""}`}
+                                        onClick={markAsCompleted}
                                         disabled={isCompleted}
                                     >
                                         {isCompleted ? "Completed ✅" : "Mark as Completed"}
