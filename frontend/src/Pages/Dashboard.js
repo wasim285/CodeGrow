@@ -4,6 +4,9 @@ import axios from "axios";
 import "../styles/Dashboard.css";
 import Navbar from "../components/navbar";
 
+// ✅ Correct API Base URL
+const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
+
 const Dashboard = () => {
     const navigate = useNavigate();
     const [mainLesson, setMainLesson] = useState(null);
@@ -24,15 +27,15 @@ const Dashboard = () => {
             }
 
             try {
-                // ✅ Use the correct dashboard endpoint
-                const response = await axios.get("https://codegrow-backend.onrender.com/api/dashboard/", {
+                // ✅ Fixed API path for dashboard
+                const response = await axios.get(`${API_BASE_URL}dashboard/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
 
                 const data = response.data;
 
                 // ✅ Ensure progress exists before accessing properties
-                setLessonsCompleted(data.progress?.total_lessons_completed || 0);
+                setLessonsCompleted(data.progress?.lessons_completed || 0);
                 setTotalLessons(data.total_lessons || 10);
                 setStreak(data.progress?.streak || 0);
                 setMainLesson(data.current_lesson);
@@ -55,7 +58,8 @@ const Dashboard = () => {
         }
 
         try {
-            const response = await axios.delete(`https://codegrow-backend.onrender.com/api/study-sessions/${sessionId}/`, {
+            // ✅ Fixed API path for removing study sessions
+            const response = await axios.delete(`${API_BASE_URL}study-sessions/${sessionId}/`, {
                 headers: { Authorization: `Token ${token}` },
             });
 
@@ -91,8 +95,8 @@ const Dashboard = () => {
                 <div className="grid-container">
                     <div className="progress-box">
                         <h3>📊 Your Progress</h3>
-                        <p>Lessons Completed: <strong>{lessonsCompleted || 0}/{totalLessons || 10}</strong></p>
-                        <p>🔥 Streak: <strong>{streak || 0} days</strong></p>
+                        <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
+                        <p>🔥 Streak: <strong>{streak} days</strong></p>
                         <div className="progress-bar">
                             <div className="progress-fill" style={{ width: `${progressPercentage}%` }}>
                                 {progressPercentage}%
