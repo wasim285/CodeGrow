@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { getProfile, getStudySessions, fetchRecommendations } from "../utils/api"; // ✅ Import API functions
 import "../styles/Dashboard.css";
 import Navbar from "../components/navbar";
 
@@ -18,16 +18,21 @@ const Dashboard = () => {
 
     useEffect(() => {
         const fetchDashboardData = async () => {
+            if (!token) {
+                setError("User not authenticated. Please log in again.");
+                return;
+            }
+
             try {
-                const response = await axios.get("http://127.0.0.1:8000/api/accounts/dashboard/", {
-                    headers: { Authorization: `Token ${token}` },
-                });
-                setMainLesson(response.data.current_lesson);
-                setRecommendedLessons(response.data.recommended_lessons);
-                setStudySessions(response.data.study_sessions);
-                setLessonsCompleted(response.data.progress.total_lessons_completed || 0);
-                setTotalLessons(response.data.total_lessons || 10);
-                setStreak(response.data.progress.streak || 0);
+                const response = await getProfile(token);
+                const data = response.data;
+
+                setMainLesson(data.current_lesson);
+                setRecommendedLessons(data.recommended_lessons);
+                setStudySessions(data.study_sessions);
+                setLessonsCompleted(data.progress.total_lessons_completed || 0);
+                setTotalLessons(data.total_lessons || 10);
+                setStreak(data.progress.streak || 0);
             } catch (error) {
                 setError("An error occurred while loading.");
                 console.error("Error fetching dashboard data:", error);
@@ -44,7 +49,8 @@ const Dashboard = () => {
         }
 
         try {
-            const response = await axios.delete(`http://127.0.0.1:8000/api/accounts/study-sessions/${sessionId}/`, {
+            const response = await fetch(`https://codegrow-backend.onrender.com/api/accounts/study-sessions/${sessionId}/`, {
+                method: "DELETE",
                 headers: { Authorization: `Token ${token}` },
             });
 
