@@ -65,15 +65,6 @@ def create_default_lessons(cls, user):
                     "order": 1,
                     "code_snippet": "print('Hello, Python!')",
                 },
-                {
-                    "title": "Variables & Data Types",
-                    "description": "Learn about variables and data types.",
-                    "step1_content": "<h3>Understanding Variables</h3><p>Variables store data in Python.</p>",
-                    "step2_content": "<h3>Working with Variables</h3><p>Define a variable and assign a value.</p>",
-                    "step3_challenge": "<h3>Mini Challenge</h3><p>Declare a variable 'name' and assign your name to it.</p>",
-                    "order": 2,
-                    "code_snippet": "age = 25\nname = 'John'",
-                },
             ],
         },
         "Portfolio": {
@@ -123,7 +114,6 @@ def create_default_lessons(cls, user):
                 "code_snippet": lesson_data["code_snippet"],
             },
         )
-
 
 
 from datetime import timedelta, date

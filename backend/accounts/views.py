@@ -60,17 +60,26 @@ class ProfileView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user  
 
-    def get(self, request, *args, **kwargs):
-        user = self.get_object()
-        serializer = self.get_serializer(user)
-        return Response(serializer.data, status=200)
-    
     def patch(self, request, *args, **kwargs):
         user = self.get_object()
         serializer = self.get_serializer(user, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=200)
+            
+            # ✅ Fetch updated lessons after profile update
+            lessons = Lesson.objects.filter(
+                learning_goal=user.learning_goal,
+                difficulty_level=user.difficulty_level
+            ).order_by("order")
+
+            return Response({
+                "message": "Profile updated successfully!",
+                "learning_goal": user.learning_goal,
+                "difficulty_level": user.difficulty_level,
+                "lessons": LessonSerializer(lessons, many=True).data
+            }, status=200)
+
         return Response(serializer.errors, status=400)
 
 

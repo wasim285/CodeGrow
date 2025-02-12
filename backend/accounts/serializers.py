@@ -58,12 +58,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         if updated:
             instance.save()
 
-            # ✅ Fix: Ensure lessons are properly assigned when difficulty changes
-            if "learning_goal" in validated_data or "difficulty_level" in validated_data:
-                Lesson.create_default_lessons(instance)
+            # ✅ Fix: Ensure lessons are reassigned when difficulty changes
+            Lesson.create_default_lessons(instance)
 
         return instance
-
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
