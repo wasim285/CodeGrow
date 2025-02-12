@@ -9,9 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")
 
-# ✅ Set DEBUG to True for now to help with debugging (Change back to False after testing)
-DEBUG = True  
-
+DEBUG = False
 ALLOWED_HOSTS = ["codegrow-backend.onrender.com", "localhost", "127.0.0.1"]
 
 INSTALLED_APPS = [
@@ -59,12 +57,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-# ✅ PostgreSQL Database (Render)
+# ✅ Use the Render PostgreSQL Database
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgres://your_db_url"),
-        conn_max_age=600,
-        ssl_require=True
+        default="postgres://codegrow_db_user:A4Vz3uF2kgizzAmceOCX26TZt0w59PCP@dpg-cuikurt6l47c73aggv50-a.frankfurt-postgres.render.com:5432/codegrow_db",
+        conn_max_age=600, ssl_require=True
     )
 }
 
@@ -93,19 +90,9 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ✅ Updated CORS settings (More Secure)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "https://codegrow-frontend.onrender.com",
-]
-
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-
-# ✅ Updated CSRF Trusted Origins (Fixes CSRF Issues)
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "https://codegrow-frontend.onrender.com",
-]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
@@ -117,7 +104,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
-
-# ✅ Force migrations to run correctly on Render
-if os.getenv("RENDER"):
-    os.system("python manage.py migrate --noinput")
