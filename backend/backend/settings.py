@@ -1,4 +1,4 @@
-from pathlib import Path  
+from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
@@ -28,7 +28,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ For static files in production
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,11 +57,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-# ✅ PostgreSQL Database Configuration
+# ✅ Use the Render PostgreSQL Database
 DATABASES = {
     'default': dj_database_url.config(
-        default="postgres://codegrow_user:wasim@localhost:5432/codegrow_db",
-        conn_max_age=600, ssl_require=False
+        default="postgres://codegrow_db_user:A4Vz3uF2kgizzAmceOCX26TZt0w59PCP@dpg-cuikurt6l47c73aggv50-a.frankfurt-postgres.render.com:5432/codegrow_db",
+        conn_max_age=600, ssl_require=True
     )
 }
 
@@ -77,19 +77,14 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# ✅ Static and Media Files Configuration
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ✅ Collects all static files here
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # ✅ Development static files
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# ✅ Use WhiteNoise for static file compression in production
 if not DEBUG:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
