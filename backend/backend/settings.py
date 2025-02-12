@@ -100,7 +100,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
-    "https://codegrow-frontend.onrender.com"
+    "https://codegrow-frontend.onrender.com",
+    "https://codegrow-backend.onrender.com"  # ✅ Added Backend to Prevent 400 Errors
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
