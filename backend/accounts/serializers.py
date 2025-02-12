@@ -57,11 +57,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         if updated:
             instance.save()
-
-            # ✅ Fix: Ensure lessons are reassigned when difficulty changes
             Lesson.create_default_lessons(instance)
 
         return instance
+
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:

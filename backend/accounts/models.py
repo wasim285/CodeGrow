@@ -48,72 +48,55 @@ class Lesson(models.Model):
     def __str__(self):
         return f"{self.title} ({self.learning_goal} - {self.difficulty_level})"
 
-@classmethod
-def create_default_lessons(cls, user):
-    if not user or not user.learning_goal or not user.difficulty_level:
-        return
+    @classmethod
+    def create_default_lessons(cls, user):
+        if not user or not user.learning_goal or not user.difficulty_level:
+            return
 
-    default_lessons = {
-        "School": {
-            "Beginner": [
-                {
-                    "title": "Introduction to Python",
-                    "description": "Learn Python basics.",
-                    "step1_content": "<h3>What is Python?</h3><p>Python is a beginner-friendly programming language.</p>",
-                    "step2_content": "<h3>Basic Syntax</h3><p>Let's write a simple Python program.</p>",
-                    "step3_challenge": "<h3>Mini Challenge</h3><p>Write a Python program that prints 'Hello, World!'.</p>",
-                    "order": 1,
-                    "code_snippet": "print('Hello, Python!')",
-                },
-            ],
-        },
-        "Portfolio": {
-            "Beginner": [
-                {
-                    "title": "Building Your First Project",
-                    "description": "Start your portfolio with a simple project.",
-                    "step1_content": "<h3>Why build projects?</h3><p>Projects help you practice coding by solving real-world problems.</p>",
-                    "step2_content": "<h3>Project Structure</h3><p>Let's set up our first project.</p>",
-                    "step3_challenge": "<h3>Mini Challenge</h3><p>Set up a Python file and print a message.</p>",
-                    "order": 1,
-                    "code_snippet": "# My first project\nprint('Welcome to my first Python project!')",
-                },
-            ],
-        },
-        "Career Growth": {
-            "Beginner": [
-                {
-                    "title": "Introduction to Data Structures",
-                    "description": "Learn the basics of stacks and queues.",
-                    "step1_content": "<h3>Why Data Structures Matter</h3><p>Understanding data structures is essential for coding interviews.</p>",
-                    "step2_content": "<h3>Stacks & Queues</h3><p>Stacks and Queues are fundamental concepts in programming.</p>",
-                    "step3_challenge": "<h3>Mini Challenge</h3><p>Implement a basic stack in Python.</p>",
-                    "order": 1,
-                    "code_snippet": "stack = []\nstack.append(1)\nstack.append(2)\nprint(stack.pop())",
-                },
-            ],
-        },
-    }
-
-    lessons = default_lessons.get(user.learning_goal, {}).get(user.difficulty_level, [])
-
-    if not lessons:
-        return
-
-    for lesson_data in lessons:
-        cls.objects.get_or_create(
-            title=lesson_data["title"],
-            learning_goal=user.learning_goal,
-            difficulty_level=user.difficulty_level,
-            defaults={
-                "description": lesson_data["description"],
-                "step1_content": lesson_data["step1_content"],
-                "step2_content": lesson_data["step2_content"],
-                "step3_challenge": lesson_data["step3_challenge"],
-                "order": lesson_data["order"],
-                "code_snippet": lesson_data["code_snippet"],
+        default_lessons = {
+            "School": {
+                "Beginner": [
+                    {
+                        "title": "Introduction to Python",
+                        "description": "Learn Python basics.",
+                        "step1_content": "<h3>What is Python?</h3><p>Python is a beginner-friendly programming language.</p>",
+                        "step2_content": "<h3>Basic Syntax</h3><p>Let's write a simple Python program.</p>",
+                        "step3_challenge": "<h3>Mini Challenge</h3><p>Write a Python program that prints 'Hello, World!'.</p>",
+                        "order": 1,
+                        "code_snippet": "print('Hello, Python!')",
+                    },
+                    {
+                        "title": "Variables & Data Types",
+                        "description": "Learn about variables and data types.",
+                        "step1_content": "<h3>Understanding Variables</h3><p>Variables store data in Python.</p>",
+                        "step2_content": "<h3>Working with Variables</h3><p>Define a variable and assign a value.</p>",
+                        "step3_challenge": "<h3>Mini Challenge</h3><p>Declare a variable 'name' and assign your name to it.</p>",
+                        "order": 2,
+                        "code_snippet": "age = 25\nname = 'John'",
+                    },
+                ],
             },
-        )
+        }
+
+        lessons = default_lessons.get(user.learning_goal, {}).get(user.difficulty_level, [])
+
+        if not lessons:
+            return
+
+        for lesson_data in lessons:
+            cls.objects.get_or_create(
+                title=lesson_data["title"],
+                learning_goal=user.learning_goal,
+                difficulty_level=user.difficulty_level,
+                defaults={
+                    "description": lesson_data["description"],
+                    "step1_content": lesson_data["step1_content"],
+                    "step2_content": lesson_data["step2_content"],
+                    "step3_challenge": lesson_data["step3_challenge"],
+                    "order": lesson_data["order"],
+                    "code_snippet": lesson_data["code_snippet"],
+                },
+            )
 
 
 from datetime import timedelta, date
