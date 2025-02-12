@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/Authcontext";
 import { Link } from "react-router-dom";
+import { getAllLessons } from "../utils/api"; // ✅ Import API function
 import "../styles/LessonsPage.css";
 import Navbar from "../components/navbar";
 
@@ -20,17 +21,13 @@ const LessonsPage = () => {
                     return;
                 }
 
-                const response = await fetch("http://127.0.0.1:8000/api/accounts/all-lessons/", {
-                    method: "GET",
-                    headers: { Authorization: `Token ${token}` },
-                });
+                const response = await getAllLessons(token); // ✅ Use API helper function
 
-                if (!response.ok) {
+                if (response.status !== 200) {
                     throw new Error("Failed to fetch lessons");
                 }
 
-                const data = await response.json();
-                setLessons(data);
+                setLessons(response.data);
             } catch (error) {
                 setError(error.message);
             } finally {
