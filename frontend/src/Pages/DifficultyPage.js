@@ -37,14 +37,10 @@ const DifficultyPage = () => {
                 return;
             }
 
-            // ✅ Get user profile before updating difficulty
-            const profileResponse = await getProfile(token);
-
-            if (profileResponse.status !== 200) {
-                throw new Error("Failed to fetch user profile.");
-            }
-
+            // ✅ Fetch profile correctly using API helper
+            const profileResponse = await getProfile(token);  
             const profileData = profileResponse.data;
+
             const currentGoal = profileData.learning_goal || "School";
 
             // ✅ Save updated difficulty level
