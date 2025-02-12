@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getProfile } from "../utils/api"; // ✅ Import API function
 import "../styles/ProfilePage.css";
 
 const ProfilePage = () => {
@@ -10,22 +11,12 @@ const ProfilePage = () => {
         const fetchProfile = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await fetch("http://127.0.0.1:8000/api/accounts/profile/", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Token ${token}`,
-                    },
-                });
+                if (!token) throw new Error("User not authenticated.");
 
-                if (!response.ok) {
-                    throw new Error("Failed to load profile data.");
-                }
-
-                const data = await response.json();
-                setUserData(data);
+                const response = await getProfile(token); // ✅ Use API call
+                setUserData(response.data);
             } catch (err) {
-                setError(err.message);
+                setError(err.message || "Failed to load profile data.");
             } finally {
                 setLoading(false);
             }
@@ -34,13 +25,8 @@ const ProfilePage = () => {
         fetchProfile();
     }, []);
 
-    if (loading) {
-        return <div className="profile-container">Loading...</div>;
-    }
-
-    if (error) {
-        return <div className="profile-container error-message">{error}</div>;
-    }
+    if (loading) return <div className="profile-container">Loading...</div>;
+    if (error) return <div className="profile-container error-message">{error}</div>;
 
     return (
         <div className="profile-page">
@@ -51,35 +37,12 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="profile-info">
-                    <div className="profile-field">
-                        <label>First Name:</label>
-                        <input type="text" value={userData.first_name || ""} disabled />
-                    </div>
-
-                    <div className="profile-field">
-                        <label>Last Name:</label>
-                        <input type="text" value={userData.last_name || ""} disabled />
-                    </div>
-
-                    <div className="profile-field">
-                        <label>Username:</label>
-                        <input type="text" value={userData.username} disabled />
-                    </div>
-
-                    <div className="profile-field">
-                        <label>Email:</label>
-                        <input type="text" value={userData.email} disabled />
-                    </div>
-
-                    <div className="profile-field">
-                        <label>Learning Goal:</label>
-                        <input type="text" value={userData.learning_goal || "Not Set"} disabled />
-                    </div>
-
-                    <div className="profile-field">
-                        <label>Difficulty Level:</label>
-                        <input type="text" value={userData.difficulty_level || "Not Set"} disabled />
-                    </div>
+                    {["first_name", "last_name", "username", "email", "learning_goal", "difficulty_level"].map((field) => (
+                        <div className="profile-field" key={field}>
+                            <label>{field.replace("_", " ")}:</label>
+                            <input type="text" value={userData[field] || "Not Set"} disabled />
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
