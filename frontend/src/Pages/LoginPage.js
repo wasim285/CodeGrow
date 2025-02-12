@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Authcontext";
+import { loginUser } from "../utils/api"; // ✅ Uses correct API function
 import "../styles/LoginPage.css";
 
 const LoginPage = () => {
@@ -18,24 +19,20 @@ const LoginPage = () => {
         setError("");
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/accounts/login/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+            const response = await loginUser(formData); // ✅ Call API directly
 
-            const data = await response.json();
-
-            if (response.ok) {
-                login(data.token);
+            if (response.status === 200) { // ✅ Check correct success status
+                const data = response.data;
+                login(data.token); 
                 localStorage.setItem("token", data.token);
-                navigate("/pathways");
+
+                navigate("/pathways"); // ✅ Redirect to pathways after login
             } else {
-                setError(data.error || "Wrong credentials. Please try again.");
+                setError(data.error || "⚠️ Invalid credentials. Please try again.");
             }
         } catch (error) {
-            console.error("Error:", error);
-            setError("Something went wrong. Please try again later.");
+            console.error("Login Error:", error.response?.data || error.message);
+            setError("❌ Network error. Please try again.");
         }
     };
 
