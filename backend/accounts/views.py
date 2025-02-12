@@ -14,6 +14,8 @@ from .serializers import (
 )
 from .models import CustomUser, UserProgress, Lesson, StudySession
 import subprocess
+import sys
+from django.http import JsonResponse
 
 
 class RegisterView(APIView):
@@ -265,24 +267,23 @@ class RunCodeView(APIView):
             return Response({"error": "Missing code or lesson_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # ✅ Execute Python code safely
+            # ✅ Ensure we use the correct Python binary
             result = subprocess.run(
-                ["python", "-c", code],
+                [sys.executable, "-c", code],  # Run Python safely
                 capture_output=True, text=True, timeout=5
             )
 
             output = result.stdout if result.stdout else result.stderr
 
-            return Response({
+            return JsonResponse({
                 "output": output.strip(),
+                "status_code": result.returncode
             }, status=status.HTTP_200_OK)
 
         except subprocess.TimeoutExpired:
             return Response({"error": "Execution timeout exceeded."}, status=status.HTTP_408_REQUEST_TIMEOUT)
-
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            return Response({"error": f"Execution failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @receiver(post_save, sender=CustomUser)
 def assign_lessons_on_signup(sender, instance, created, **kwargs):
