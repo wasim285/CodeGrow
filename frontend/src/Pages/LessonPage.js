@@ -35,7 +35,7 @@ const LessonPage = () => {
                     return;
                 }
 
-                const response = await fetch(`http://127.0.0.1:8000/api/accounts/lessons/${lessonId}/`, {  
+                const response = await fetch(`https://codegrow-backend.onrender.com/api/accounts/lessons/${lessonId}/`, {  
                     method: "GET",
                     headers: { Authorization: `Token ${token}` },
                 });
@@ -57,7 +57,7 @@ const LessonPage = () => {
 
     const markAsCompleted = async () => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/accounts/complete-lesson/${lessonId}/`, {
+            const response = await fetch(`https://codegrow-backend.onrender.com/api/accounts/complete-lesson/${lessonId}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -82,7 +82,7 @@ const LessonPage = () => {
         try {
             const token = localStorage.getItem("token");
 
-            const response = await fetch("http://127.0.0.1:8000/api/accounts/run-code/", {
+            const response = await fetch("https://codegrow-backend.onrender.com/api/accounts/run-code/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
