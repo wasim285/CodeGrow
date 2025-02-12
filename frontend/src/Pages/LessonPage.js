@@ -71,11 +71,7 @@ const LessonPage = () => {
 
             if (response.status === 200) {
                 setIsCompleted(true);
-
-                // ✅ Trigger an event to update dashboard
-                window.dispatchEvent(new Event("progressUpdated"));
-
-                alert("Lesson marked as completed! 🎉 Check your dashboard.");
+                window.dispatchEvent(new Event("lessonCompleted"));
             }
         } catch (error) {
             console.error("Error completing lesson:", error);
