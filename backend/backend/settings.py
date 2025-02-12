@@ -16,6 +16,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 # ✅ Fix `ALLOWED_HOSTS` to Read from Environment Variables
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow-backend.onrender.com,localhost,127.0.0.1").split(",")
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
