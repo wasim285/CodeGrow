@@ -44,7 +44,11 @@ const LessonPage = () => {
                 });
 
                 setLesson(response.data);
-                setUserCode(prev => step === 2 ? (response.data.code_snippet || prev) : ""); // ✅ Prevents unnecessary updates
+
+                // ✅ Pre-fill code editor only if it's Step 2 and lesson has a code snippet
+                if (response.data.code_snippet && step === 2) {
+                    setUserCode(response.data.code_snippet);
+                }
             } catch (error) {
                 setError(error.response?.data?.error || "Lesson not found.");
             } finally {
