@@ -37,17 +37,20 @@ function App() {
             {user && !hideNavbarPaths.includes(location.pathname) && !loading && <Navbar />}
 
             <Routes>
-                <Route path="/" element={user ? <Navigate to="/pathways" /> : <HomePage />} />
-                <Route path="/login" element={user ? <Navigate to="/pathways" /> : <LoginPage />} />
-                <Route path="/register" element={user ? <Navigate to="/pathways" /> : <RegisterPage />} />
-                <Route path="/pathways" element={user ? <PathwaysPage /> : <Navigate to="/" />} />
-                <Route path="/difficulty" element={user ? <DifficultyPage /> : <Navigate to="/" />} />
-                <Route path="/dashboard" element={loading ? <TreeLoader /> : user ? <Dashboard /> : <Navigate to="/" />} />
-                <Route path="/lessons" element={user ? <LessonsPage /> : <Navigate to="/" />} />
-                <Route path="/lessons/:lessonId" element={user ? <LessonPage /> : <Navigate to="/" />} />
-                <Route path="/study-sessions" element={user ? <StudyCalendar /> : <Navigate to="/" />} />
-                <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
-            </Routes>
+    <Route path="/" element={user ? <Navigate to="/pathways" /> : <HomePage />} />
+    <Route path="/login" element={user ? <Navigate to="/pathways" /> : <LoginPage />} />
+    <Route path="/register" element={user ? <Navigate to="/pathways" /> : <RegisterPage />} />
+    <Route path="/pathways" element={user ? <PathwaysPage /> : <Navigate to="/" />} />
+    <Route path="/difficulty" element={user ? <DifficultyPage /> : <Navigate to="/" />} />
+    <Route path="/dashboard" element={loading ? <TreeLoader /> : user ? <Dashboard /> : <Navigate to="/" />} />
+    <Route path="/lessons" element={user ? <LessonsPage /> : <Navigate to="/" />} />
+    <Route path="/lessons/:lessonId" element={user ? <LessonPage /> : <Navigate to="/" />} />
+    <Route path="/study-sessions" element={user ? <StudyCalendar /> : <Navigate to="/" />} />
+    <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
+    
+    <Route path="*" element={<Navigate to="/" />} />
+</Routes>
+
         </>
     );
 }
