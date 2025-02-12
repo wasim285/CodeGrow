@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile, getStudySessions, fetchRecommendations } from "../utils/api"; // ✅ Import API functions
+import axios from "axios";
 import "../styles/Dashboard.css";
 import Navbar from "../components/navbar";
 
@@ -24,15 +24,21 @@ const Dashboard = () => {
             }
 
             try {
-                const response = await getProfile(token);
+                // ✅ Use the correct dashboard endpoint
+                const response = await axios.get("https://codegrow-backend.onrender.com/api/dashboard/", {
+                    headers: { Authorization: `Token ${token}` },
+                });
+
                 const data = response.data;
 
-                setMainLesson(data.current_lesson);
-                setRecommendedLessons(data.recommended_lessons);
-                setStudySessions(data.study_sessions);
-                setLessonsCompleted(data.progress.total_lessons_completed || 0);
+                // ✅ Ensure progress exists before accessing properties
+                setLessonsCompleted(data.progress?.total_lessons_completed || 0);
                 setTotalLessons(data.total_lessons || 10);
-                setStreak(data.progress.streak || 0);
+                setStreak(data.progress?.streak || 0);
+                setMainLesson(data.current_lesson);
+                setRecommendedLessons(data.recommended_lessons || []);
+                setStudySessions(data.study_sessions || []);
+
             } catch (error) {
                 setError("An error occurred while loading.");
                 console.error("Error fetching dashboard data:", error);
@@ -49,8 +55,7 @@ const Dashboard = () => {
         }
 
         try {
-            const response = await fetch(`https://codegrow-backend.onrender.com/api/accounts/study-sessions/${sessionId}/`, {
-                method: "DELETE",
+            const response = await axios.delete(`https://codegrow-backend.onrender.com/api/study-sessions/${sessionId}/`, {
                 headers: { Authorization: `Token ${token}` },
             });
 
@@ -86,8 +91,8 @@ const Dashboard = () => {
                 <div className="grid-container">
                     <div className="progress-box">
                         <h3>📊 Your Progress</h3>
-                        <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
-                        <p>🔥 Streak: <strong>{streak} days</strong></p>
+                        <p>Lessons Completed: <strong>{lessonsCompleted || 0}/{totalLessons || 10}</strong></p>
+                        <p>🔥 Streak: <strong>{streak || 0} days</strong></p>
                         <div className="progress-bar">
                             <div className="progress-fill" style={{ width: `${progressPercentage}%` }}>
                                 {progressPercentage}%
