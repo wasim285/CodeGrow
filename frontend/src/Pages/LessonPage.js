@@ -8,7 +8,8 @@ import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import axios from "axios";
 
-const API_BASE_URL = "https://codegrow-backend.onrender.com/api/";
+// ✅ Correct API Base URL
+const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const LessonPage = () => {
     const { user } = useContext(AuthContext);
@@ -38,37 +39,33 @@ const LessonPage = () => {
                     return;
                 }
 
-                const response = await fetch(`${API_BASE_URL}lessons/${lessonId}/`, {
-                    method: "GET",
+                const response = await axios.get(`${API_BASE_URL}lessons/${lessonId}/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
 
-                if (!response.ok) throw new Error("Lesson not found.");
-
-                const data = await response.json();
-                setLesson(data);
-                setUserCode(step === 2 ? (data.code_snippet || "") : "");
+                setLesson(response.data);
+                setUserCode(prev => step === 2 ? (response.data.code_snippet || prev) : ""); // ✅ Prevents unnecessary updates
             } catch (error) {
-                setError(error.message);
+                setError(error.response?.data?.error || "Lesson not found.");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchLesson();
-    }, [user, lessonId, navigate, step]);
+    }, [user, lessonId, navigate]);
 
     const markAsCompleted = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}complete-lesson/${lessonId}/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Token ${localStorage.getItem("token")}`,
-                },
-            });
+            const response = await axios.post(
+                `${API_BASE_URL}complete-lesson/${lessonId}/`,
+                {},
+                {
+                    headers: { Authorization: `Token ${localStorage.getItem("token")}` },
+                }
+            );
 
-            if (response.ok) {
+            if (response.status === 200) {
                 setIsCompleted(true);
                 window.dispatchEvent(new Event("lessonCompleted"));
             }
@@ -117,13 +114,13 @@ const LessonPage = () => {
                             {step === 1 && (
                                 <div>
                                     <h3>Step 1: Introduction</h3>
-                                    <p dangerouslySetInnerHTML={{ __html: lesson.step1_content }}></p>
+                                    <p dangerouslySetInnerHTML={{ __html: lesson.step1_content || "No content available." }}></p>
                                 </div>
                             )}
                             {step === 2 && (
                                 <div>
                                     <h3>Step 2: Guided Code Example</h3>
-                                    <p dangerouslySetInnerHTML={{ __html: lesson.step2_content }}></p>
+                                    <p dangerouslySetInnerHTML={{ __html: lesson.step2_content || "No content available." }}></p>
                                     <div className="code-editor">
                                         <CodeMirror
                                             value={userCode}
@@ -147,7 +144,7 @@ const LessonPage = () => {
                                     <h3>Step 3: Mini Challenge</h3>
                                     {lesson.step3_challenge ? (
                                         <>
-                                            <p dangerouslySetInnerHTML={{ __html: lesson.step3_challenge }}></p>
+                                            <p dangerouslySetInnerHTML={{ __html: lesson.step3_challenge || "No challenge available." }}></p>
                                             <div className="code-editor">
                                                 <CodeMirror
                                                     value={userCode}
