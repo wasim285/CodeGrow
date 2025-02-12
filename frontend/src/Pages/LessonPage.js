@@ -35,7 +35,7 @@ const LessonPage = () => {
                     return;
                 }
 
-                const response = await fetch(`https://codegrow-backend.onrender.com/api/accounts/lessons/${lessonId}/`, {  
+                const response = await fetch(`https://codegrow-backend.onrender.com/api/lessons/${lessonId}/`, {  
                     method: "GET",
                     headers: { Authorization: `Token ${token}` },
                 });
