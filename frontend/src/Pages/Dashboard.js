@@ -27,21 +27,19 @@ const Dashboard = () => {
             }
 
             try {
-                // ✅ Fixed API path for dashboard
-                const response = await axios.get(`${API_BASE_URL}dashboard/`, {
+                const response = await axios.get("https://codegrow-backend.onrender.com/api/dashboard/", {
                     headers: { Authorization: `Token ${token}` },
                 });
 
                 const data = response.data;
 
-                // ✅ Ensure progress exists before accessing properties
+                // ✅ Update progress immediately
                 setLessonsCompleted(data.progress?.lessons_completed || 0);
-                setTotalLessons(data.total_lessons || 10);
+                setTotalLessons(data.progress?.total_lessons || 10);
                 setStreak(data.progress?.streak || 0);
                 setMainLesson(data.current_lesson);
                 setRecommendedLessons(data.recommended_lessons || []);
                 setStudySessions(data.study_sessions || []);
-
             } catch (error) {
                 setError("An error occurred while loading.");
                 console.error("Error fetching dashboard data:", error);
@@ -49,6 +47,13 @@ const Dashboard = () => {
         };
 
         fetchDashboardData();
+
+        // ✅ Listen for lesson completion updates
+        window.addEventListener("progressUpdated", fetchDashboardData);
+
+        return () => {
+            window.removeEventListener("progressUpdated", fetchDashboardData);
+        };
     }, [token]);
 
     const handleRemoveSession = async (sessionId) => {
