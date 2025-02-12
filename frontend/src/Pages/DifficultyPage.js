@@ -37,15 +37,15 @@ const DifficultyPage = () => {
                 return;
             }
 
-            // ✅ Fetch profile correctly using API helper
-            const profileResponse = await getProfile(token);  
+            // ✅ Fetch user profile correctly
+            const profileResponse = await getProfile(token);
             const profileData = profileResponse.data;
 
             const currentGoal = profileData.learning_goal || "School";
 
-            // ✅ Save updated difficulty level
+            // ✅ FIXED: Corrected the API endpoint (removed `/accounts/`)
             const updateResponse = await fetch(
-                "https://codegrow-backend.onrender.com/api/accounts/profile/",
+                "https://codegrow-backend.onrender.com/api/profile/",
                 {
                     method: "PATCH",
                     headers: {
