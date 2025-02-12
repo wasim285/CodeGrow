@@ -45,19 +45,19 @@ const LessonPage = () => {
 
                 setLesson(response.data);
 
-                // ✅ Pre-fill code editor only if it's Step 2 and lesson has a code snippet
-                if (response.data.code_snippet && step === 2) {
+                // ✅ Ensure code editor pre-fills guided examples
+                if (response.data.code_snippet) {
                     setUserCode(response.data.code_snippet);
                 }
             } catch (error) {
-                setError(error.response?.data?.error || "Lesson not found.");
+                setError("Lesson not found.");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchLesson();
-    }, [user, lessonId, navigate]);
+    }, [lessonId, navigate]);  // ✅ Ensure useEffect runs when `lessonId` changes
 
     const markAsCompleted = async () => {
         try {
