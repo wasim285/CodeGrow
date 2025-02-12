@@ -6,10 +6,7 @@ import Navbar from "../components/navbar";
 import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
-import axios from "axios";
-
-// ✅ Correct API Base URL
-const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
+import api from "../utils/api"; // ✅ Use API helper
 
 const LessonPage = () => {
     const { user } = useContext(AuthContext);
@@ -39,13 +36,11 @@ const LessonPage = () => {
                     return;
                 }
 
-                const response = await axios.get(`${API_BASE_URL}lessons/${lessonId}/`, {
+                const response = await api.get(`lessons/${lessonId}/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
 
                 setLesson(response.data);
-
-                // ✅ Ensure code editor pre-fills guided examples
                 if (response.data.code_snippet) {
                     setUserCode(response.data.code_snippet);
                 }
@@ -57,17 +52,13 @@ const LessonPage = () => {
         };
 
         fetchLesson();
-    }, [lessonId, navigate]);  // ✅ Ensure useEffect runs when `lessonId` changes
+    }, [user, lessonId, navigate]); // ✅ Added `user` to dependencies
 
     const markAsCompleted = async () => {
         try {
-            const response = await axios.post(
-                `${API_BASE_URL}complete-lesson/${lessonId}/`,
-                {},
-                {
-                    headers: { Authorization: `Token ${localStorage.getItem("token")}` },
-                }
-            );
+            const response = await api.post(`complete-lesson/${lessonId}/`, {}, {
+                headers: { Authorization: `Token ${localStorage.getItem("token")}` },
+            });
 
             if (response.status === 200) {
                 setIsCompleted(true);
@@ -87,11 +78,12 @@ const LessonPage = () => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("User not authenticated.");
 
-            const response = await axios.post(
-                `${API_BASE_URL}run-code/`,
-                { code: userCode.trim(), lesson_id: lessonId },
-                { headers: { Authorization: `Token ${token}` } }
-            );
+            const response = await api.post("run-code/", { 
+                code: userCode.trim(), 
+                lesson_id: lessonId 
+            }, { 
+                headers: { Authorization: `Token ${token}` } 
+            });
 
             setOutput(response.data.output || "No output.");
         } catch (error) {

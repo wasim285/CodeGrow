@@ -77,7 +77,11 @@ class ProfileView(RetrieveUpdateAPIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def all_lessons(request):
-    lessons = Lesson.objects.all().order_by("order")
+    user = request.user
+    lessons = Lesson.objects.filter(
+        learning_goal=user.learning_goal,
+        difficulty_level=user.difficulty_level
+    ).order_by("order")
     serializer = LessonSerializer(lessons, many=True)
     return Response(serializer.data)
 
@@ -90,7 +94,7 @@ def complete_lesson(request, lesson_id):
 
     try:
         lesson = Lesson.objects.get(id=lesson_id)
-        progress, created = UserProgress.objects.get_or_create(user=user)
+        progress, _ = UserProgress.objects.get_or_create(user=user)
 
         if lesson in progress.completed_lessons.all():
             return Response({"message": "Lesson already completed."}, status=status.HTTP_200_OK)
@@ -99,11 +103,17 @@ def complete_lesson(request, lesson_id):
         progress.lessons_completed = progress.completed_lessons.count()
         progress.save()
 
-        return Response({"message": "Lesson marked as completed.", "lessons_completed": progress.lessons_completed}, status=status.HTTP_200_OK)
+        # ✅ Unlock the next lesson
+        next_lesson = progress.unlock_next_lesson(lesson)
+
+        return Response({
+            "message": "Lesson marked as completed.",
+            "lessons_completed": progress.lessons_completed,
+            "next_lesson_id": next_lesson
+        }, status=status.HTTP_200_OK)
 
     except Lesson.DoesNotExist:
         return Response({"error": "Lesson not found."}, status=status.HTTP_404_NOT_FOUND)
-
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -141,70 +151,6 @@ class LessonDetailView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        lesson = self.get_object()
-        return Response({
-            "title": lesson.title,
-            "description": lesson.description,
-            "step1_content": lesson.step1_content,
-            "step2_content": lesson.step2_content,
-            "step3_challenge": lesson.step3_challenge,
-            "code_snippet": lesson.code_snippet,
-        }, status=status.HTTP_200_OK)
-
-
-class LessonListView(generics.ListAPIView):
-    serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if not user.learning_goal or not user.difficulty_level:
-            return Lesson.objects.none()
-
-        return Lesson.objects.filter(
-            learning_goal=user.learning_goal.strip(),
-            difficulty_level=user.difficulty_level.strip()
-        ).order_by("order")
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        lessons_data = [
-            {
-                "title": lesson.title,
-                "description": lesson.description,
-                "step1_content": lesson.step1_content,
-                "step2_content": lesson.step2_content,
-                "step3_challenge": lesson.step3_challenge,
-                "code_snippet": lesson.code_snippet,
-            }
-            for lesson in queryset
-        ]
-        return Response(lessons_data, status=status.HTTP_200_OK)
-
-
-class AllLessonsView(generics.ListAPIView):
-    serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Lesson.objects.all().order_by("order")  # Ensure this is returning lessons correctly
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        lessons_data = [
-            {
-                "title": lesson.title,
-                "description": lesson.description,
-                "step1_content": lesson.step1_content,
-                "step2_content": lesson.step2_content,
-                "step3_challenge": lesson.step3_challenge,
-                "code_snippet": lesson.code_snippet,
-            }
-            for lesson in queryset
-        ]
-        return Response(lessons_data, status=status.HTTP_200_OK)
-
 
 class DashboardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -218,11 +164,9 @@ class DashboardView(APIView):
             difficulty_level=user.difficulty_level
         ).order_by("order")
 
-        current_lesson = available_lessons.first()
+        current_lesson = available_lessons.exclude(id__in=progress.completed_lessons.all()).first()
         study_sessions = StudySession.objects.filter(user=user)
-
-        # ✅ Recommended lessons are now the next 3 lessons in the user's pathway
-        recommended_lessons = available_lessons.exclude(id__in=progress.completed_lessons.all())[:3]
+        recommended_lessons = available_lessons.exclude(id__in=progress.completed_lessons.all())[1:4]
 
         return Response({
             "current_lesson": LessonSerializer(current_lesson).data if current_lesson else None,
@@ -285,6 +229,7 @@ class RunCodeView(APIView):
         except Exception as e:
             return Response({"error": f"Execution failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @receiver(post_save, sender=CustomUser)
 def assign_lessons_on_signup(sender, instance, created, **kwargs):
     if created or (instance.learning_goal and instance.difficulty_level):
@@ -300,3 +245,28 @@ class LogoutView(APIView):
             return Response({"message": "Logged out successfully!"}, status=status.HTTP_200_OK)
         except:
             return Response({"error": "Logout failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_lesson_for_user(request):
+    """Retrieve the first lesson based on the user's pathway and difficulty level."""
+    user = request.user
+
+    if not user.learning_goal or not user.difficulty_level:
+        return Response({"error": "User has not selected a learning pathway."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # ✅ Fetch correct lesson based on the pathway and difficulty level
+        lesson = Lesson.objects.filter(
+            learning_goal=user.learning_goal.strip(),
+            difficulty_level=user.difficulty_level.strip()
+        ).order_by("id").first()  # Order by id to get the first relevant lesson
+
+        if lesson:
+            return Response(LessonSerializer(lesson).data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No lessons found for this pathway."}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

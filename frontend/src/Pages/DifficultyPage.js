@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../utils/api"; // ✅ Import API helper
+import api, { getProfile } from "../utils/api";  // ✅ Import API helper
 import "../styles/Difficulty.css";
 import PathwaysNavbar from "../components/PathwaysNavbar";
 
@@ -37,28 +37,16 @@ const DifficultyPage = () => {
                 return;
             }
 
-            // ✅ Fetch user profile correctly
+            // ✅ Fetch user profile
             const profileResponse = await getProfile(token);
             const profileData = profileResponse.data;
 
             const currentGoal = profileData.learning_goal || "School";
 
-            // ✅ FIXED: Corrected the API endpoint (ensuring `/accounts/profile/` is used)
-            const updateResponse = await fetch(
-                "https://codegrow-backend.onrender.com/api/accounts/profile/",
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Token ${token}`,
-                    },
-                    body: JSON.stringify({ difficulty_level: level, learning_goal: currentGoal }),
-                }
-            );
-
-            if (!updateResponse.ok) {
-                throw new Error("Failed to update difficulty level.");
-            }
+            // ✅ Use API helper to update profile instead of `fetch()`
+            await api.patch("profile/", { difficulty_level: level, learning_goal: currentGoal }, {
+                headers: { Authorization: `Token ${token}` },
+            });
 
             navigate("/dashboard"); // ✅ Navigate to dashboard
 
