@@ -19,16 +19,15 @@ const LoginPage = () => {
         setError("");
 
         try {
-            const response = await loginUser(formData); // ✅ Call API directly
+            const response = await loginUser(formData); // ✅ Call API
 
-            if (response.status === 200) { // ✅ Check correct success status
-                const data = response.data;
-                login(data.token); 
+            if (response.status === 200) { // ✅ Success
+                const data = response.data;  // ✅ Correctly define `data`
+                login(data.token);
                 localStorage.setItem("token", data.token);
-
-                navigate("/pathways"); // ✅ Redirect to pathways after login
+                navigate("/pathways");
             } else {
-                setError(data.error || "⚠️ Invalid credentials. Please try again.");
+                setError(response.data?.error || "⚠️ Invalid credentials. Please try again.");
             }
         } catch (error) {
             console.error("Login Error:", error.response?.data || error.message);
