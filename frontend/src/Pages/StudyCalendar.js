@@ -5,6 +5,12 @@ import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
 import "../styles/StudyCalendar.css";
 
+// ✅ Use deployed API automatically
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://codegrow-backend.onrender.com/api/accounts/"
+    : "http://127.0.0.1:8000/api/accounts/";
+
 const StudyCalendar = () => {
     const [sessions, setSessions] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
@@ -22,7 +28,7 @@ const StudyCalendar = () => {
     useEffect(() => {
         const fetchLessons = async () => {
             try {
-                const response = await axios.get("http://127.0.0.1:8000/api/accounts/all-lessons/", {
+                const response = await axios.get(`${API_BASE_URL}all-lessons/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
                 setLessons(response.data);
@@ -37,7 +43,7 @@ const StudyCalendar = () => {
         if (!token) return;
         const fetchSessions = async () => {
             try {
-                const response = await axios.get("http://127.0.0.1:8000/api/accounts/study-sessions/", {
+                const response = await axios.get(`${API_BASE_URL}study-sessions/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
                 setSessions(response.data);
@@ -73,7 +79,7 @@ const StudyCalendar = () => {
         };
 
         try {
-            const response = await axios.post("http://127.0.0.1:8000/api/accounts/study-sessions/", newSession, {
+            const response = await axios.post(`${API_BASE_URL}study-sessions/`, newSession, {
                 headers: { Authorization: `Token ${token}` },
             });
             setSessions((prevSessions) => [...prevSessions, response.data]);
@@ -96,7 +102,7 @@ const StudyCalendar = () => {
     const handleRemoveSession = async () => {
         if (!sessionToDelete) return;
         try {
-            const response = await axios.delete(`http://127.0.0.1:8000/api/accounts/study-sessions/${sessionToDelete}/`, {
+            const response = await axios.delete(`${API_BASE_URL}study-sessions/${sessionToDelete}/`, {
                 headers: { Authorization: `Token ${token}` },
             });
 
