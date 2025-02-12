@@ -47,7 +47,6 @@ function App() {
     <Route path="/lessons/:lessonId" element={user ? <LessonPage /> : <Navigate to="/" />} />
     <Route path="/study-sessions" element={user ? <StudyCalendar /> : <Navigate to="/" />} />
     <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
-    
     <Route path="*" element={<Navigate to="/" />} />
 </Routes>
 
