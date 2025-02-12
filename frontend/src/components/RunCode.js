@@ -1,27 +1,27 @@
-import React, { useState } from "react";
-import { runCode } from "../utils/api";
+import axios from "axios";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/accounts/";
+// Automatically switch between local and deployed backend
+const API_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://codegrow-backend.onrender.com/api/accounts/"
+    : "http://127.0.0.1:8000/api/accounts/";
 
-const runCode = async (code) => {
+export const runCode = async (code, lessonId) => {
     try {
-        const response = await fetch(`${API_BASE_URL}run-code/`, { 
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Token ${localStorage.getItem("token")}`,
-            },
-            body: JSON.stringify({ code }),
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to execute code.");
+        const token = localStorage.getItem("token");
+        if (!token) {
+            throw new Error("User not authenticated.");
         }
 
-        const data = await response.json();
-        return data.output;
+        const response = await axios.post(
+            `${API_BASE_URL}run-code/`,
+            { code, lesson_id: lessonId },
+            { headers: { Authorization: `Token ${token}` } }
+        );
+
+        return response.data.output || "No output.";
     } catch (error) {
-        console.error("Error running code:", error);
-        return "Error executing code.";
+        console.error("Run Code API Error:", error.response?.data || error.message);
+        return error.response?.data?.error || "Error executing code.";
     }
 };
