@@ -4,7 +4,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.db.models import CASCADE
-from datetime import timedelta, date
 
 
 class CustomUser(AbstractUser):
@@ -54,9 +53,6 @@ class Lesson(models.Model):
         if not user or not user.learning_goal or not user.difficulty_level:
             return
 
-        # ✅ Delete old lessons when the user changes pathways
-        cls.objects.filter(learning_goal=user.learning_goal, difficulty_level=user.difficulty_level).delete()
-
         default_lessons = {
             "School": {
                 "Beginner": [
@@ -80,32 +76,6 @@ class Lesson(models.Model):
                     },
                 ],
             },
-            "Portfolio": {
-                "Beginner": [
-                    {
-                        "title": "Project-Based Learning Intro",
-                        "description": "Start working on mini projects.",
-                        "step1_content": "<h3>Why Projects Matter?</h3><p>Building projects helps solidify your learning.</p>",
-                        "step2_content": "<h3>Start a Simple Project</h3><p>Write a Python script that asks for user input.</p>",
-                        "step3_challenge": "<h3>Mini Challenge</h3><p>Build a simple to-do list in Python.</p>",
-                        "order": 1,
-                        "code_snippet": "tasks = []\nprint('Welcome to your to-do list!')",
-                    },
-                ],
-            },
-            "Career Growth": {
-                "Beginner": [
-                    {
-                        "title": "Python for Interviews",
-                        "description": "Solve common interview questions.",
-                        "step1_content": "<h3>Understand Algorithms</h3><p>Interviewers expect strong algorithm knowledge.</p>",
-                        "step2_content": "<h3>Code a Simple Algorithm</h3><p>Write a Python function that reverses a string.</p>",
-                        "step3_challenge": "<h3>Mini Challenge</h3><p>Implement the Fibonacci sequence.</p>",
-                        "order": 1,
-                        "code_snippet": "def reverse_string(s): return s[::-1]",
-                    },
-                ],
-            },
         }
 
         lessons = default_lessons.get(user.learning_goal, {}).get(user.difficulty_level, [])
@@ -114,18 +84,22 @@ class Lesson(models.Model):
             return
 
         for lesson_data in lessons:
-            cls.objects.create(
+            cls.objects.get_or_create(
                 title=lesson_data["title"],
                 learning_goal=user.learning_goal,
                 difficulty_level=user.difficulty_level,
-                description=lesson_data["description"],
-                step1_content=lesson_data["step1_content"],
-                step2_content=lesson_data["step2_content"],
-                step3_challenge=lesson_data["step3_challenge"],
-                order=lesson_data["order"],
-                code_snippet=lesson_data["code_snippet"],
+                defaults={
+                    "description": lesson_data["description"],
+                    "step1_content": lesson_data["step1_content"],
+                    "step2_content": lesson_data["step2_content"],
+                    "step3_challenge": lesson_data["step3_challenge"],
+                    "order": lesson_data["order"],
+                    "code_snippet": lesson_data["code_snippet"],
+                },
             )
 
+
+from datetime import timedelta, date
 
 class UserProgress(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=CASCADE, related_name="progress")
@@ -139,10 +113,13 @@ class UserProgress(models.Model):
 
     def mark_lesson_completed(self, lesson):
         """Marks a lesson as completed, unlocks the next lesson, and updates progress."""
+
+        # ✅ Ensure the lesson isn't already marked as completed
         if lesson not in self.completed_lessons.all():
             self.completed_lessons.add(lesson)
             self.lessons_completed += 1
 
+            # ✅ Update Learning Streak
             today = date.today()
             if self.last_active == today - timedelta(days=1):  # Was active yesterday
                 self.streak += 1
@@ -159,17 +136,10 @@ class UserProgress(models.Model):
         next_lesson = Lesson.objects.filter(
             learning_goal=self.user.learning_goal,
             difficulty_level=self.user.difficulty_level,
-            order__gt=lesson.order
+            order__gt=lesson.order  # Get next lesson in sequence
         ).order_by("order").first()
 
         return next_lesson.id if next_lesson else None
-
-    def get_completed_lessons(self):
-        """Returns only lessons completed in the user's current pathway."""
-        return self.completed_lessons.filter(
-            learning_goal=self.user.learning_goal,
-            difficulty_level=self.user.difficulty_level
-        )
 
 
 class StudySession(models.Model):

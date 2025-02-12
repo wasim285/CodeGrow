@@ -47,19 +47,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         updated = False
 
-        if "learning_goal" in validated_data or "difficulty_level" in validated_data:
-            # ✅ Remove old lessons before updating
-            Lesson.objects.filter(
-                learning_goal=instance.learning_goal,
-                difficulty_level=instance.difficulty_level
-            ).delete()
-            updated = True
-
         if "learning_goal" in validated_data:
             instance.learning_goal = validated_data["learning_goal"]
+            updated = True
 
         if "difficulty_level" in validated_data:
             instance.difficulty_level = validated_data["difficulty_level"]
+            updated = True
 
         if updated:
             instance.save()
@@ -71,10 +65,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = [
-            "id", "title", "description", "step1_content", "step2_content",
-            "step3_challenge", "code_snippet", "learning_goal", "difficulty_level"
-        ]
+        fields = ["id", "title", "description", "step1_content", "step2_content", "step3_challenge", "code_snippet"]
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
@@ -86,11 +77,8 @@ class UserProgressSerializer(serializers.ModelSerializer):
         fields = ["streak", "total_lessons_completed", "last_active"]
 
     def get_total_lessons_completed(self, obj):
-        """Returns the total number of lessons the user has completed in the current pathway."""
-        return obj.completed_lessons.filter(
-            learning_goal=obj.user.learning_goal,
-            difficulty_level=obj.user.difficulty_level
-        ).count()
+        """Returns the total number of lessons the user has completed."""
+        return obj.completed_lessons.count()
 
 
 class StudySessionSerializer(serializers.ModelSerializer):
