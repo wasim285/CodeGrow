@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import PathwaysNavbar from "../components/PathwaysNavbar";
+import { getProfile } from "../utils/api"; // ✅ Import API helper
 import "../styles/Difficulty.css";
+import PathwaysNavbar from "../components/PathwaysNavbar";
 
 const DifficultyPage = () => {
     const [text, setText] = useState("Select Your Difficulty Level");
@@ -30,30 +31,39 @@ const DifficultyPage = () => {
 
         try {
             const token = localStorage.getItem("token");
-            if (!token) throw new Error("User not authenticated.");
+            if (!token) {
+                alert("User not authenticated. Please log in again.");
+                navigate("/login");
+                return;
+            }
 
-            const profileResponse = await fetch("http://127.0.0.1:8000/api/accounts/profile/", {
-                method: "GET",
-                headers: { Authorization: `Token ${token}` },
-            });
+            // ✅ Get user profile before updating difficulty
+            const profileResponse = await getProfile(token);
 
-            if (!profileResponse.ok) throw new Error("Failed to fetch user profile.");
+            if (profileResponse.status !== 200) {
+                throw new Error("Failed to fetch user profile.");
+            }
 
-            const profileData = await profileResponse.json();
+            const profileData = profileResponse.data;
             const currentGoal = profileData.learning_goal || "School";
 
-            const updateResponse = await fetch("http://127.0.0.1:8000/api/accounts/profile/", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Token ${token}`,
-                },
-                body: JSON.stringify({ difficulty_level: level, learning_goal: currentGoal }),
-            });
+            // ✅ Save updated difficulty level
+            const updateResponse = await fetch(
+                "https://codegrow-backend.onrender.com/api/accounts/profile/",
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Token ${token}`,
+                    },
+                    body: JSON.stringify({ difficulty_level: level, learning_goal: currentGoal }),
+                }
+            );
 
             if (!updateResponse.ok) throw new Error("Failed to update difficulty level.");
 
-            navigate("/dashboard");
+            navigate("/dashboard"); // ✅ Navigate to dashboard
+
         } catch (error) {
             alert(error.message || "Something went wrong. Please try again.");
         } finally {
