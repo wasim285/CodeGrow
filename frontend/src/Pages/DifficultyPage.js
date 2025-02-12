@@ -32,7 +32,7 @@ const DifficultyPage = () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) {
-                alert("User not authenticated. Please log in again.");
+                console.error("User not authenticated. Redirecting to login.");
                 navigate("/login");
                 return;
             }
@@ -43,7 +43,7 @@ const DifficultyPage = () => {
 
             const currentGoal = profileData.learning_goal || "School";
 
-            // ✅ FIXED: Corrected the API endpoint (removed `/accounts/`)
+            // ✅ FIXED: Corrected the API endpoint (ensuring `/accounts/profile/` is used)
             const updateResponse = await fetch(
                 "https://codegrow-backend.onrender.com/api/accounts/profile/",
                 {
@@ -56,12 +56,15 @@ const DifficultyPage = () => {
                 }
             );
 
-            if (!updateResponse.ok) throw new Error("Failed to update difficulty level.");
+            if (!updateResponse.ok) {
+                throw new Error("Failed to update difficulty level.");
+            }
 
             navigate("/dashboard"); // ✅ Navigate to dashboard
 
         } catch (error) {
-            alert(error.message || "Something went wrong. Please try again.");
+            console.error("Error updating difficulty level:", error);
+            alert("Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
