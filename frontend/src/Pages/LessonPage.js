@@ -45,8 +45,8 @@ const LessonPage = () => {
 
                 setLesson(response.data);
 
-                // ✅ Pre-fill code editor only if it's Step 2 and lesson has a code snippet
-                if (response.data.code_snippet && step === 2) {
+                // ✅ Load code snippet only when in Step 2 and the user hasn't modified code yet
+                if (response.data.code_snippet && step === 2 && userCode.trim() === "") {
                     setUserCode(response.data.code_snippet);
                 }
             } catch (error) {
@@ -57,7 +57,7 @@ const LessonPage = () => {
         };
 
         fetchLesson();
-    }, [user, lessonId, navigate]);
+    }, [user, lessonId, navigate, step]); // ✅ Ensure it re-fetches when the step changes
 
     const markAsCompleted = async () => {
         try {
