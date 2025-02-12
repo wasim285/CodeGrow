@@ -7,10 +7,14 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ✅ Get Secret Key from Render Environment Variables
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")
 
-DEBUG = False
-ALLOWED_HOSTS = ["codegrow-backend.onrender.com", "localhost", "127.0.0.1"]
+# ✅ Use Environment Variable for Debug Mode
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+
+# ✅ Fix `ALLOWED_HOSTS` to Read from Environment Variables
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow-backend.onrender.com,localhost,127.0.0.1").split(",")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -57,10 +61,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-# ✅ Use the Render PostgreSQL Database
+# ✅ Fix Database Configuration to Use Environment Variables
 DATABASES = {
     'default': dj_database_url.config(
-        default="postgres://codegrow_db_user:A4Vz3uF2kgizzAmceOCX26TZt0w59PCP@dpg-cuikurt6l47c73aggv50-a.frankfurt-postgres.render.com:5432/codegrow_db",
+        default=os.getenv("DATABASE_URL"),
         conn_max_age=600, ssl_require=True
     )
 }
@@ -90,9 +94,14 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# ✅ Fix CORS & CSRF to Work with Render
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "https://codegrow-frontend.onrender.com"
+]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
