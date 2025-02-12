@@ -37,12 +37,13 @@ const DifficultyPage = () => {
                 return;
             }
 
-            // ✅ Fetch user profile to get the learning goal
+            // ✅ Fetch user profile correctly
             const profileResponse = await getProfile(token);
             const profileData = profileResponse.data;
-            const currentGoal = profileData.learning_goal || "School"; // ✅ Ensure default goal is set
 
-            // ✅ Send both difficulty and goal in the PATCH request
+            const currentGoal = profileData.learning_goal || "School";
+
+            // ✅ FIXED: Corrected the API endpoint (ensuring `/accounts/profile/` is used)
             const updateResponse = await fetch(
                 "https://codegrow-backend.onrender.com/api/accounts/profile/",
                 {
@@ -51,10 +52,7 @@ const DifficultyPage = () => {
                         "Content-Type": "application/json",
                         Authorization: `Token ${token}`,
                     },
-                    body: JSON.stringify({
-                        difficulty_level: level,
-                        learning_goal: currentGoal,  // ✅ Ensure both are sent
-                    }),
+                    body: JSON.stringify({ difficulty_level: level, learning_goal: currentGoal }),
                 }
             );
 
@@ -62,7 +60,7 @@ const DifficultyPage = () => {
                 throw new Error("Failed to update difficulty level.");
             }
 
-            navigate("/dashboard"); // ✅ Redirect user to dashboard
+            navigate("/dashboard"); // ✅ Navigate to dashboard
 
         } catch (error) {
             console.error("Error updating difficulty level:", error);

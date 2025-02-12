@@ -25,32 +25,40 @@ const Dashboard = () => {
                 setError("User not authenticated. Please log in again.");
                 return;
             }
-
+    
             try {
-                // ✅ Fixed API path for dashboard
                 const response = await axios.get(`${API_BASE_URL}dashboard/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
-
+    
                 const data = response.data;
-
-                // ✅ Ensure progress exists before accessing properties
+    
                 setLessonsCompleted(data.progress?.lessons_completed || 0);
                 setTotalLessons(data.total_lessons || 10);
                 setStreak(data.progress?.streak || 0);
                 setMainLesson(data.current_lesson);
                 setRecommendedLessons(data.recommended_lessons || []);
                 setStudySessions(data.study_sessions || []);
-
             } catch (error) {
                 setError("An error occurred while loading.");
                 console.error("Error fetching dashboard data:", error);
             }
         };
-
+    
         fetchDashboardData();
+    
+        // ✅ Listen for the lesson completion event
+        const handleLessonCompletion = () => {
+            fetchDashboardData();
+        };
+    
+        window.addEventListener("lessonCompleted", handleLessonCompletion);
+    
+        return () => {
+            window.removeEventListener("lessonCompleted", handleLessonCompletion);
+        };
     }, [token]);
-
+    
     const handleRemoveSession = async (sessionId) => {
         if (!sessionId) {
             console.error("No session ID provided for deletion!");
