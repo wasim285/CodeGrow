@@ -93,23 +93,17 @@ def complete_lesson(request, lesson_id):
         progress, created = UserProgress.objects.get_or_create(user=user)
 
         if lesson in progress.completed_lessons.all():
-            return Response({
-                "message": "Lesson already completed.",
-                "lessons_completed": progress.completed_lessons.count(),
-            }, status=status.HTTP_200_OK)
+            return Response({"message": "Lesson already completed."}, status=status.HTTP_200_OK)
 
         progress.completed_lessons.add(lesson)
         progress.lessons_completed = progress.completed_lessons.count()
         progress.save()
 
-        return Response({
-            "message": "Lesson marked as completed.",
-            "lessons_completed": progress.lessons_completed,  # ✅ Ensure progress updates
-            "streak": progress.streak,
-        }, status=status.HTTP_200_OK)
+        return Response({"message": "Lesson marked as completed.", "lessons_completed": progress.lessons_completed}, status=status.HTTP_200_OK)
 
     except Lesson.DoesNotExist:
         return Response({"error": "Lesson not found."}, status=status.HTTP_404_NOT_FOUND)
+
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
