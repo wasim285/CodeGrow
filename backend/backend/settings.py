@@ -1,19 +1,20 @@
-from pathlib import Path 
+from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Secret Key
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")
+# SECRET KEY
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-1!(u2*429$^mz@ofapp2***xq1!4u$_47hlo#kfmldiv(eaox")
 
-# Debug Mode
+# DEBUG MODE
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-# Allowed Hosts
+# ALLOWED HOSTS
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow-backend.onrender.com,codegrow.onrender.com,localhost,127.0.0.1").split(",")
 
 # Installed Apps
@@ -43,7 +44,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# URL Configuration
 ROOT_URLCONF = 'backend.urls'
 
 # Templates
@@ -66,7 +66,7 @@ TEMPLATES = [
 # WSGI Application
 WSGI_APPLICATION = "backend.wsgi.application"
 
-# Database Configuration
+# Database
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv("DATABASE_URL"),
@@ -88,41 +88,34 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static and Media Files
+# Static & Media Files
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 if not DEBUG:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Default Primary Key Field Type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ✅ CORS & CSRF Configuration
+# CORS & CSRF Settings
 CORS_ALLOWED_ORIGINS = [
-    "https://codegrow-backend.onrender.com",
-    "http://localhost:3000"  # Keep for local testing
+    "https://codegrow.onrender.com",
 ]
-CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://codegrow-backend.onrender.com",
-    "http://localhost:3000"  # Keep for local testing
+    "https://codegrow.onrender.com",
 ]
 
-# ✅ HTTPS Enforcement for Security
-SECURE_SSL_REDIRECT = True  # Redirects HTTP to HTTPS
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CORS_ALLOW_CREDENTIALS = True
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
-# REST Framework Configuration
+# Django Rest Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
