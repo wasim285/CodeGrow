@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # Allowed Hosts
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow-backend.onrender.com,localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow-backend.onrender.com,codegrow.onrender.com,localhost,127.0.0.1").split(",")
 
 # Installed Apps
 INSTALLED_APPS = [
