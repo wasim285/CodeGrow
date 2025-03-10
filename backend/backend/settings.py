@@ -104,10 +104,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS & CSRF Settings
 CORS_ALLOWED_ORIGINS = [
     "https://codegrow.onrender.com",
+    "https://codegrow-frontend-8j0z.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://codegrow.onrender.com",
+    "https://codegrow-frontend-8j0z.onrender.com",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
