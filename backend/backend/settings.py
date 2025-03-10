@@ -15,7 +15,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-1!(u2*429$^mz@ofapp2***xq1
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # ALLOWED HOSTS
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow-backend.onrender.com,codegrow.onrender.com,localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow.onrender.com,localhost,127.0.0.1").split(",")
 
 # Installed Apps
 INSTALLED_APPS = [
