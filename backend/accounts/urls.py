@@ -14,7 +14,7 @@ urlpatterns = [
     path("run-code/", views.RunCodeView.as_view(), name="run-code"),
     path("all-lessons/", views.all_lessons, name="all-lessons"),
     
-    # ✅ Updated AI Recommendation Endpoint
+ 
     path("recommended-lessons/", views.AllLessonsView.as_view(), name="recommended-lessons"),  
     
     path("complete_lesson/", views.complete_lesson, name="complete_lesson"),

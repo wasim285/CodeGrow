@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Authcontext";
-import { loginUser } from "../utils/api"; // ✅ Uses correct API function
+import { loginUser } from "../utils/api";
 import "../styles/LoginPage.css";
 
 const LoginPage = () => {
@@ -19,25 +19,24 @@ const LoginPage = () => {
         setError("");
 
         try {
-            const response = await loginUser(formData); // ✅ Call API
+            const response = await loginUser(formData);
 
-            if (response.status === 200) { // ✅ Success
-                const data = response.data;  // ✅ Correctly define `data`
+            if (response.status === 200) {
+                const data = response.data;
                 login(data.token);
                 localStorage.setItem("token", data.token);
                 navigate("/pathways");
             } else {
-                setError(response.data?.error || "⚠️ Invalid credentials. Please try again.");
+                setError(response.data?.error || "Invalid credentials. Please try again.");
             }
         } catch (error) {
             console.error("Login Error:", error.response?.data || error.message);
-            setError("❌ Network error. Please try again.");
+            setError("Network error. Please try again.");
         }
     };
 
     return (
         <div>
-            {/* ✅ Navbar at the top */}
             <nav className="auth-navbar">
                 <a href="/" className="navbar-logo">CodeGrow</a>
             </nav>

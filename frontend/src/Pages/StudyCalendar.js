@@ -5,7 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
 import "../styles/StudyCalendar.css";
 
-// ✅ Use deployed API automatically
+
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
     ? "https://codegrow-backend.onrender.com/api/accounts/"

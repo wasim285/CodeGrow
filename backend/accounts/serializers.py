@@ -69,7 +69,6 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
-    """Updated serializer to include completed lessons count correctly."""
     total_lessons_completed = serializers.SerializerMethodField()
 
     class Meta:
@@ -77,13 +76,12 @@ class UserProgressSerializer(serializers.ModelSerializer):
         fields = ["streak", "total_lessons_completed", "last_active"]
 
     def get_total_lessons_completed(self, obj):
-        """Returns the total number of lessons the user has completed."""
         return obj.completed_lessons.count()
 
 
 class StudySessionSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)  # ✅ Ensure ID is included in responses
-    lesson_title = serializers.CharField(source="lesson.title", read_only=True)  # ✅ Fix lesson title retrieval
+    id = serializers.IntegerField(read_only=True)
+    lesson_title = serializers.CharField(source="lesson.title", read_only=True)
 
     class Meta:
         model = StudySession

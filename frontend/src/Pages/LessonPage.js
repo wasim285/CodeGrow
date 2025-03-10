@@ -8,7 +8,6 @@ import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import axios from "axios";
 
-// ✅ Correct API Base URL
 const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const LessonPage = () => {
@@ -45,7 +44,6 @@ const LessonPage = () => {
 
                 setLesson(response.data);
 
-                // ✅ Load code snippet only when in Step 2 and the user hasn't modified code yet
                 if (response.data.code_snippet && step === 2 && userCode.trim() === "") {
                     setUserCode(response.data.code_snippet);
                 }
@@ -57,7 +55,7 @@ const LessonPage = () => {
         };
 
         fetchLesson();
-    }, [user, lessonId, navigate, step]); // ✅ Ensure it re-fetches when the step changes
+    }, [user, lessonId, navigate, step]);
 
     const markAsCompleted = async () => {
         try {
@@ -185,7 +183,7 @@ const LessonPage = () => {
                                         onClick={markAsCompleted}
                                         disabled={isCompleted}
                                     >
-                                        {isCompleted ? "Completed ✅" : "Mark as Completed"}
+                                        {isCompleted ? "Completed" : "Mark as Completed"}
                                     </button>
                                 )}
                             </div>

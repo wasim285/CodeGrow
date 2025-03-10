@@ -4,7 +4,7 @@ import axios from "axios";
 import "../styles/Dashboard.css";
 import Navbar from "../components/navbar";
 
-// ✅ Correct API Base URL
+
 const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const Dashboard = () => {
@@ -47,7 +47,6 @@ const Dashboard = () => {
     
         fetchDashboardData();
     
-        // ✅ Listen for the lesson completion event
         const handleLessonCompletion = () => {
             fetchDashboardData();
         };

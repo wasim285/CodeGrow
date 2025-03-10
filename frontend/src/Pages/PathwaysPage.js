@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../utils/api"; // ✅ Import API helper
+import { getProfile } from "../utils/api";
 import "../styles/Pathways.css";
 import PathwaysNavbar from "../components/PathwaysNavbar";
 
@@ -37,10 +37,10 @@ const PathwaysPage = () => {
                 return;
             }
 
-            const response = await getProfile(token); // ✅ Use API function
+            const response = await getProfile(token);
 
             if (response.status === 200) {
-                navigate("/difficulty"); // ✅ Navigate after success
+                navigate("/difficulty");
             } else {
                 throw new Error("Failed to update learning goal.");
             }

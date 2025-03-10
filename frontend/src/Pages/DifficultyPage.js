@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../utils/api"; // ✅ Import API helper
+import { getProfile } from "../utils/api"; 
 import "../styles/Difficulty.css";
 import PathwaysNavbar from "../components/PathwaysNavbar";
 
@@ -37,13 +37,11 @@ const DifficultyPage = () => {
                 return;
             }
 
-            // ✅ Fetch user profile correctly
             const profileResponse = await getProfile(token);
             const profileData = profileResponse.data;
 
             const currentGoal = profileData.learning_goal || "School";
 
-            // ✅ FIXED: Corrected the API endpoint (ensuring `/accounts/profile/` is used)
             const updateResponse = await fetch(
                 "https://codegrow-backend.onrender.com/api/accounts/profile/",
                 {
@@ -60,7 +58,7 @@ const DifficultyPage = () => {
                 throw new Error("Failed to update difficulty level.");
             }
 
-            navigate("/dashboard"); // ✅ Navigate to dashboard
+            navigate("/dashboard");
 
         } catch (error) {
             console.error("Error updating difficulty level:", error);

@@ -29,14 +29,14 @@ class CustomUser(AbstractUser):
 
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='customuser_groups',  # Add related_name to avoid clash
+        related_name='customuser_groups',
         blank=True,
         help_text='The groups this user belongs to.',
         verbose_name='groups',
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='customuser_permissions',  # Add related_name to avoid clash
+        related_name='customuser_permissions',
         blank=True,
         help_text='Specific permissions for this user.',
         verbose_name='user permissions',
@@ -49,9 +49,9 @@ class CustomUser(AbstractUser):
 class Lesson(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    step1_content = models.TextField(blank=True, null=True)  # Step 1: Introduction
-    step2_content = models.TextField(blank=True, null=True)  # Step 2: Guided Code Example
-    step3_challenge = models.TextField(blank=True, null=True)  # Step 3: Mini Challenge
+    step1_content = models.TextField(blank=True, null=True)
+    step2_content = models.TextField(blank=True, null=True)
+    step3_challenge = models.TextField(blank=True, null=True)
     difficulty_level = models.CharField(max_length=50, choices=CustomUser.DIFFICULTY_LEVELS)
     learning_goal = models.CharField(max_length=50, choices=CustomUser.LEARNING_GOALS)
     order = models.PositiveIntegerField()
@@ -117,7 +117,7 @@ class Lesson(models.Model):
 
 class UserProgress(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=CASCADE, related_name="progress")
-    streak = models.PositiveIntegerField(default=0)  # 🔥 Learning Streak
+    streak = models.PositiveIntegerField(default=0)
     lessons_completed = models.PositiveIntegerField(default=0)
     last_active = models.DateField(auto_now=True)
     completed_lessons = models.ManyToManyField(Lesson, blank=True)
@@ -126,18 +126,14 @@ class UserProgress(models.Model):
         return f"Progress for {self.user.username}"
 
     def mark_lesson_completed(self, lesson):
-        """Marks a lesson as completed, unlocks the next lesson, and updates progress."""
-
-        # ✅ Ensure the lesson isn't already marked as completed
         if lesson not in self.completed_lessons.all():
             self.completed_lessons.add(lesson)
             self.lessons_completed += 1
 
-            # ✅ Update Learning Streak
             today = date.today()
-            if self.last_active == today - timedelta(days=1):  # Was active yesterday
+            if self.last_active == today - timedelta(days=1):
                 self.streak += 1
-            elif self.last_active != today:  # Missed a day
+            elif self.last_active != today:
                 self.streak = 1
 
             self.last_active = today
@@ -146,17 +142,15 @@ class UserProgress(models.Model):
         return self.unlock_next_lesson(lesson)
 
     def unlock_next_lesson(self, lesson):
-        """Finds and unlocks the next lesson if available."""
         next_lesson = Lesson.objects.filter(
             learning_goal=self.user.learning_goal,
             difficulty_level=self.user.difficulty_level,
-            order__gt=lesson.order  # Get next lesson in sequence
+            order__gt=lesson.order
         ).order_by("order").first()
 
         return next_lesson.id if next_lesson else None
 
     def get_completed_lessons(self):
-        """Returns only lessons completed in the user's current pathway."""
         return self.completed_lessons.filter(
             learning_goal=self.user.learning_goal,
             difficulty_level=self.user.difficulty_level
@@ -175,8 +169,6 @@ class StudySession(models.Model):
         return f"Study Session for {self.user.username} on {self.lesson.title}"
 
     def delete(self, *args, **kwargs):
-        """Ensure lesson removal from study sessions correctly reflects in the UI"""
-        print(f"🟢 Deleting Study Session: {self.id} for {self.user.username}")
         super().delete(*args, **kwargs)
 
 

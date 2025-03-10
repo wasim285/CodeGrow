@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SignUpPage.css";
-import { registerUser } from "../utils/api"; // ✅ Importing API call correctly
+import { registerUser } from "../utils/api";
 
 const SignUpPage = () => {
     const [formData, setFormData] = useState({ 
@@ -27,34 +27,33 @@ const SignUpPage = () => {
         setSuccessMessage("");
 
         try {
-            const response = await registerUser(formData); // ✅ Call API directly
+            const response = await registerUser(formData);
             
-            if (response.status === 201) { // ✅ Check correct success status
-                setSuccessMessage("✅ Signup successful! Redirecting to login...");
+            if (response.status === 201) {
+                setSuccessMessage("Signup successful! Redirecting to login...");
                 setTimeout(() => navigate("/login"), 2000);
             } else {
                 const responseData = response.data || {};
-                let errorMsg = "⚠️ Signup failed. Please check your details.";
+                let errorMsg = "Signup failed. Please check your details.";
 
                 if (responseData.username) {
-                    errorMsg = `⚠️ ${responseData.username[0]}`;
+                    errorMsg = `${responseData.username[0]}`;
                 } else if (responseData.email) {
-                    errorMsg = `⚠️ ${responseData.email[0]}`;
+                    errorMsg = `${responseData.email[0]}`;
                 } else if (responseData.password) {
-                    errorMsg = `⚠️ ${responseData.password[0]}`;
+                    errorMsg = `${responseData.password[0]}`;
                 }
 
                 setError(errorMsg);
             }
         } catch (error) {
             console.error("Signup Error:", error.response?.data || error.message);
-            setError("❌ Network error. Please try again.");
+            setError("Network error. Please try again.");
         }
     };
 
     return (
         <div>
-            {/* ✅ Navbar at the top */}
             <nav className="auth-navbar">
                 <a href="/" className="navbar-logo">CodeGrow</a>
             </nav>

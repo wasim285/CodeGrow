@@ -85,7 +85,6 @@ def all_lessons(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def complete_lesson(request, lesson_id):
-    """Marks a lesson as completed for the user and updates progress count."""
     user = request.user
 
     try:
@@ -111,7 +110,6 @@ def complete_lesson(request, lesson_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_lesson_completion(request, lesson_id):
-    """Checks if a lesson has been completed by the user."""
     user = request.user
     try:
         progress, _ = UserProgress.objects.get_or_create(user=user)
@@ -188,7 +186,7 @@ class AllLessonsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Lesson.objects.all().order_by("order")  # Ensure this is returning lessons correctly
+        return Lesson.objects.all().order_by("order")
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -221,7 +219,6 @@ class DashboardView(APIView):
         current_lesson = available_lessons.first()
         study_sessions = StudySession.objects.filter(user=user)
 
-        # ✅ Recommended lessons are now the next 3 lessons in the user's pathway
         recommended_lessons = available_lessons.exclude(id__in=progress.completed_lessons.all())[:3]
 
         return Response({
@@ -267,9 +264,8 @@ class RunCodeView(APIView):
             return Response({"error": "Missing code or lesson_id."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # ✅ Ensure we use the correct Python binary
             result = subprocess.run(
-                [sys.executable, "-c", code],  # Run Python safely
+                [sys.executable, "-c", code],
                 capture_output=True, text=True, timeout=5
             )
 

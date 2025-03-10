@@ -1,11 +1,10 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../context/Authcontext";
 import { Link } from "react-router-dom";
-import axios from "axios"; // ✅ Directly using axios for better control
+import axios from "axios";
 import "../styles/LessonsPage.css";
 import Navbar from "../components/navbar";
 
-// ✅ Correct API Base URL
 const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const LessonsPage = () => {
@@ -24,7 +23,6 @@ const LessonsPage = () => {
                     return;
                 }
 
-                // ✅ Fetch lessons directly with axios
                 const response = await axios.get(`${API_BASE_URL}all-lessons/`, {
                     headers: { Authorization: `Token ${token}` },
                 });

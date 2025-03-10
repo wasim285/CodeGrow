@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// ✅ Automatically switch between local and deployed backend
+
 const API_BASE_URL =
   window.location.hostname.includes("onrender.com")
     ? "https://codegrow-backend.onrender.com/api/accounts/"
@@ -8,10 +8,10 @@ const API_BASE_URL =
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // ✅ Prevent API requests from hanging indefinitely
+  timeout: 10000, 
 });
 
-// ✅ Register User
+
 export const registerUser = async (userData) => {
   try {
     return await api.post("register/", userData);
@@ -21,7 +21,7 @@ export const registerUser = async (userData) => {
   }
 };
 
-// ✅ Login User
+
 export const loginUser = async (userData) => {
   try {
     return await api.post("login/", userData);
@@ -31,7 +31,7 @@ export const loginUser = async (userData) => {
   }
 };
 
-// ✅ Get User Profile
+
 export const getProfile = async (token) => {
   try {
     return await api.get("profile/", {
@@ -43,7 +43,7 @@ export const getProfile = async (token) => {
   }
 };
 
-// ✅ Fetch All Lessons
+
 export const getAllLessons = async (token) => {
   try {
     return await api.get("lessons/", {  // ✅ Ensure correct API route
@@ -55,7 +55,7 @@ export const getAllLessons = async (token) => {
   }
 };
 
-// ✅ Fetch Study Sessions
+
 export const getStudySessions = async (token) => {
   try {
     return await api.get("study-sessions/", {
@@ -67,7 +67,7 @@ export const getStudySessions = async (token) => {
   }
 };
 
-// ✅ Logout User
+
 export const logoutUser = async (token) => {
   try {
     return await api.post("logout/", {}, {

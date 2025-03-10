@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// Automatically switch between local and deployed backend
+
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
     ? "https://codegrow-backend.onrender.com/api/accounts/"

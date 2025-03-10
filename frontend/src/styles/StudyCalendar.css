@@ -1,11 +1,11 @@
-/* 🔹 General Page Styles */
+
 body {
     background-color: #0f0f1a !important;
     color: white;
     font-family: Arial, sans-serif;
 }
 
-/* 🔹 Study Calendar Container */
+
 .study-calendar-container {
     max-width: 65%;  /* Reduce width for better fit */
     margin: auto;
@@ -24,7 +24,7 @@ body {
     color: black !important;
 }
 
-/* 🔹 Full Calendar Styling */
+
 .fc {
     background: white !important;
     border-radius: 10px;
@@ -138,7 +138,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* 🔹 Input Fields Styling */
+
 .modal label {
     width: 100%;
     text-align: left;
@@ -160,7 +160,7 @@ body {
     cursor: pointer;
 }
 
-/* 🔹 Time Picker Customization */
+
 .modal input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
@@ -174,7 +174,7 @@ body {
     box-shadow: 0 0 5px rgba(0, 168, 232, 0.6);
 }
 
-/* 🔹 Modal Buttons */
+
 .modal-buttons {
     display: flex;
     justify-content: space-between; /* Evenly distributes buttons */
@@ -213,7 +213,7 @@ body {
     transform: scale(1.05);
 }
 
-/* 🔹 Success Alert */
+
 .success-alert {
     position: fixed;
     top: 80px;
@@ -236,7 +236,7 @@ body {
     100% { opacity: 0; }
 }
 
-/* 🔹 Study Sessions Box */
+
 .study-sessions-box ul {
     list-style: none;
     padding: 0;

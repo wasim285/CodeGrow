@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getProfile } from "../utils/api"; // ✅ Import API function
+import { getProfile } from "../utils/api";
 import "../styles/ProfilePage.css";
 
 const ProfilePage = () => {
@@ -13,7 +13,7 @@ const ProfilePage = () => {
                 const token = localStorage.getItem("token");
                 if (!token) throw new Error("User not authenticated.");
 
-                const response = await getProfile(token); // ✅ Use API call
+                const response = await getProfile(token);
                 setUserData(response.data);
             } catch (err) {
                 setError(err.message || "Failed to load profile data.");

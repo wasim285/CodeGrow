@@ -23,15 +23,15 @@ def main():
 
             if username and email and password:
                 if not User.objects.filter(username=username).exists():
-                    print(f"✅ Creating superuser: {username}")
+                    print(f"Creating superuser: {username}")
                     User.objects.create_superuser(username, email, password)
                 else:
-                    print("✅ Superuser already exists, skipping creation.")
+                    print("Superuser already exists, skipping creation.")
             else:
-                print("❌ Missing superuser credentials in environment variables.")
+                print("Missing superuser credentials in environment variables.")
 
         except Exception as e:
-            print(f"❌ Failed to create superuser: {e}")
+            print(f"Failed to create superuser: {e}")
 
     try:
         from django.core.management import execute_from_command_line
