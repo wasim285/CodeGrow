@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path 
 import os
 import dj_database_url
 from dotenv import load_dotenv
@@ -7,16 +7,16 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+# Secret Key
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-secret-key")
 
-
+# Debug Mode
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-
+# Allowed Hosts
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "codegrow-backend.onrender.com,localhost,127.0.0.1").split(",")
 
-
+# Installed Apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
+# Middleware
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -42,8 +43,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URL Configuration
 ROOT_URLCONF = 'backend.urls'
 
+# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -60,9 +63,10 @@ TEMPLATES = [
     },
 ]
 
+# WSGI Application
 WSGI_APPLICATION = "backend.wsgi.application"
 
-
+# Database Configuration
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv("DATABASE_URL"),
@@ -70,6 +74,7 @@ DATABASES = {
     )
 }
 
+# Password Validators
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -77,11 +82,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# Localization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Static and Media Files
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
@@ -93,20 +100,29 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 if not DEBUG:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# Default Primary Key Field Type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-CORS_ALLOW_ALL_ORIGINS = True
+# ✅ CORS & CSRF Configuration
+CORS_ALLOWED_ORIGINS = [
+    "https://codegrow-backend.onrender.com",
+    "http://localhost:3000"  # Keep for local testing
+]
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "https://codegrow-frontend.onrender.com",
-    "https://codegrow-backend.onrender.com"  
+    "https://codegrow-backend.onrender.com",
+    "http://localhost:3000"  # Keep for local testing
 ]
 
+# ✅ HTTPS Enforcement for Security
+SECURE_SSL_REDIRECT = True  # Redirects HTTP to HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+# REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
