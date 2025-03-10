@@ -101,7 +101,6 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS & CSRF Settings
 CORS_ALLOWED_ORIGINS = [
     "https://codegrow.onrender.com",
     "https://codegrow-frontend-8j0z.onrender.com",
@@ -113,6 +112,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Make sure this is False
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.CustomUser'
