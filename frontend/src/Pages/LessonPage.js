@@ -8,7 +8,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import axios from "axios";
 
-const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
+const API_BASE_URL = "https://codegrow.onrender.com/api/accounts/";
 
 const LessonPage = () => {
     const { user } = useContext(AuthContext);

@@ -4,8 +4,8 @@ import axios from "axios";
 import "../styles/Dashboard.css";
 import Navbar from "../components/navbar";
 
+const API_BASE_URL = "https://codegrow.onrender.com/api/accounts/";
 
-const API_BASE_URL = "https://codegrow-backend.onrender.com/api/accounts/";
 
 const Dashboard = () => {
     const navigate = useNavigate();

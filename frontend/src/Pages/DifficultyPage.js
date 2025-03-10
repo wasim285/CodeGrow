@@ -43,7 +43,7 @@ const DifficultyPage = () => {
             const currentGoal = profileData.learning_goal || "School";
 
             const updateResponse = await fetch(
-                "https://codegrow-backend.onrender.com/api/accounts/profile/",
+                "https://codegrow.onrender.com/api/accounts/profile/",
                 {
                     method: "PATCH",
                     headers: {

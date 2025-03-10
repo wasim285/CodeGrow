@@ -5,10 +5,9 @@ import interactionPlugin from "@fullcalendar/interaction";
 import axios from "axios";
 import "../styles/StudyCalendar.css";
 
-
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "https://codegrow-backend.onrender.com/api/accounts/"
+    ? "https://codegrow.onrender.com/api/accounts/"
     : "http://127.0.0.1:8000/api/accounts/";
 
 const StudyCalendar = () => {

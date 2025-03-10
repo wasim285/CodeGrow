@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_BASE_URL =
   window.location.hostname.includes("onrender.com")
-    ? "https://codegrow-backend.onrender.com/api/accounts/"
+    ? "https://codegrow.onrender.com/api/accounts/"
     : "http://127.0.0.1:8000/api/accounts/";
 
 const api = axios.create({
