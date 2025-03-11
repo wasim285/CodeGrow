@@ -10,7 +10,6 @@ const api = axios.create({
   timeout: 30000, 
 });
 
-
 export const registerUser = async (userData) => {
   try {
     return await api.post("register/", userData);
@@ -20,7 +19,6 @@ export const registerUser = async (userData) => {
   }
 };
 
-
 export const loginUser = async (userData) => {
   try {
     return await api.post("login/", userData);
@@ -29,7 +27,6 @@ export const loginUser = async (userData) => {
     throw error;
   }
 };
-
 
 export const getProfile = async (token) => {
   try {
@@ -42,10 +39,9 @@ export const getProfile = async (token) => {
   }
 };
 
-
 export const getAllLessons = async (token) => {
   try {
-    return await api.get("lessons/", {  // ✅ Ensure correct API route
+    return await api.get("lessons/", {
       headers: { Authorization: `Token ${token}` },
     });
   } catch (error) {
@@ -53,7 +49,6 @@ export const getAllLessons = async (token) => {
     throw error;
   }
 };
-
 
 export const getStudySessions = async (token) => {
   try {
@@ -66,7 +61,6 @@ export const getStudySessions = async (token) => {
   }
 };
 
-
 export const logoutUser = async (token) => {
   try {
     return await api.post("logout/", {}, {
@@ -75,6 +69,23 @@ export const logoutUser = async (token) => {
   } catch (error) {
     console.error("Logout API Error:", error.response?.data || error.message);
     throw error;
+  }
+};
+
+export const getAIReview = async (userCode) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}ai-feedback/`,
+      { code: userCode },
+      { headers: { Authorization: `Token ${token}` } }
+    );
+
+    return response.data.feedback; 
+  } catch (error) {
+    console.error("AI Feedback API Error:", error.response?.data || error.message);
+    return { error: "Failed to retrieve AI feedback." };
   }
 };
 
