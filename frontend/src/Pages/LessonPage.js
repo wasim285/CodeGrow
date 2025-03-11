@@ -8,7 +8,6 @@ import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import api from "../utils/api";
 
-
 const API_BASE_URL =
   window.location.hostname.includes("onrender.com")
     ? "https://codegrow.onrender.com/api/accounts/"
@@ -70,18 +69,17 @@ const LessonPage = () => {
                     headers: { Authorization: `Token ${localStorage.getItem("token")}` },
                 }
             );
-    
+
             if (response.status === 200) {
                 setIsCompleted(true);
-    
-                // 🔹 Trigger dashboard update
-                window.dispatchEvent(new Event("lessonCompleted"));
+                
+                const updatedProgress = response.data.progress; 
+                window.dispatchEvent(new CustomEvent("lessonCompleted", { detail: updatedProgress }));
             }
         } catch (error) {
             console.error("Error completing lesson:", error);
         }
     };
-    
 
     const runCode = async () => {
         if (running) return;

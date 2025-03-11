@@ -6,7 +6,6 @@ import Navbar from "../components/navbar";
 
 const API_BASE_URL = "https://codegrow.onrender.com/api/accounts/";
 
-
 const Dashboard = () => {
     const navigate = useNavigate();
     const [mainLesson, setMainLesson] = useState(null);
@@ -25,14 +24,14 @@ const Dashboard = () => {
                 setError("User not authenticated. Please log in again.");
                 return;
             }
-    
+
             try {
                 const response = await axios.get(`${API_BASE_URL}dashboard/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
-    
+
                 const data = response.data;
-    
+
                 setLessonsCompleted(data.progress?.lessons_completed || 0);
                 setTotalLessons(data.total_lessons || 10);
                 setStreak(data.progress?.streak || 0);
@@ -44,23 +43,21 @@ const Dashboard = () => {
                 console.error("Error fetching dashboard data:", error);
             }
         };
-    
+
         fetchDashboardData();
-    
-        // 🔹 Listen for lesson completion event and refresh dashboard
-        const handleLessonCompletion = () => {
-            console.log("Lesson completed! Refreshing dashboard...");
+
+        const handleLessonCompletion = (event) => {
+            console.log("Lesson completed! Refreshing dashboard...", event.detail);
             fetchDashboardData();
         };
-    
+
         window.addEventListener("lessonCompleted", handleLessonCompletion);
-    
+
         return () => {
             window.removeEventListener("lessonCompleted", handleLessonCompletion);
         };
     }, [token]);
-    
-    
+
     const handleRemoveSession = async (sessionId) => {
         if (!sessionId) {
             console.error("No session ID provided for deletion!");
@@ -68,7 +65,6 @@ const Dashboard = () => {
         }
 
         try {
-            // ✅ Fixed API path for removing study sessions
             const response = await axios.delete(`${API_BASE_URL}study-sessions/${sessionId}/`, {
                 headers: { Authorization: `Token ${token}` },
             });
