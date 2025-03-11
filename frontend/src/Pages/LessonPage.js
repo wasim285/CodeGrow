@@ -6,9 +6,12 @@ import Navbar from "../components/navbar";
 import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
-import axios from "axios";
+import api from "../api"; // Updated import statement
 
-const API_BASE_URL = "https://codegrow.onrender.com/api/accounts/";
+const API_BASE_URL =
+  window.location.hostname.includes("onrender.com")
+    ? "https://codegrow.onrender.com/api/accounts/"
+    : "http://127.0.0.1:8000/api/accounts/";
 
 const LessonPage = () => {
     const { user } = useContext(AuthContext);
@@ -38,7 +41,7 @@ const LessonPage = () => {
                     return;
                 }
 
-                const response = await axios.get(`${API_BASE_URL}lessons/${lessonId}/`, {
+                const response = await api.get(`lessons/${lessonId}/`, {
                     headers: { Authorization: `Token ${token}` },
                 });
 
@@ -59,8 +62,8 @@ const LessonPage = () => {
 
     const markAsCompleted = async () => {
         try {
-            const response = await axios.post(
-                `${API_BASE_URL}complete-lesson/${lessonId}/`,
+            const response = await api.post(
+                `complete-lesson/${lessonId}/`,
                 {},
                 {
                     headers: { Authorization: `Token ${localStorage.getItem("token")}` },
@@ -85,8 +88,8 @@ const LessonPage = () => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("User not authenticated.");
 
-            const response = await axios.post(
-                `${API_BASE_URL}run-code/`,
+            const response = await api.post(
+                `run-code/`,
                 { code: userCode.trim(), lesson_id: lessonId },
                 { headers: { Authorization: `Token ${token}` } }
             );

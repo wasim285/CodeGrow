@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 const API_BASE_URL =
   window.location.hostname.includes("onrender.com")
     ? "https://codegrow.onrender.com/api/accounts/"
@@ -8,9 +7,8 @@ const API_BASE_URL =
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, 
+  timeout: 30000,
 });
-
 
 export const registerUser = async (userData) => {
   try {
@@ -21,7 +19,6 @@ export const registerUser = async (userData) => {
   }
 };
 
-
 export const loginUser = async (userData) => {
   try {
     return await api.post("login/", userData);
@@ -30,7 +27,6 @@ export const loginUser = async (userData) => {
     throw error;
   }
 };
-
 
 export const getProfile = async (token) => {
   try {
@@ -43,10 +39,9 @@ export const getProfile = async (token) => {
   }
 };
 
-
 export const getAllLessons = async (token) => {
   try {
-    return await api.get("lessons/", {  // ✅ Ensure correct API route
+    return await api.get("lessons/", {
       headers: { Authorization: `Token ${token}` },
     });
   } catch (error) {
@@ -55,6 +50,16 @@ export const getAllLessons = async (token) => {
   }
 };
 
+export const getFilteredLessons = async (token, learningGoal, difficultyLevel) => {
+  try {
+    return await api.get(`lessons/?learning_goal=${learningGoal}&difficulty_level=${difficultyLevel}`, {
+      headers: { Authorization: `Token ${token}` },
+    });
+  } catch (error) {
+    console.error("Filtered Lessons API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
 
 export const getStudySessions = async (token) => {
   try {
@@ -66,7 +71,6 @@ export const getStudySessions = async (token) => {
     throw error;
   }
 };
-
 
 export const logoutUser = async (token) => {
   try {
