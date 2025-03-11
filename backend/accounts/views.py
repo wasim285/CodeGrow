@@ -125,13 +125,16 @@ class LessonListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if not user.learning_goal or not user.difficulty_level:
-            return Lesson.objects.none()  
 
-        return Lesson.objects.filter(
+        if not user.learning_goal or not user.difficulty_level:
+            return Lesson.objects.none()
+
+        lessons = Lesson.objects.filter(
             learning_goal=user.learning_goal.strip(),
             difficulty_level=user.difficulty_level.strip()
         ).order_by("order")
+
+        return lessons
 
 
 class LessonDetailView(generics.RetrieveAPIView):
