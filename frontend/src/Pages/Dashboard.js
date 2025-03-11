@@ -18,6 +18,8 @@ const Dashboard = () => {
     const [selectedSessionId, setSelectedSessionId] = useState(null);
     const token = localStorage.getItem("token");
 
+    const [, forceUpdate] = useState();
+
     useEffect(() => {
         const fetchDashboardData = async () => {
             if (!token) {
@@ -30,14 +32,14 @@ const Dashboard = () => {
                     headers: { Authorization: `Token ${token}` },
                 });
 
-                const data = response.data;
+                setLessonsCompleted(response.data.progress?.total_lessons_completed || 0);
+                setTotalLessons(response.data.total_lessons || 10);
+                setStreak(response.data.progress?.streak || 0);
+                setMainLesson(response.data.current_lesson);
+                setRecommendedLessons(response.data.recommended_lessons || []);
+                setStudySessions(response.data.study_sessions || []);
 
-                setLessonsCompleted(data.progress?.lessons_completed || 0);
-                setTotalLessons(data.total_lessons || 10);
-                setStreak(data.progress?.streak || 0);
-                setMainLesson(data.current_lesson);
-                setRecommendedLessons(data.recommended_lessons || []);
-                setStudySessions(data.study_sessions || []);
+                forceUpdate({});
             } catch (error) {
                 setError("An error occurred while loading.");
                 console.error("Error fetching dashboard data:", error);
@@ -48,16 +50,13 @@ const Dashboard = () => {
 
         const handleLessonCompletion = (event) => {
             if (event.detail) {
-                console.log("Updating progress with new data:", event.detail);
-                
-                setLessonsCompleted(event.detail.lessons_completed);
+                setLessonsCompleted(event.detail.total_lessons_completed);
                 setStreak(event.detail.streak);
+                forceUpdate({});
             } else {
-                console.log("No progress details found, fetching from API...");
-                fetchDashboardData(); // Fallback in case of missing data
+                fetchDashboardData();
             }
         };
-        
 
         window.addEventListener("lessonCompleted", handleLessonCompletion);
 
