@@ -60,18 +60,22 @@ class ProfileView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user  
 
-    def get(self, request, *args, **kwargs):
-        user = self.get_object()
-        serializer = self.get_serializer(user)
-        return Response(serializer.data, status=200)
-    
     def patch(self, request, *args, **kwargs):
         user = self.get_object()
         serializer = self.get_serializer(user, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
+
+            # 🔹 Force update lessons when learning goal or difficulty level changes
+            if "learning_goal" in request.data or "difficulty_level" in request.data:
+                user.refresh_from_db()  # Ensure we have the latest data
+                Lesson.create_default_lessons(user)  # ✅ Ensure lessons update properly
+
             return Response(serializer.data, status=200)
+
         return Response(serializer.errors, status=400)
+
 
 
 @api_view(['GET'])
