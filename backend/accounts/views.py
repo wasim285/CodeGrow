@@ -96,8 +96,10 @@ def complete_lesson(request, lesson_id):
                 "streak": progress.streak,
             }, status=status.HTTP_200_OK)
 
+        # ✅ Force add lesson and manually commit save
         progress.completed_lessons.add(lesson)
         progress.lessons_completed = progress.completed_lessons.count()
+        progress.save(update_fields=["lessons_completed"])  # ✅ Force DB update
 
         from datetime import date, timedelta
         today = date.today()
@@ -108,7 +110,7 @@ def complete_lesson(request, lesson_id):
             progress.streak = 1
 
         progress.last_active = today
-        progress.save()
+        progress.save(update_fields=["last_active", "streak"])  # ✅ Ensure DB commit
 
         return Response({
             "message": "Lesson marked as completed.",
@@ -122,6 +124,7 @@ def complete_lesson(request, lesson_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 @api_view(['GET'])
