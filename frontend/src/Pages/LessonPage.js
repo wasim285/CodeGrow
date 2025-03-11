@@ -6,7 +6,8 @@ import Navbar from "../components/navbar";
 import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
-import api from "../api"; // Updated import statement
+import api from "../utils/api";
+
 
 const API_BASE_URL =
   window.location.hostname.includes("onrender.com")
