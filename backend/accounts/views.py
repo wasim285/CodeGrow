@@ -16,49 +16,6 @@ from .models import CustomUser, UserProgress, Lesson, StudySession
 import subprocess
 import sys
 from django.http import JsonResponse
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def complete_lesson(request, lesson_id):
-    user = request.user
-
-    try:
-        lesson = Lesson.objects.get(id=lesson_id)
-        progress, created = UserProgress.objects.get_or_create(user=user)
-
-        if lesson in progress.completed_lessons.all():
-            return Response({
-                "message": "Lesson already completed.",
-                "lessons_completed": progress.lessons_completed,
-                "streak": progress.streak,
-            }, status=status.HTTP_200_OK)
-
-        # 🔹 Add lesson to completed lessons and update progress
-        progress.completed_lessons.add(lesson)
-        progress.lessons_completed = progress.completed_lessons.count()
-
-        # 🔹 Update streak logic
-        from datetime import date, timedelta
-        today = date.today()
-
-        if progress.last_active == today - timedelta(days=1):
-            progress.streak += 1  # Continue streak
-        elif progress.last_active != today:
-            progress.streak = 1  # Reset streak if inactive
-
-        progress.last_active = today  # Update last active date
-        progress.save()
-
-        return Response({
-            "message": "Lesson marked as completed.",
-            "lessons_completed": progress.lessons_completed,
-            "streak": progress.streak,
-        }, status=status.HTTP_200_OK)
-
-    except Lesson.DoesNotExist:
-        return Response({"error": "Lesson not found."}, status=status.HTTP_404_NOT_FOUND)
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RegisterView(APIView):
@@ -106,19 +63,13 @@ class ProfileView(RetrieveUpdateAPIView):
     def patch(self, request, *args, **kwargs):
         user = self.get_object()
         serializer = self.get_serializer(user, data=request.data, partial=True)
-
         if serializer.is_valid():
             serializer.save()
-
-            # 🔹 Force update lessons when learning goal or difficulty level changes
             if "learning_goal" in request.data or "difficulty_level" in request.data:
-                user.refresh_from_db()  # Ensure we have the latest data
-                Lesson.create_default_lessons(user)  # ✅ Ensure lessons update properly
-
+                user.refresh_from_db()
+                Lesson.create_default_lessons(user)
             return Response(serializer.data, status=200)
-
         return Response(serializer.errors, status=400)
-
 
 
 @api_view(['GET'])
@@ -145,26 +96,25 @@ def complete_lesson(request, lesson_id):
                 "streak": progress.streak,
             }, status=status.HTTP_200_OK)
 
-        # 🔹 Add lesson to completed lessons and update progress
         progress.completed_lessons.add(lesson)
         progress.lessons_completed = progress.completed_lessons.count()
 
-        # 🔹 Update streak logic
         from datetime import date, timedelta
         today = date.today()
 
         if progress.last_active == today - timedelta(days=1):
-            progress.streak += 1  # Continue streak
+            progress.streak += 1
         elif progress.last_active != today:
-            progress.streak = 1  # Reset streak if inactive
+            progress.streak = 1
 
-        progress.last_active = today  # Update last active date
+        progress.last_active = today
         progress.save()
 
         return Response({
             "message": "Lesson marked as completed.",
             "lessons_completed": progress.lessons_completed,
             "streak": progress.streak,
+            "progress": UserProgressSerializer(progress).data
         }, status=status.HTTP_200_OK)
 
     except Lesson.DoesNotExist:
