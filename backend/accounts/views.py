@@ -16,6 +16,49 @@ from .models import CustomUser, UserProgress, Lesson, StudySession
 import subprocess
 import sys
 from django.http import JsonResponse
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_lesson(request, lesson_id):
+    user = request.user
+
+    try:
+        lesson = Lesson.objects.get(id=lesson_id)
+        progress, created = UserProgress.objects.get_or_create(user=user)
+
+        if lesson in progress.completed_lessons.all():
+            return Response({
+                "message": "Lesson already completed.",
+                "lessons_completed": progress.lessons_completed,
+                "streak": progress.streak,
+            }, status=status.HTTP_200_OK)
+
+        # 🔹 Add lesson to completed lessons and update progress
+        progress.completed_lessons.add(lesson)
+        progress.lessons_completed = progress.completed_lessons.count()
+
+        # 🔹 Update streak logic
+        from datetime import date, timedelta
+        today = date.today()
+
+        if progress.last_active == today - timedelta(days=1):
+            progress.streak += 1  # Continue streak
+        elif progress.last_active != today:
+            progress.streak = 1  # Reset streak if inactive
+
+        progress.last_active = today  # Update last active date
+        progress.save()
+
+        return Response({
+            "message": "Lesson marked as completed.",
+            "lessons_completed": progress.lessons_completed,
+            "streak": progress.streak,
+        }, status=status.HTTP_200_OK)
+
+    except Lesson.DoesNotExist:
+        return Response({"error": "Lesson not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RegisterView(APIView):
@@ -96,13 +139,33 @@ def complete_lesson(request, lesson_id):
         progress, created = UserProgress.objects.get_or_create(user=user)
 
         if lesson in progress.completed_lessons.all():
-            return Response({"message": "Lesson already completed."}, status=status.HTTP_200_OK)
+            return Response({
+                "message": "Lesson already completed.",
+                "lessons_completed": progress.lessons_completed,
+                "streak": progress.streak,
+            }, status=status.HTTP_200_OK)
 
+        # 🔹 Add lesson to completed lessons and update progress
         progress.completed_lessons.add(lesson)
         progress.lessons_completed = progress.completed_lessons.count()
+
+        # 🔹 Update streak logic
+        from datetime import date, timedelta
+        today = date.today()
+
+        if progress.last_active == today - timedelta(days=1):
+            progress.streak += 1  # Continue streak
+        elif progress.last_active != today:
+            progress.streak = 1  # Reset streak if inactive
+
+        progress.last_active = today  # Update last active date
         progress.save()
 
-        return Response({"message": "Lesson marked as completed.", "lessons_completed": progress.lessons_completed}, status=status.HTTP_200_OK)
+        return Response({
+            "message": "Lesson marked as completed.",
+            "lessons_completed": progress.lessons_completed,
+            "streak": progress.streak,
+        }, status=status.HTTP_200_OK)
 
     except Lesson.DoesNotExist:
         return Response({"error": "Lesson not found."}, status=status.HTTP_404_NOT_FOUND)
