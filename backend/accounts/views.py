@@ -18,6 +18,11 @@ import sys
 from django.http import JsonResponse
 from django.views import View
 from django.conf import settings
+import os
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables
 
 
 class RegisterView(APIView):
@@ -333,3 +338,31 @@ class CreateSuperUserView(View):
             return JsonResponse({"message": "Superuser created successfully!"}, status=201)
         else:
             return JsonResponse({"message": "Superuser already exists."}, status=200)
+
+
+class CodeFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        code = request.data.get("code", "").strip()
+
+        if not code:
+            return Response({"error": "No code provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+        API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
+
+        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+        payload = {"inputs": f"Review this Python code and suggest improvements:\n{code}"}
+
+        try:
+            response = requests.post(API_URL, headers=headers, json=payload)
+            feedback = response.json()
+
+            if "error" in feedback:
+                return Response({"error": "AI feedback failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({"feedback": feedback}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
