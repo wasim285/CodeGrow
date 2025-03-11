@@ -70,15 +70,18 @@ const LessonPage = () => {
                     headers: { Authorization: `Token ${localStorage.getItem("token")}` },
                 }
             );
-
+    
             if (response.status === 200) {
                 setIsCompleted(true);
+    
+                // 🔹 Trigger dashboard update
                 window.dispatchEvent(new Event("lessonCompleted"));
             }
         } catch (error) {
             console.error("Error completing lesson:", error);
         }
     };
+    
 
     const runCode = async () => {
         if (running) return;

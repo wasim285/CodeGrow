@@ -47,7 +47,9 @@ const Dashboard = () => {
     
         fetchDashboardData();
     
+        // 🔹 Listen for lesson completion event and refresh dashboard
         const handleLessonCompletion = () => {
+            console.log("Lesson completed! Refreshing dashboard...");
             fetchDashboardData();
         };
     
@@ -57,6 +59,7 @@ const Dashboard = () => {
             window.removeEventListener("lessonCompleted", handleLessonCompletion);
         };
     }, [token]);
+    
     
     const handleRemoveSession = async (sessionId) => {
         if (!sessionId) {
