@@ -27,8 +27,7 @@ const DifficultyPage = () => {
 
     const handleDifficultySelect = async (level) => {
         setLoading(true);
-        localStorage.setItem("difficulty_level", level);
-
+    
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -36,30 +35,26 @@ const DifficultyPage = () => {
                 navigate("/login");
                 return;
             }
-
-            const profileResponse = await getProfile(token);
-            const profileData = profileResponse.data;
-
-            const currentGoal = profileData.learning_goal || "School";
-
-            const updateResponse = await fetch(
-                "https://codegrow.onrender.com/api/accounts/profile/",
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Token ${token}`,
-                    },
-                    body: JSON.stringify({ difficulty_level: level, learning_goal: currentGoal }),
-                }
-            );
-
+    
+            const currentGoal = localStorage.getItem("learning_goal") || "School"; // ✅ Get from localStorage instead of API
+    
+            // 🔹 Send API request to update difficulty_level
+            const updateResponse = await fetch("https://codegrow.onrender.com/api/accounts/profile/", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Token ${token}`,
+                },
+                body: JSON.stringify({ difficulty_level: level, learning_goal: currentGoal }), 
+            });
+    
             if (!updateResponse.ok) {
                 throw new Error("Failed to update difficulty level.");
             }
-
+    
+            localStorage.setItem("difficulty_level", level); // ✅ Save locally too
             navigate("/dashboard");
-
+    
         } catch (error) {
             console.error("Error updating difficulty level:", error);
             alert("Something went wrong. Please try again.");
@@ -67,6 +62,7 @@ const DifficultyPage = () => {
             setLoading(false);
         }
     };
+    
 
     return (
         <>

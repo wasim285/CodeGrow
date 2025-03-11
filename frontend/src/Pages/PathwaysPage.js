@@ -27,8 +27,7 @@ const PathwaysPage = () => {
 
     const handlePathwaySelect = async (pathway) => {
         setLoading(true);
-        localStorage.setItem("learning_goal", pathway);
-
+    
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -36,14 +35,23 @@ const PathwaysPage = () => {
                 navigate("/login");
                 return;
             }
-
-            const response = await getProfile(token);
-
-            if (response.status === 200) {
-                navigate("/difficulty");
-            } else {
+    
+            // 🔹 Send API request to update learning_goal in the backend
+            const response = await fetch("https://codegrow.onrender.com/api/accounts/profile/", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Token ${token}`,
+                },
+                body: JSON.stringify({ learning_goal: pathway }), // ✅ Update learning goal in backend
+            });
+    
+            if (!response.ok) {
                 throw new Error("Failed to update learning goal.");
             }
+    
+            localStorage.setItem("learning_goal", pathway); // ✅ Save locally too
+            navigate("/difficulty");
         } catch (error) {
             console.error("Error updating learning goal:", error);
             alert(error.message || "Something went wrong. Please try again.");
@@ -51,6 +59,7 @@ const PathwaysPage = () => {
             setLoading(false);
         }
     };
+    
 
     return (
         <>
