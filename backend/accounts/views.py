@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models.signals import post_save
@@ -16,6 +16,8 @@ from .models import CustomUser, UserProgress, Lesson, StudySession
 import subprocess
 import sys
 from django.http import JsonResponse
+from django.views import View
+from django.conf import settings
 
 
 class RegisterView(APIView):
@@ -96,10 +98,8 @@ def complete_lesson(request, lesson_id):
                 "streak": progress.streak,
             }, status=status.HTTP_200_OK)
 
-        # ✅ Force add lesson and manually commit save
         progress.completed_lessons.add(lesson)
         progress.lessons_completed = progress.completed_lessons.count()
-        progress.save(update_fields=["lessons_completed"])  # ✅ Force DB update
 
         from datetime import date, timedelta
         today = date.today()
@@ -110,7 +110,7 @@ def complete_lesson(request, lesson_id):
             progress.streak = 1
 
         progress.last_active = today
-        progress.save(update_fields=["last_active", "streak"])  # ✅ Ensure DB commit
+        progress.save()
 
         return Response({
             "message": "Lesson marked as completed.",
@@ -124,7 +124,6 @@ def complete_lesson(request, lesson_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 @api_view(['GET'])
@@ -319,3 +318,18 @@ class LogoutView(APIView):
             return Response({"message": "Logged out successfully!"}, status=status.HTTP_200_OK)
         except:
             return Response({"error": "Logout failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateSuperUserView(View):
+    def get(self, request, *args, **kwargs):
+        User = get_user_model()
+        
+        username = "admin"
+        email = "admin@example.com"
+        password = "AdminSecurePass123"
+
+        if not User.objects.filter(username=username).exists():
+            User.objects.create_superuser(username=username, email=email, password=password)
+            return JsonResponse({"message": "Superuser created successfully!"}, status=201)
+        else:
+            return JsonResponse({"message": "Superuser already exists."}, status=200)
