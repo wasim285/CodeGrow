@@ -47,9 +47,17 @@ const Dashboard = () => {
         fetchDashboardData();
 
         const handleLessonCompletion = (event) => {
-            console.log("Lesson completed! Refreshing dashboard...", event.detail);
-            fetchDashboardData();
+            if (event.detail) {
+                console.log("Updating progress with new data:", event.detail);
+                
+                setLessonsCompleted(event.detail.lessons_completed);
+                setStreak(event.detail.streak);
+            } else {
+                console.log("No progress details found, fetching from API...");
+                fetchDashboardData(); // Fallback in case of missing data
+            }
         };
+        
 
         window.addEventListener("lessonCompleted", handleLessonCompletion);
 

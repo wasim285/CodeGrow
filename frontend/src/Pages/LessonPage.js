@@ -65,14 +65,13 @@ const LessonPage = () => {
             const response = await api.post(
                 `complete-lesson/${lessonId}/`,
                 {},
-                {
-                    headers: { Authorization: `Token ${localStorage.getItem("token")}` },
-                }
+                { headers: { Authorization: `Token ${localStorage.getItem("token")}` } }
             );
-
+    
             if (response.status === 200) {
                 setIsCompleted(true);
                 
+                // ✅ Send progress details with event
                 const updatedProgress = response.data.progress; 
                 window.dispatchEvent(new CustomEvent("lessonCompleted", { detail: updatedProgress }));
             }
@@ -80,6 +79,7 @@ const LessonPage = () => {
             console.error("Error completing lesson:", error);
         }
     };
+    
 
     const runCode = async () => {
         if (running) return;
