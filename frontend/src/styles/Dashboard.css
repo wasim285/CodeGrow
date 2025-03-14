@@ -80,6 +80,7 @@
     font-weight: bold;
     text-anchor: middle;
     dominant-baseline: middle;
+    transform: rotate(90deg); /* Counter-rotate the text */
 }
 
 .study-sessions-box {
