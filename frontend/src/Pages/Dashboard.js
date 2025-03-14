@@ -108,13 +108,22 @@ const Dashboard = () => {
                 <div className="grid-container">
                     <div className="progress-box">
                         <h3>📊 Your Progress</h3>
+                        <div className="progress-circle">
+                            <svg viewBox="0 0 100 100">
+                                <circle className="progress-bg" cx="50" cy="50" r="40"></circle>
+                                <circle
+                                    className="progress-fill"
+                                    cx="50"
+                                    cy="50"
+                                    r="40"
+                                    strokeDasharray="251.2"
+                                    strokeDashoffset={251.2 - (progressPercentage / 100) * 251.2}
+                                ></circle>
+                                <text x="50" y="50" className="progress-text">{progressPercentage}%</text>
+                            </svg>
+                        </div>
                         <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
                         <p>🔥 Streak: <strong>{streak} days</strong></p>
-                        <div className="progress-bar">
-                            <div className="progress-fill" style={{ width: `${progressPercentage}%` }}>
-                                {progressPercentage}%
-                            </div>
-                        </div>
                     </div>
                     <div className="study-sessions-box">
                         <h3>📅 Upcoming Study Sessions</h3>
