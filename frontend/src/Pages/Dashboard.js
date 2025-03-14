@@ -64,15 +64,6 @@ const Dashboard = () => {
     return (
         <div className="dashboard-container">
             <Navbar />
-            <div className="sidebar">
-                <h2>CodeGrow</h2>
-                <ul>
-                    <li>Dashboard</li>
-                    <li>Lessons</li>
-                    <li>Pathway</li>
-                    <li>Study Sessions</li>
-                </ul>
-            </div>
             <div className="dashboard-content">
                 <div className="welcome-box">
                     <h2>Welcome Back!</h2>
@@ -102,28 +93,28 @@ const Dashboard = () => {
                                     strokeDasharray="251.2"
                                     strokeDashoffset={251.2 - (progressPercentage / 100) * 251.2}
                                 ></circle>
-                                <text x="50" y="50" textAnchor="middle" dy="0.3em">{progressPercentage}%</text>
+                                <text x="50" y="54" textAnchor="middle" className="progress-text">{progressPercentage}%</text>
                             </svg>
                         </div>
                         <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
                         <p>🔥 Streak: <strong>{streak} days</strong></p>
                     </div>
+                </div>
 
-                    <div className="study-sessions-box">
-                        <h3>📅 Upcoming Study Sessions</h3>
-                        {studySessions.length > 0 ? (
-                            <ul>
-                                {studySessions.map((session, index) => (
-                                    <li key={session.id || index}>
-                                        <strong>{session.lesson_title || "No Lesson Name"}</strong>
-                                        <span>{session.date} {session.start_time} - {session.end_time}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p>No sessions scheduled. Start learning today! 📌</p>
-                        )}
-                    </div>
+                <div className="study-sessions-box">
+                    <h3>📅 Upcoming Study Sessions</h3>
+                    {studySessions.length > 0 ? (
+                        <ul>
+                            {studySessions.map((session, index) => (
+                                <li key={session.id || index}>
+                                    <strong>{session.lesson_title || "No Lesson Name"}</strong>
+                                    <span>{session.date} {session.start_time} - {session.end_time}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No sessions scheduled. Start learning today! 📌</p>
+                    )}
                 </div>
             </div>
         </div>
