@@ -69,6 +69,7 @@ const Dashboard = () => {
                     <h2>Welcome Back!</h2>
                     <p>Keep your learning streak going! 🚀</p>
                 </div>
+
                 <div className="dashboard-grid">
                     <div className="lesson-box">
                         <h3>{mainLesson ? mainLesson.title : "No Lesson Available"}</h3>
@@ -93,7 +94,9 @@ const Dashboard = () => {
                                     strokeDasharray="251.2"
                                     strokeDashoffset={251.2 - (progressPercentage / 100) * 251.2}
                                 ></circle>
-                                <text x="50" y="54" textAnchor="middle" className="progress-text">{progressPercentage}%</text>
+                                <text x="50" y="50" textAnchor="middle" alignmentBaseline="middle" className="progress-text">
+                                    {progressPercentage}%
+                                </text>
                             </svg>
                         </div>
                         <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>

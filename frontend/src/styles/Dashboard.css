@@ -28,16 +28,16 @@
 .dashboard-grid {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 20px;
+    align-items: flex-start;
+    gap: 30px;
     margin-bottom: 30px;
 }
 
 .lesson-box, .progress-section {
     background: #262636;
     border-radius: 12px;
-    padding: 20px;
-    width: 45%;
+    padding: 25px;
+    width: 48%;
     box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
 }
 
@@ -55,7 +55,6 @@
 .progress-circle svg {
     width: 100%;
     height: 100%;
-    transform: rotate(-90deg);
 }
 
 .progress-bg {
@@ -76,6 +75,8 @@
     fill: white;
     font-size: 18px;
     font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
 }
 
 .study-sessions-box {
