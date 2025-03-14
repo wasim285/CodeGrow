@@ -55,6 +55,7 @@
 .progress-circle svg {
     width: 100%;
     height: 100%;
+    transform: rotate(-90deg); /* Fix rotation issue */
 }
 
 .progress-bg {
@@ -77,6 +78,7 @@
     font-weight: bold;
     text-anchor: middle;
     dominant-baseline: middle;
+    transform: rotate(90deg); /* Fix number rotation */
 }
 
 .study-sessions-box {
