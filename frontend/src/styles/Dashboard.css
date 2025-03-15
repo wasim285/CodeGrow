@@ -1,3 +1,4 @@
+/* Main container */
 .dashboard-container {
     display: flex;
     flex-direction: column;
@@ -9,12 +10,14 @@
     padding-top: 80px;
 }
 
+/* Dashboard content area */
 .dashboard-content {
     width: 90%;
-    max-width: 1200px;
+    max-width: 1400px;
     text-align: center;
 }
 
+/* Welcome banner */
 .welcome-box {
     background: linear-gradient(45deg, #ff6b6b, #ffb900);
     border-radius: 12px;
@@ -25,129 +28,46 @@
     margin-bottom: 30px;
 }
 
+/* Dashboard layout grid */
 .dashboard-grid {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: 40px;
-    flex-wrap: wrap;
-    align-items: center;
-    max-width: 1100px;
-    margin: auto;
+    width: 100%;
 }
 
-.lesson-box, .progress-section {
+/* Left section (Lessons & Study Sessions) */
+.left-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 65%;
+}
+
+/* Lesson box */
+.lesson-box {
     background: #262636;
     border-radius: 12px;
     padding: 25px;
-    width: 48%;
-    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
-}
-
-.progress-section {
-    text-align: center;
-}
-
-.progress-circle {
-    width: 150px;
-    height: 150px;
-    margin: 0 auto;
-    position: relative;
-}
-
-.progress-circle svg {
     width: 100%;
-    height: 100%;
-    transform: rotate(-90deg); /* Ensures the progress starts at the top */
-}
-
-.progress-bg {
-    fill: none;
-    stroke: #444;
-    stroke-width: 8;
-}
-
-.progress-fill {
-    fill: none;
-    stroke: #4caf50;
-    stroke-width: 8;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.5s;
-}
-
-.progress-text {
-    fill: white;
-    font-size: 18px;
-    font-weight: bold;
-    text-anchor: middle;
-    dominant-baseline: middle;
-    transform: rotate(90deg); /* Counter-rotate the text */
-}
-
-.study-sessions-box {
-    background: #1e1e2e;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
     box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
-    max-width: 600px;
-    margin: auto;
-}
-
-.study-sessions-box ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.study-sessions-box li {
-    background: #2c3e50;
-    color: white;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-}
-
-.dashboard-page {
-    background: radial-gradient(circle, #121220, #0a0a1a);
-    color: white;
-    font-family: "Poppins", sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 100px;
-}
-
-.lesson-pathway {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 40px;
-    gap: 20px;
-}
-
-.lesson-box {
-    background: #1e1e2e;
-    border-radius: 12px;
-    padding: 25px;
     text-align: center;
-    width: 100%;
-    max-width: 600px;
-    position: relative;
-    z-index: 10;
-    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.15);
-    margin-bottom: 30px;
 }
 
+/* Lesson box title */
 .lesson-box h3 {
     font-size: 22px;
     font-weight: bold;
 }
 
+/* Lesson description */
 .lesson-box p {
     font-size: 16px;
     color: #b3b3b3;
 }
 
+/* Start lesson button */
 .lesson-box button {
     background-color: #4caf50;
     color: white;
@@ -164,32 +84,156 @@
     transform: scale(1.05);
 }
 
-.grid-container {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    align-items: stretch;
+/* Study sessions box */
+.study-sessions-box {
+    background: #1e1e2e;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
     width: 100%;
-    max-width: 900px;
 }
 
-.progress-box, .study-sessions-box {
+/* Study sessions list */
+.study-sessions-box ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.study-sessions-box li {
+    background: #2c3e50;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+
+/* Right section (Progress tracker) */
+.progress-section {
+    width: 30%;
     background: #262636;
     border-radius: 12px;
-    padding: 20px;
-    width: 300px;
+    padding: 25px;
     text-align: center;
     box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
 }
 
-.progress-box h3, .study-sessions-box h3 {
-    font-size: 20px;
+/* Progress circle container */
+.progress-circle {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* SVG styling */
+.progress-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); /* Fix arc rotation */
+}
+
+/* Background circle */
+.progress-bg {
+    fill: none;
+    stroke: #444;
+    stroke-width: 8;
+}
+
+/* Progress fill */
+.progress-fill {
+    fill: none;
+    stroke: #4caf50;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s;
+}
+
+/* Percentage text inside the circle */
+.progress-text {
+    fill: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    transform: rotate(0deg); /* Fix number rotation */
+}
+
+/* Recommended lessons box */
+.recommendations-box {
+    margin-top: 40px;
+    padding: 20px;
+    width: 100%;
+    max-width: 700px;
+    background: #1e1e2e;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.15);
+    text-align: center;
+}
+
+/* Recommended lessons title */
+.recommendations-box h2 {
+    font-size: 22px;
     font-weight: bold;
 }
 
-.progress-box p, .study-sessions-box p {
-    font-size: 16px;
+/* Recommended lessons list */
+.recommendations-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* Recommended lesson items */
+.recommendations-box li {
+    background: #262636;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.recommendations-box li:hover {
+    transform: translateY(-5px);
+}
+
+/* Recommended lesson title */
+.recommendations-box li h3 {
+    font-size: 18px;
+    color: white;
+}
+
+/* Recommended lesson description */
+.recommendations-box li p {
+    font-size: 14px;
     color: #b3b3b3;
+}
+
+/* Recommended lesson button */
+.recommendations-box button {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.recommendations-box button:hover {
+    background-color: #d9534f;
+    transform: scale(1.05);
+}
+
+/* Ensuring buttons look uniform */
+button {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    opacity: 0.8;
 }
 
 .study-sessions-box ul {
@@ -250,66 +294,6 @@
 
 .remove-btn:hover {
     background: darkred;
-}
-
-.recommendations-box {
-    margin-top: 40px;
-    padding: 20px;
-    width: 100%;
-    max-width: 700px;
-    background: #1e1e2e;
-    border-radius: 12px;
-    box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.15);
-    text-align: center;
-}
-
-.recommendations-box h2 {
-    font-size: 22px;
-    font-weight: bold;
-}
-
-.recommendations-box ul {
-    list-style: none;
-    padding: 0;
-}
-
-.recommendations-box li {
-    background: #262636;
-    border-radius: 8px;
-    padding: 15px;
-    margin: 10px 0;
-    box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.1);
-    transition: transform 0.2s ease;
-}
-
-.recommendations-box li:hover {
-    transform: translateY(-5px);
-}
-
-.recommendations-box li h3 {
-    font-size: 18px;
-    color: white;
-}
-
-.recommendations-box li p {
-    font-size: 14px;
-    color: #b3b3b3;
-}
-
-.recommendations-box button {
-    background-color: #ff6b6b;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.2s ease;
-}
-
-.recommendations-box button:hover {
-    background-color: #d9534f;
-    transform: scale(1.05);
 }
 
 input[type="number"]::-webkit-inner-spin-button,

@@ -42,22 +42,41 @@ const Dashboard = () => {
         };
 
         fetchDashboardData();
+
+        const handleLessonCompletion = (event) => {
+            if (event.detail) {
+                setLessonsCompleted(event.detail.total_lessons_completed);
+                setStreak(event.detail.streak);
+            } else {
+                fetchDashboardData();
+            }
+        };
+
+        window.addEventListener("lessonCompleted", handleLessonCompletion);
+
+        return () => {
+            window.removeEventListener("lessonCompleted", handleLessonCompletion);
+        };
     }, [token]);
 
     const progressPercentage = totalLessons > 0 ? Math.round((lessonsCompleted / totalLessons) * 100) : 0;
+    const circleStroke = 251.2 - (progressPercentage / 100) * 251.2; // Calculates the arc length
 
     return (
         <div className="dashboard-container">
             <Navbar />
             <div className="dashboard-content">
+                {/* Welcome Banner */}
                 <div className="welcome-box">
                     <h2>Welcome Back!</h2>
                     <p>Keep your learning streak going! 🚀</p>
                 </div>
 
+                {/* Dashboard Layout */}
                 <div className="dashboard-grid">
-                    {/* Left Section */}
+                    {/* Left Section: Lessons & Study Sessions */}
                     <div className="left-section">
+                        {/* Current Lesson */}
                         <div className="lesson-box">
                             <h3>{mainLesson ? mainLesson.title : "No Lesson Available"}</h3>
                             <p>{mainLesson ? mainLesson.description : "Check your pathway settings."}</p>
@@ -68,6 +87,7 @@ const Dashboard = () => {
                             )}
                         </div>
 
+                        {/* Study Sessions */}
                         <div className="study-sessions-box">
                             <h3>📅 Upcoming Study Sessions</h3>
                             {studySessions.length > 0 ? (
@@ -83,9 +103,29 @@ const Dashboard = () => {
                                 <p>No sessions scheduled. Start learning today! 📌</p>
                             )}
                         </div>
+
+                        {/* Recommended Lessons */}
+                        <div className="recommendations-box">
+                            <h3>📚 Recommended Lessons</h3>
+                            {recommendedLessons.length > 0 ? (
+                                <ul>
+                                    {recommendedLessons.map((lesson) => (
+                                        <li key={lesson.id}>
+                                            <h4>{lesson.title}</h4>
+                                            <p>{lesson.description}</p>
+                                            <button onClick={() => navigate(`/lessons/${lesson.id}`)}>
+                                                Start Lesson
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p>No recommended lessons available.</p>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Right Section - Progress Card */}
+                    {/* Right Section: Progress Tracker */}
                     <div className="progress-section">
                         <h3>📊 Your Progress</h3>
                         <div className="progress-circle">
@@ -97,9 +137,9 @@ const Dashboard = () => {
                                     cy="50"
                                     r="40"
                                     strokeDasharray="251.2"
-                                    strokeDashoffset={251.2 - (progressPercentage / 100) * 251.2}
+                                    strokeDashoffset={circleStroke}
                                 ></circle>
-                                <text x="50" y="55" textAnchor="middle" className="progress-text">
+                                <text x="50" y="50" textAnchor="middle" alignmentBaseline="middle" className="progress-text">
                                     {progressPercentage}%
                                 </text>
                             </svg>
