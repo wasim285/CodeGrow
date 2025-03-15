@@ -139,7 +139,7 @@ const Dashboard = () => {
                                     strokeDasharray="251.2"
                                     strokeDashoffset={circleStroke}
                                 ></circle>
-                                <text x="50" y="50" textAnchor="middle" dominantBaseline="central" className="progress-text">
+                                <text x="50" y="55" textAnchor="middle" className="progress-text" transform="rotate(90, 50, 50)">
                                     {progressPercentage}%
                                 </text>
                             </svg>
