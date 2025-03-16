@@ -30,9 +30,9 @@ function HomePage() {
           CodeGrow
         </div>
 
-        {/* Empty nav-links - Login button removed from top bar */}
         <div className="nav-links">
-          {/* No links here anymore */}
+          {/* Features and About links removed */}
+          <Link to="/login" className="login-button">Login</Link>
         </div>
       </nav>
 
@@ -56,8 +56,7 @@ function HomePage() {
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }}>
-                {/* Changed to login-button class for blue styling */}
-                <Link to="/login" className="login-button">
+                <Link to="/login" className="btn btn-outline">
                   Login
                 </Link>
               </motion.div>
