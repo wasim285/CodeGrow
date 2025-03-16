@@ -1,7 +1,7 @@
 .pathways-container {
     background: radial-gradient(circle, #121220, #0a0a1a);
     color: white;
-    font-family: "Poppins", sans-serif;
+    font-family: "Outfit", "Inter", sans-serif; /* Updated to match theme fonts */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -12,37 +12,66 @@
 }
 
 .pathways-header {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 30px;
+    font-size: 32px; /* Slightly larger */
+    font-weight: 700; /* Bolder */
+    margin-bottom: 40px;
     text-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+    font-family: "Outfit", sans-serif; /* Primary heading font */
+    letter-spacing: -0.5px; /* Tighter letter spacing for modern look */
 }
 
 .pathways-options {
     display: flex;
-    gap: 20px;
+    gap: 30px; /* Increased gap */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .card {
-    width: 220px;
-    height: 280px;
+    width: 240px; /* Slightly wider */
+    height: 300px; /* Slightly taller */
     background: #07182E;
     position: relative;
     display: flex;
+    flex-direction: column; /* Changed to column */
     justify-content: center;
     align-items: center;
     border-radius: 20px;
     cursor: pointer;
     overflow: hidden;
-    transition: transform 0.3s ease-in-out;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
 }
 
 .card h2 {
     z-index: 2;
     color: white;
-    font-size: 1.5em;
+    font-size: 1.7em;
     text-align: center;
-    font-weight: bold;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif; /* Match heading font */
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #fff, #b8b8d0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.3px;
+}
+
+.card p {
+    z-index: 2;
+    color: #b8b8d0;
+    font-size: 0.95em;
+    text-align: center;
+    padding: 0 20px;
+    font-family: "Inter", sans-serif; /* Secondary font for body text */
+    font-weight: 400;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease-out;
 }
 
 .card::before {
@@ -70,12 +99,64 @@
     background: #07182E;
     inset: 5px;
     border-radius: 15px;
+    transition: all 0.3s ease;
 }
 
 .card:hover {
-    transform: scale(1.08);
+    transform: scale(1.05) translateY(-10px);
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.5);
 }
 
 .card:hover::before {
-    animation: rotateBG 3.5s linear infinite;
+    animation: rotateBG 3s linear infinite;
+    opacity: 0.8;
+}
+
+.card:hover::after {
+    inset: 6px;
+}
+
+.card:hover p {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Add subtle icon for each card */
+.card-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Add subtle indicator for active pathway */
+.card.active {
+    box-shadow: 0 0 0 2px #4caf50, 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.card.active::before {
+    background-image: linear-gradient(180deg, rgb(76, 175, 80), rgb(139, 195, 74));
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .pathways-options {
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .card {
+        width: 85%;
+        max-width: 280px;
+        height: 260px;
+    }
+    
+    .pathways-header {
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
 }

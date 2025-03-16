@@ -1,47 +1,95 @@
+/* Enhanced Difficulty Selection Styling with CodeGrow Theme Fonts */
+
 .difficulty-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    min-height: 100vh;
     background: radial-gradient(circle, #121220, #0a0a1a);
     color: white;
+    font-family: "Outfit", "Inter", sans-serif;
+    padding-top: 80px;
+    text-align: center;
+    animation: fadeIn 0.5s ease forwards;
 }
 
 .difficulty-header {
-    text-align: center;
-    font-size: 1.8rem;
-    font-weight: bold;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    text-shadow: 0px 4px 10px rgba(255, 255, 255, 0.1);
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.5px;
     color: white;
-    margin-bottom: 30px;
     width: 100%;
 }
 
 .difficulty-options {
     display: flex;
-    gap: 20px;
+    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .card {
-    width: 220px;
-    height: 280px;
+    width: 240px;
+    height: 300px;
     background: #07182E;
     position: relative;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     border-radius: 20px;
     cursor: pointer;
     overflow: hidden;
-    transition: transform 0.3s ease-in-out;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 }
 
 .card h2 {
     z-index: 2;
     color: white;
-    font-size: 1.5em;
+    font-size: 1.7em;
     text-align: center;
-    font-weight: bold;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #fff, #b8b8d0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.3px;
+}
+
+.card p {
+    z-index: 2;
+    color: #b8b8d0;
+    font-size: 0.95em;
+    text-align: center;
+    padding: 0 20px;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease-out;
+}
+
+/* Different gradient colors for difficulty levels */
+.card.beginner::before {
+    background-image: linear-gradient(180deg, #4caf50, #8bc34a);
+}
+
+.card.intermediate::before {
+    background-image: linear-gradient(180deg, #ff9800, #ffb74d);
+}
+
+.card.advanced::before {
+    background-image: linear-gradient(180deg, #f44336, #e57373);
 }
 
 .card::before {
@@ -69,16 +117,66 @@
     background: #07182E;
     inset: 5px;
     border-radius: 15px;
+    transition: all 0.3s ease;
 }
 
 .card:hover {
-    transform: scale(1.08);
+    transform: scale(1.05) translateY(-10px);
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.5);
 }
 
 .card:hover::before {
-    animation: rotateBG 3.5s linear infinite;
+    animation: rotateBG 3s linear infinite;
+    opacity: 0.8;
 }
 
+.card:hover::after {
+    inset: 6px;
+}
+
+.card:hover p {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Difficulty level icon */
+.difficulty-icon {
+    position: relative;
+    z-index: 2;
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+/* Beginner icon color */
+.beginner .difficulty-icon {
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Intermediate icon color */
+.intermediate .difficulty-icon {
+    background: linear-gradient(45deg, #ff9800, #ffb74d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Advanced icon color */
+.advanced .difficulty-icon {
+    background: linear-gradient(45deg, #f44336, #e57373);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Active difficulty indicator */
+.card.active {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Enhanced fade-in animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -88,4 +186,51 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+    .difficulty-options {
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .card {
+        width: 85%;
+        max-width: 280px;
+        height: 260px;
+    }
+    
+    .difficulty-header {
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
+}
+
+/* Back button styling */
+.back-button {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-5px);
+}
+
+.back-icon {
+    font-size: 18px;
 }
