@@ -60,13 +60,14 @@ const Dashboard = () => {
         };
     }, [token]);
 
+    // Inside your Dashboard component
     // Calculate the progress percentage
     const progressPercentage = totalLessons > 0 ? Math.round((lessonsCompleted / totalLessons) * 100) : 0;
-    
-    // Calculate the circle circumference based on the radius (r = 40)
+
+    // Calculate the circle circumference based on the ACTUAL radius (r = 40) in your SVG
     const radius = 40;
     const circumference = 2 * Math.PI * radius;
-    
+
     // Calculate stroke offset - when progress is 0%, offset equals circumference (empty circle)
     // When progress is 100%, offset equals 0 (full circle)
     const circleStroke = circumference - (progressPercentage / 100) * circumference;
