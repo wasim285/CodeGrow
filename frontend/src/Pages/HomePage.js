@@ -1,11 +1,14 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../styles/NewHomePage.css";
+import "../styles/NewHomePage.css"; // Make sure this path is correct!
 
 function HomePage() {
+  console.log("HomePage component rendering"); // Debug log
+  
   return (
     <div className="homepage">
-      {/* Animated Background with code snippets and leaves - exactly 12 particles as defined in CSS */}
+      {/* Animated Background - Make sure this is the exact structure */}
       <div className="animated-bg">
         <span className="code-particle">&lt;div&gt;</span>
         <span className="code-particle">function()</span>
@@ -21,7 +24,7 @@ function HomePage() {
         <span className="leaf-particle">🍃</span>
       </div>
 
-      <div className="navbar">
+      <nav className="navbar">
         <div className="logo">
           <span className="logo-icon">{"</>"}</span>
           CodeGrow
@@ -32,7 +35,7 @@ function HomePage() {
           <a href="#about" className="nav-link">About</a>
           <Link to="/login" className="login-button">Login</Link>
         </div>
-      </div>
+      </nav>
 
       <div className="container">
         <motion.div
@@ -134,8 +137,7 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <motion.div 
+      <motion.div
         className="stats-section"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -155,7 +157,6 @@ function HomePage() {
         </div>
       </motion.div>
       
-      {/* Footer */}
       <motion.footer 
         className="footer"
         initial={{ opacity: 0 }}
