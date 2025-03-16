@@ -24,7 +24,7 @@
     padding: 18px 40px;
     z-index: 1000;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* Change from space-between to flex-start since we have empty nav-links */
     align-items: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -39,6 +39,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-right: auto; /* Push everything else to the right side */
 }
 
 .logo-icon {
@@ -52,6 +53,7 @@
     display: flex;
     gap: 25px;
     align-items: center;
+    /* Keep empty but maintain structure */
 }
 
 .nav-link {
@@ -576,10 +578,12 @@
     .buttons {
         flex-direction: column;
         width: 100%;
+        gap: 15px; /* Reduced gap for better mobile look */
     }
     
     .btn {
         width: 100%;
+        padding: 14px 28px; /* Slightly smaller on mobile */
     }
     
     .features-grid {
@@ -598,6 +602,11 @@
     .nav-links {
         display: none;
     }
+    
+    .login-button, 
+    .btn {
+        padding: 14px 28px; /* Slightly smaller on mobile */
+    }
 }
 
 /* Update Login Button Styling to Blue */
@@ -608,16 +617,19 @@
     border-radius: 30px;
     font-size: 16px;
     font-weight: 600;
-    padding: 10px 25px;
+    padding: 16px 32px; /* Match the padding of the Get Started button */
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: "Inter", sans-serif;
     box-shadow: 0 4px 10px rgba(58, 142, 255, 0.3);
     text-decoration: none;
+    min-width: 160px; /* Match the min-width of the Get Started button */
+    text-align: center;
+    display: inline-block;
 }
 
 .login-button:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px); /* Match the transform of the Get Started button */
     box-shadow: 0 6px 15px rgba(58, 142, 255, 0.4);
     background: linear-gradient(135deg, #2e7bff, #3b51e0);
 }
