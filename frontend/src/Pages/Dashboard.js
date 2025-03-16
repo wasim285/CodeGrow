@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Dashboard.css";
@@ -16,6 +16,7 @@ const Dashboard = () => {
     const [streak, setStreak] = useState(0);
     const [error, setError] = useState(null);
     const token = localStorage.getItem("token");
+    const progressTextRef = useRef(null);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -69,6 +70,14 @@ const Dashboard = () => {
     // Calculate stroke offset - when progress is 0%, offset equals circumference (empty circle)
     // When progress is 100%, offset equals 0 (full circle)
     const circleStroke = circumference - (progressPercentage / 100) * circumference;
+    
+    // Fix text rotation after render
+    useEffect(() => {
+        if (progressTextRef.current) {
+            // Reset any transform that might be applied from SVG rotation
+            progressTextRef.current.style.transform = "rotate(90deg)";
+        }
+    }, [progressPercentage]);
 
     return (
         <div className="dashboard-container">
@@ -137,37 +146,33 @@ const Dashboard = () => {
                     <div className="progress-section">
                         <h3>📊 Your Progress</h3>
                         <div className="progress-circle">
-                            <svg viewBox="0 0 100 100">
-                                <defs>
-                                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stopColor="#4caf50" />
-                                        <stop offset="100%" stopColor="#8bc34a" />
-                                    </linearGradient>
-                                </defs>
-                                <circle 
-                                    className="progress-bg" 
-                                    cx="50" 
-                                    cy="50" 
-                                    r="40"
-                                ></circle>
-                                <circle
-                                    className="progress-fill"
-                                    cx="50"
-                                    cy="50"
-                                    r="40"
-                                    strokeDasharray={circumference}
-                                    strokeDashoffset={circleStroke}
-                                    style={{ stroke: 'url(#progressGradient)' }}
-                                ></circle>
-                                <text 
-                                    x="50" 
-                                    y="50" 
-                                    textAnchor="middle" 
-                                    dominantBaseline="middle"
-                                    className="progress-text">
-                                    {progressPercentage}%
-                                </text>
-                            </svg>
+                            <div className="progress-wrapper">
+                                <svg viewBox="0 0 100 100">
+                                    <defs>
+                                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#4caf50" />
+                                            <stop offset="100%" stopColor="#8bc34a" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle 
+                                        className="progress-bg" 
+                                        cx="50" 
+                                        cy="50" 
+                                        r="40"
+                                    ></circle>
+                                    <circle
+                                        className="progress-fill"
+                                        cx="50"
+                                        cy="50"
+                                        r="40"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={circleStroke}
+                                    ></circle>
+                                </svg>
+                                <div className="percentage-display">
+                                    <span>{progressPercentage}%</span>
+                                </div>
+                            </div>
                         </div>
                         <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
                         <p>🔥 Streak: <strong>{streak} days</strong></p>
