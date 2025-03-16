@@ -26,7 +26,7 @@
     color: white;
     font-size: 20px;
     font-weight: bold;
-    margin-bottom: 30px;
+    margin-bottom: 40px; /* Increased spacing */
     box-shadow: 0 6px 12px rgba(255, 107, 107, 0.2);
 }
 
@@ -53,7 +53,7 @@
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 40px; /* Increased spacing between left section elements */
     width: 65%;
 }
 
@@ -66,6 +66,7 @@
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 0; /* Reset any default margins */
 }
 
 .lesson-box:hover {
@@ -117,6 +118,7 @@
     text-align: center;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
     width: 100%;
+    margin: 0; /* Reset any default margins */
 }
 
 .study-sessions-box h3 {
@@ -131,6 +133,9 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Consistent gap between list items */
 }
 
 .study-sessions-box li {
@@ -139,10 +144,10 @@
     background: #2c3e50;
     color: white;
     padding: 15px 20px;
-    margin: 12px 0;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease;
+    margin: 0; /* Remove margins from list items, we'll use gap instead */
 }
 
 .study-sessions-box li:hover {
@@ -231,7 +236,7 @@
 
 /* Recommended lessons box */
 .recommendations-box {
-    margin-top: 30px;
+    margin-top: 0; /* Remove top margin, we're using gaps now */
     padding: 30px;
     width: 100%;
     background: #1e1e2e;
@@ -328,6 +333,7 @@
 @media (max-width: 768px) {
     .dashboard-grid {
         flex-direction: column;
+        gap: 30px; /* Reduced gap for mobile */
     }
     
     .left-section, 
@@ -335,8 +341,8 @@
         width: 100%;
     }
     
-    .progress-section {
-        margin-top: 30px;
+    .left-section {
+        gap: 30px; /* Reduced gap for mobile */
     }
     
     .recommendations-box ul {
@@ -358,10 +364,10 @@ button:hover {
 .session-item {
     background: #1f1f2e;
     padding: 12px;
-    margin: 8px 0;
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s ease-in-out;
+    margin: 0; /* Remove margins from session items */
 }
 
 .session-item:hover {
