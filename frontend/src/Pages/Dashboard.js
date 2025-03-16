@@ -59,8 +59,16 @@ const Dashboard = () => {
         };
     }, [token]);
 
+    // Calculate the progress percentage
     const progressPercentage = totalLessons > 0 ? Math.round((lessonsCompleted / totalLessons) * 100) : 0;
-    const circleStroke = 251.2 - (progressPercentage / 100) * 251.2; // Calculates the arc length
+    
+    // Calculate the circle circumference based on the radius (r = 40)
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+    
+    // Calculate stroke offset - when progress is 0%, offset equals circumference (empty circle)
+    // When progress is 100%, offset equals 0 (full circle)
+    const circleStroke = circumference - (progressPercentage / 100) * circumference;
 
     return (
         <div className="dashboard-container">
@@ -129,20 +137,34 @@ const Dashboard = () => {
                     <div className="progress-section">
                         <h3>📊 Your Progress</h3>
                         <div className="progress-circle">
-                            <svg viewBox="0 0 100 100">
-                                <circle className="progress-bg" cx="50" cy="50" r="40"></circle>
-                                <circle
-                                    className="progress-fill"
-                                    cx="50"
-                                    cy="50"
-                                    r="40"
-                                    strokeDasharray="251.2"
-                                    strokeDashoffset={circleStroke}
-                                ></circle>
-                                <text x="50" y="55" textAnchor="middle" className="progress-text" transform="rotate(90, 50, 50)">
-                                    {progressPercentage}%
-                                </text>
-                            </svg>
+                            <div className="progress-wrapper">
+                                <svg viewBox="0 0 100 100">
+                                    <defs>
+                                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#4caf50" />
+                                            <stop offset="100%" stopColor="#8bc34a" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle 
+                                        className="progress-bg" 
+                                        cx="50" 
+                                        cy="50" 
+                                        r="40"
+                                    ></circle>
+                                    <circle
+                                        className="progress-fill"
+                                        cx="50"
+                                        cy="50"
+                                        r="40"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={circleStroke}
+                                        style={{ stroke: 'url(#progressGradient)' }}
+                                    ></circle>
+                                </svg>
+                                <div className="percentage-display">
+                                    <span>{progressPercentage}%</span>
+                                </div>
+                            </div>
                         </div>
                         <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
                         <p>🔥 Streak: <strong>{streak} days</strong></p>
