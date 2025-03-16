@@ -131,8 +131,8 @@ const Dashboard = () => {
 
                 {/* Welcome Banner */}
                 <div className="welcome-box">
-                    <h2>Welcome Back!</h2>
-                    <p>Keep your learning streak going! 🚀</p>
+                    <h2>Welcome to CodeGrow, {localStorage.getItem('username') || 'Coder'}! 👋</h2>
+                    <p>Ready to level up your coding skills today?</p>
                 </div>
 
                 {/* Dashboard Layout */}
@@ -227,7 +227,7 @@ const Dashboard = () => {
                             </div>
                         </div>
                         <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
-                        <p>🔥 Streak: <strong>{streak} days</strong></p>
+                        <p>🔥 Current Streak: <strong>{streak} {streak === 1 ? 'day' : 'days'}</strong></p>
                     </div>
                 </div>
 
