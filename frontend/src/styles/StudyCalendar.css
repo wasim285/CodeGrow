@@ -1,95 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 body {
-    background-color: #0f0f1a !important;
+    background-color: #121220 !important;
     color: white;
-    font-family: Arial, sans-serif;
+    font-family: "Outfit", "Inter", sans-serif;
 }
 
-
+/* Calendar Container */
 .study-calendar-container {
-    max-width: 65%;  /* Reduce width for better fit */
+    max-width: 65%;
     margin: auto;
     text-align: center;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    background: linear-gradient(145deg, #1a1a2e, #16162c);
+    border-radius: 16px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     position: relative;
-    margin-top: 80px;
+    margin-top: 90px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     transition: all 0.3s ease-in-out;
 }
 
-.study-calendar-container h2,
+.study-calendar-container:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-5px);
+}
+
+.study-calendar-container h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: white !important;
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+}
+
 .calendar-subtitle {
-    color: black !important;
+    color: #b8b8d0 !important;
+    font-size: 18px;
+    font-family: "Inter", sans-serif;
+    margin-bottom: 30px;
 }
 
-
+/* Calendar Main Component */
 .fc {
-    background: white !important;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-    height: 700px; /* Increase vertical height */
-    max-height: 80vh; /* Ensure it does not overflow */
+    background: linear-gradient(145deg, #222232, #1e1e2e) !important;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    height: 700px;
+    max-height: 80vh;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Calendar Headers and Text */
 .fc th,
 .fc td,
-.fc-daygrid-day-number,
-.fc-toolbar-title {
-    color: black !important;
-    font-weight: bold;
+.fc-daygrid-day-number {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
 }
 
+.fc-toolbar-title {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    font-size: 24px !important;
+    letter-spacing: -0.3px;
+}
+
+/* Calendar Days */
 .fc-daygrid-day {
-    height: 100px; /* Increase row height */
+    height: 110px;
     font-size: 16px;
-    transition: 0.3s;
+    transition: all 0.3s ease;
     cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.03) !important;
 }
 
 .fc-daygrid-day:hover {
-    background: rgba(46, 204, 113, 0.25);
-    border-radius: 5px;
+    background: rgba(76, 175, 80, 0.15);
+    border-radius: 8px;
+    transform: scale(1.02);
 }
 
-/* 🔹 Study Session Event */
+.fc-day-today {
+    background: rgba(76, 175, 80, 0.2) !important;
+    border-radius: 8px;
+}
+
+/* Event Styling */
 .fc-event {
-    background: #007bff !important;
+    background: linear-gradient(45deg, #4caf50, #8bc34a) !important;
     color: white !important;
-    border: none;
-    border-radius: 5px;
-    padding: 5px;
+    border: none !important;
+    border-radius: 10px;
+    padding: 8px 10px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
     text-align: center;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
 }
 
 .fc-event:hover {
-    background: #0056b3 !important;
-    transform: scale(1.05);
+    background: linear-gradient(45deg, #3d9140, #7cb342) !important;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
 }
 
-/* 🔹 Calendar Toolbar */
+/* Calendar Toolbar */
 .fc-toolbar {
-    color: black !important;
-    font-weight: bold;
+    color: white !important;
+    font-weight: 600;
+    margin-bottom: 25px !important;
 }
 
 .fc-button {
-    background-color: #4caf50 !important;
+    background: linear-gradient(to right, #4caf50, #45a049) !important;
     color: white !important;
-    border: none;
+    border: none !important;
+    border-radius: 30px !important;
+    padding: 10px 16px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    font-family: "Inter", sans-serif !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3) !important;
 }
 
 .fc-button:hover {
-    background-color: #388e3c !important;
+    background: linear-gradient(to right, #45a049, #388e3c) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4) !important;
 }
 
-/* 🔹 Modal Styling */
+.fc-button:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.fc-button-active {
+    background: linear-gradient(to right, #388e3c, #2e7d32) !important;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Modal Styling */
 .modal-overlay {
     display: block;
     position: fixed;
@@ -97,31 +156,33 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
     z-index: 999;
 }
 
 .modal {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center aligns all fields */
+    align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 16px;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: #2c3e50;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(145deg, #2a2a3d, #262636);
+    padding: 35px;
+    border-radius: 14px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     z-index: 1000;
-    width: 400px;
+    width: 450px;
     text-align: center;
-    animation: fadeIn 0.3s ease-in-out;
+    animation: modalFadeIn 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-@keyframes fadeIn {
+@keyframes modalFadeIn {
     from {
         opacity: 0;
         transform: translate(-50%, -55%);
@@ -133,33 +194,43 @@ body {
 }
 
 .modal h3 {
-    font-size: 22px;
+    font-size: 26px;
     color: white;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    font-family: "Outfit", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.3px;
 }
-
 
 .modal label {
     width: 100%;
     text-align: left;
-    font-weight: bold;
+    font-weight: 600;
     color: white;
-    margin-top: 8px;
+    margin-top: 12px;
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
 }
 
 .modal select,
 .modal input[type="time"] {
     width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #444;
-    border-radius: 5px;
-    background: #222831;
+    padding: 14px;
+    margin: 8px 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    background: #1a1a2e;
     color: white;
     font-size: 16px;
     cursor: pointer;
+    font-family: "Inter", sans-serif;
+    transition: all 0.2s ease;
 }
 
+.modal select:hover,
+.modal input[type="time"]:hover {
+    border-color: rgba(76, 175, 80, 0.5);
+}
 
 .modal input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
@@ -169,97 +240,431 @@ body {
 
 .modal input[type="time"]:focus,
 .modal select:focus {
-    border-color: #00a8e8;
+    border-color: #4caf50;
     outline: none;
-    box-shadow: 0 0 5px rgba(0, 168, 232, 0.6);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
 }
 
-
+/* Modal Buttons */
 .modal-buttons {
     display: flex;
-    justify-content: space-between; /* Evenly distributes buttons */
+    justify-content: space-between;
     width: 100%;
-    margin-top: 15px;
+    margin-top: 25px;
 }
 
 .modal-buttons button {
-    flex: 1; /* Makes buttons take equal space */
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-weight: bold;
+    flex: 1;
+    padding: 14px 15px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    font-family: "Inter", sans-serif;
     cursor: pointer;
-    transition: 0.3s;
-    margin: 5px;
+    transition: all 0.3s ease;
+    margin: 0 8px;
     text-align: center;
+    border: none;
+    letter-spacing: 0.3px;
 }
 
 .modal-buttons button.confirm {
-    background: #27ae60;
+    background: linear-gradient(to right, #4caf50, #45a049);
     color: white;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
 }
 
 .modal-buttons button.confirm:hover {
-    background: #2ecc71;
-    transform: scale(1.05);
+    background: linear-gradient(to right, #45a049, #388e3c);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+}
+
+.modal-buttons button.confirm:active {
+    transform: translateY(0) scale(0.98);
 }
 
 .modal-buttons button.cancel {
-    background: #e74c3c;
+    background: linear-gradient(to right, #ff6b6b, #ff8e8e);
     color: white;
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
 }
 
 .modal-buttons button.cancel:hover {
-    background: #c0392b;
-    transform: scale(1.05);
+    background: linear-gradient(to right, #ff5252, #ff7b7b);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 12px rgba(255, 107, 107, 0.4);
 }
 
+.modal-buttons button.cancel:active {
+    transform: translateY(0) scale(0.98);
+}
 
+/* Success Alert */
 .success-alert {
     position: fixed;
-    top: 80px;
+    top: 100px;
     left: 50%;
     transform: translateX(-50%);
-    background: #32CD32;
-    color: black;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: bold;
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+    color: white;
+    padding: 16px 30px;
+    border-radius: 30px;
+    font-weight: 600;
     font-size: 16px;
     text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    animation: fadeOut 3s forwards;
+    font-family: "Inter", sans-serif;
+    box-shadow: 0 8px 16px rgba(76, 175, 80, 0.4);
+    animation: fadeOutAlert 3s forwards;
+    z-index: 1001;
+    letter-spacing: 0.2px;
 }
 
-@keyframes fadeOut {
-    0% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; }
+@keyframes fadeOutAlert {
+    0% { opacity: 1; transform: translate(-50%, 0); }
+    10% { transform: translate(-50%, -10px); }
+    80% { opacity: 1; transform: translate(-50%, -10px); }
+    100% { opacity: 0; transform: translate(-50%, -20px); }
 }
 
+/* Study Sessions List */
+.study-sessions-box {
+    width: 65%;
+    margin: 40px auto;
+    background: linear-gradient(145deg, #222232, #1e1e2e);
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.study-sessions-box h3 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #fff;
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.3px;
+}
 
 .study-sessions-box ul {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 .study-sessions-box li {
-    background: #2c3e50;
+    background: linear-gradient(145deg, #323d4a, #2c3e50);
     color: white;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 0;
+    border-radius: 12px;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.study-sessions-box li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .session-title {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 4px;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #f8c358;
+    font-family: "Outfit", sans-serif;
 }
 
 .session-time {
+    font-size: 15px;
+    color: #adbdcc;
+    font-family: "Inter", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.session-time::before {
+    content: "🕒";
+    font-size: 16px;
+}
+
+/* Action Buttons for Sessions */
+.session-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 12px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.study-sessions-box li:hover .session-actions {
+    opacity: 1;
+    max-height: 50px;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
     font-size: 14px;
-    color: #d1d1d1;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-family: "Inter", sans-serif;
+}
+
+.edit-btn {
+    background: linear-gradient(to right, #3498db, #2980b9);
+    color: white;
+}
+
+.edit-btn:hover {
+    background: linear-gradient(to right, #2980b9, #1f6aa7);
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    background: linear-gradient(to right, #ff6b6b, #ff5252);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(to right, #ff5252, #e03e3e);
+    transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .study-calendar-container,
+    .study-sessions-box {
+        width: 80%;
+    }
+}
+
+@media (max-width: 768px) {
+    .study-calendar-container,
+    .study-sessions-box {
+        width: 90%;
+        padding: 25px;
+    }
+    
+    .fc {
+        padding: 15px;
+    }
+    
+    .modal {
+        width: 90%;
+        max-width: 400px;
+    }
+}
+
+/* Extra Animation for Upcoming Session Indicator */
+.upcoming-session {
+    position: relative;
+}
+
+.upcoming-session::after {
+    content: "Next Up";
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(45deg, #ff6b6b, #ffb900);
+    color: white;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(255, 107, 107, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Calendar View Toggle */
+.calendar-view-toggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.calendar-view-toggle button {
+    background: linear-gradient(145deg, #222232, #1e1e2e);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: "Inter", sans-serif;
+}
+
+.calendar-view-toggle button.active {
+    background: linear-gradient(to right, #4caf50, #45a049);
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+.calendar-view-toggle button:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Empty State */
+.empty-state {
+    padding: 40px;
+    text-align: center;
+    background: linear-gradient(145deg, #222232, #1e1e2e);
+    border-radius: 14px;
+    margin: 20px 0;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.empty-state p {
+    font-size: 18px;
+    color: #b8b8d0;
+    font-family: "Inter", sans-serif;
+}
+
+.empty-state button {
+    background: linear-gradient(to right, #4caf50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: "Inter", sans-serif;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+.empty-state button:hover {
+    background: linear-gradient(to right, #45a049, #388e3c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+}
+
+/* Animation for newly added sessions */
+@keyframes highlightNew {
+    0% { background: rgba(76, 175, 80, 0.3); }
+    100% { background: linear-gradient(145deg, #323d4a, #2c3e50); }
+}
+
+.new-session {
+    animation: highlightNew 2s ease-out;
+}
+
+/* Status indicator for sessions */
+.session-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.status-upcoming {
+    background: #4caf50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+}
+
+.status-past {
+    background: #9e9e9e;
+}
+
+.status-in-progress {
+    background: #ff9800;
+    box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* Enhanced focus state for dates with sessions */
+.fc-daygrid-day.has-events {
+    box-shadow: inset 0 0 0 2px rgba(76, 175, 80, 0.3);
+    border-radius: 8px;
+    position: relative;
+}
+
+.fc-daygrid-day.has-events::after {
+    content: "";
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: #4caf50;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+/* Tooltip styles */
+.session-tooltip {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #16162c;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: max-content;
+    max-width: 250px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.session-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #16162c transparent transparent transparent;
+}
+
+.study-sessions-box li:hover .session-tooltip {
+    opacity: 1;
+    visibility: visible;
+    bottom: 110%;
 }
