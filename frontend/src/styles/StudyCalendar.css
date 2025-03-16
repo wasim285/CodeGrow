@@ -167,6 +167,19 @@ body {
     box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
 }
 
+/* Fix for time display in calendar events */
+.fc-event-time {
+    display: none; /* Hide the default time display that shows "10a" notation */
+}
+
+/* Style for custom event time format */
+.fc-event-title {
+    color: white !important;
+    font-weight: 600;
+    display: block !important;
+    padding: 2px 0;
+}
+
 /* Calendar Toolbar */
 .fc-toolbar {
     color: white !important;
@@ -743,13 +756,15 @@ body {
 
 /* Fix color of event time for better readability */
 .fc-event-time {
-    color: white !important;
-    font-weight: 600;
+    display: none; /* Hide the default time display that shows "10a" notation */
 }
 
 /* Fix color of event title for better readability */
 .fc-event-title {
     color: white !important;
+    font-weight: 600;
+    display: block !important;
+    padding: 2px 0;
 }
 
 /* Update week numbers if visible */

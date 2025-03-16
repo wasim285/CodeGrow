@@ -15,6 +15,11 @@ const Dashboard = () => {
     const [totalLessons, setTotalLessons] = useState(10);
     const [streak, setStreak] = useState(0);
     const [error, setError] = useState(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [sessionToDelete, setSessionToDelete] = useState(null);
+    const [sessionTitleToDelete, setSessionTitleToDelete] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const token = localStorage.getItem("token");
 
     useEffect(() => {
@@ -70,10 +75,60 @@ const Dashboard = () => {
     // When progress is 100%, offset equals 0 (full circle)
     const circleStroke = circumference - (progressPercentage / 100) * circumference;
 
+    // Handle clicking on a study session to delete
+    const handleSessionClick = (session) => {
+        setSessionToDelete(session.id);
+        setSessionTitleToDelete(session.lesson_title || "No Lesson Name");
+        setDeleteModalOpen(true);
+    };
+
+    // Handle removing a study session
+    const handleRemoveSession = async () => {
+        if (!sessionToDelete) return;
+        
+        try {
+            const response = await axios.delete(`${API_BASE_URL}study-sessions/${sessionToDelete}/`, {
+                headers: { Authorization: `Token ${token}` },
+            });
+            
+            if (response.status === 204) {
+                // Update the sessions list
+                setStudySessions(studySessions.filter(session => session.id !== sessionToDelete));
+                // Show success message
+                displaySuccessMessage("Study session removed successfully!");
+            } else {
+                console.error("Failed to delete session:", response.data);
+            }
+        } catch (error) {
+            console.error("Error removing study session:", error);
+        }
+        
+        // Close the modal
+        setDeleteModalOpen(false);
+        setSessionToDelete(null);
+        setSessionTitleToDelete("");
+    };
+
+    // Display a success message
+    const displaySuccessMessage = (message) => {
+        setSuccessMessage(message);
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+            setShowSuccessMessage(false);
+        }, 3000);
+    };
+
     return (
         <div className="dashboard-container">
             <Navbar />
             <div className="dashboard-content">
+                {/* Success Message */}
+                {showSuccessMessage && (
+                    <div className="success-alert">
+                        {successMessage}
+                    </div>
+                )}
+
                 {/* Welcome Banner */}
                 <div className="welcome-box">
                     <h2>Welcome Back!</h2>
@@ -98,12 +153,17 @@ const Dashboard = () => {
                         {/* Study Sessions */}
                         <div className="study-sessions-box">
                             <h3>📅 Upcoming Study Sessions</h3>
+                            <p className="click-info">Click on a session to remove it</p>
                             {studySessions.length > 0 ? (
                                 <ul>
                                     {studySessions.map((session, index) => (
-                                        <li key={session.id || index}>
+                                        <li 
+                                            key={session.id || index} 
+                                            onClick={() => handleSessionClick(session)}
+                                            className="clickable-session"
+                                        >
                                             <strong>{session.lesson_title || "No Lesson Name"}</strong>
-                                            <span>{session.date} {session.start_time} - {session.end_time}</span>
+                                            <span>{session.date} {session.start_time.slice(0, 5)} - {session.end_time.slice(0, 5)}</span>
                                         </li>
                                     ))}
                                 </ul>
