@@ -31,8 +31,7 @@ function HomePage() {
         </div>
 
         <div className="nav-links">
-          <a href="#features" className="nav-link">Features</a>
-          <a href="#about" className="nav-link">About</a>
+          {/* Features and About links removed */}
           <Link to="/login" className="login-button">Login</Link>
         </div>
       </nav>
