@@ -264,7 +264,6 @@
     fill: none;
     stroke: #3a3a4a;
     stroke-width: 10;
-    /* These should use the correct radius for your SVG */
     stroke-dasharray: 251.2; /* 2 * PI * 40 (your circle radius) */
     stroke-dashoffset: 0;
 }
@@ -275,9 +274,7 @@
     stroke: url(#progressGradient);
     stroke-width: 10;
     stroke-linecap: round;
-    /* Same dasharray as the background */
     stroke-dasharray: 251.2; /* 2 * PI * 40 */
-    /* Don't set stroke-dashoffset here - it will be set dynamically in JS */
     transition: stroke-dashoffset 1.5s ease;
 }
 
