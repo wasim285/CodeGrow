@@ -135,8 +135,7 @@
 
 .study-sessions-box li {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     background: #2c3e50;
     color: white;
     padding: 15px 20px;
@@ -148,6 +147,18 @@
 
 .study-sessions-box li:hover {
     transform: translateX(5px);
+}
+
+.study-sessions-box li strong {
+    color: #f39c12;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.study-sessions-box li span {
+    font-size: 15px;
+    color: #95a5a6;
 }
 
 /* Right section (Progress tracker) */
@@ -313,24 +324,6 @@
     padding: 15px;
 }
 
-/* Study session details */
-.study-sessions-box li .session-time,
-.study-sessions-box li .lesson-title {
-    margin-top: 5px;
-}
-
-.study-sessions-box li span {
-    font-size: 15px;
-    color: #95a5a6;
-}
-
-.study-sessions-box li strong {
-    color: #f39c12;
-    font-size: 16px;
-    display: block;
-    margin-bottom: 5px;
-}
-
 /* Responsive adjustments for mobile */
 @media (max-width: 768px) {
     .dashboard-grid {
@@ -361,84 +354,7 @@ button:hover {
     opacity: 0.8;
 }
 
-.study-sessions-box ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.study-sessions-box li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #2c3e50;
-    color: white;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.study-sessions-box li .session-time,
-.study-sessions-box li .lesson-title {
-    margin-top: 5px;
-}
-
-.study-sessions-box li span {
-    font-size: 14px;
-    color: #95a5a6;
-}
-
-.study-sessions-box li .session-time {
-    font-weight: bold;
-    color: #1abc9c;
-    margin-top: 8px;
-}
-
-.study-sessions-box li .lesson-title {
-    font-size: 18px;
-    font-weight: 500;
-    color: #f39c12;
-    margin-bottom: 8px;
-}
-
-.study-sessions-box li .session-time, .study-sessions-box li .lesson-title {
-    display: block;
-    line-height: 1.5;
-}
-
-.remove-btn {
-    background: red;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.remove-btn:hover {
-    background: darkred;
-}
-
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.study-session-item .date-time {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.study-session-item .date-time .start-time,
-.study-session-item .date-time .end-time {
-    margin-top: 5px;
-}
-
+/* Session item styles */
 .session-item {
     background: #1f1f2e;
     padding: 12px;
@@ -473,6 +389,7 @@ input[type="number"]::-webkit-outer-spin-button {
     max-height: 50px;
 }
 
+/* Button styles */
 .cancel-btn {
     background: gray;
     color: white;
@@ -487,6 +404,21 @@ input[type="number"]::-webkit-outer-spin-button {
     background: darkgray;
 }
 
+.remove-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.remove-btn:hover {
+    background: darkred;
+}
+
+/* Progress bar styles */
 .progress-bar {
     width: 100%;
     height: 20px;
@@ -497,7 +429,7 @@ input[type="number"]::-webkit-outer-spin-button {
     box-shadow: 0 2px 5px rgba(255, 255, 255, 0.15);
 }
 
-.progress-fill {
+.progress-bar .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #4caf50, #81c784);
     color: white;
@@ -506,4 +438,24 @@ input[type="number"]::-webkit-outer-spin-button {
     font-weight: bold;
     line-height: 20px;
     transition: width 0.5s ease-in-out;
+}
+
+/* Input styles */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Study session specific styles */
+.study-session-item .date-time {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.study-session-item .date-time .start-time,
+.study-session-item .date-time .end-time {
+    margin-top: 5px;
 }
