@@ -31,7 +31,8 @@ function HomePage() {
         </div>
 
         <div className="nav-links">
-          {/* Features and About links removed */}
+          <a href="#features" className="nav-link">Features</a>
+          <a href="#about" className="nav-link">About</a>
           <Link to="/login" className="login-button">Login</Link>
         </div>
       </nav>
@@ -57,7 +58,7 @@ function HomePage() {
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }}>
                 <Link to="/login" className="btn btn-outline">
-                  Login
+                  Learn More
                 </Link>
               </motion.div>
             </div>
@@ -136,7 +137,7 @@ function HomePage() {
         </div>
       </div>
 
-      <motion.div
+      <motion.div 
         className="stats-section"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
