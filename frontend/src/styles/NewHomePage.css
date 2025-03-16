@@ -75,7 +75,7 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    background: linear-gradient(135deg, #3a8eff, #4361ee);
     transition: all 0.3s ease;
 }
 
@@ -195,15 +195,15 @@
 
 .btn-outline {
     background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0px 8px 15px rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(58, 142, 255, 0.3);
+    box-shadow: 0px 8px 15px rgba(58, 142, 255, 0.05);
 }
 
 .btn-outline:hover {
-    border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(58, 142, 255, 0.6);
+    background: rgba(58, 142, 255, 0.05);
     transform: translateY(-3px);
-    box-shadow: 0px 10px 20px rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 10px 20px rgba(58, 142, 255, 0.1);
 }
 
 /* Right content styling */
@@ -600,9 +600,9 @@
     }
 }
 
-/* Login Button Styling */
+/* Update Login Button Styling to Blue */
 .login-button {
-    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    background: linear-gradient(135deg, #3a8eff, #4361ee);
     color: white;
     border: none;
     border-radius: 30px;
@@ -612,13 +612,28 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: "Inter", sans-serif;
-    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 4px 10px rgba(58, 142, 255, 0.3);
+    text-decoration: none;
 }
 
 .login-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
-    background: linear-gradient(135deg, #3da142, #7cb342);
+    box-shadow: 0 6px 15px rgba(58, 142, 255, 0.4);
+    background: linear-gradient(135deg, #2e7bff, #3b51e0);
+}
+
+/* Button outline - make this blue-themed for consistency */
+.btn-outline {
+    background: transparent;
+    border: 2px solid rgba(58, 142, 255, 0.3);
+    box-shadow: 0px 8px 15px rgba(58, 142, 255, 0.05);
+}
+
+.btn-outline:hover {
+    border-color: rgba(58, 142, 255, 0.6);
+    background: rgba(58, 142, 255, 0.05);
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 20px rgba(58, 142, 255, 0.1);
 }
 
 /* Animated Code/Leaves Background */

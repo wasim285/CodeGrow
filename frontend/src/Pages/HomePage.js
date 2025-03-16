@@ -31,8 +31,7 @@ function HomePage() {
         </div>
 
         <div className="nav-links">
-          <a href="#features" className="nav-link">Features</a>
-          <a href="#about" className="nav-link">About</a>
+          {/* Features and About links removed */}
           <Link to="/login" className="login-button">Login</Link>
         </div>
       </nav>
@@ -58,7 +57,7 @@ function HomePage() {
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }}>
                 <Link to="/login" className="btn btn-outline">
-                  Learn More
+                  Login
                 </Link>
               </motion.div>
             </div>
