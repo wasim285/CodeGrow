@@ -256,6 +256,9 @@
     fill: none;
     stroke: #3a3a4a;
     stroke-width: 10;
+    /* Make sure the circle is complete */
+    stroke-dasharray: 628; /* approximately 2 * PI * r where r is ~100px */
+    stroke-dashoffset: 0;
 }
 
 /* Progress fill */
@@ -264,20 +267,11 @@
     stroke: url(#progressGradient);
     stroke-width: 10;
     stroke-linecap: round;
-    transition: stroke-dashoffset 1s ease;
+    /* Set up the dash array for proper filling */
+    stroke-dasharray: 628; /* same as the background circle */
+    /* stroke-dashoffset will be set dynamically in JS based on progress */
+    transition: stroke-dashoffset 1.5s ease;
 }
-
-/* Add this SVG gradient definition in your HTML */
-/* 
-<svg width="0" height="0">
-  <defs>
-    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4caf50" />
-      <stop offset="100%" stop-color="#8bc34a" />
-    </linearGradient>
-  </defs>
-</svg>
-*/
 
 /* Percentage text inside the circle */
 .progress-text {
