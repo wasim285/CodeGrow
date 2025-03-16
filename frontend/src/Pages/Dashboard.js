@@ -230,6 +230,20 @@ const Dashboard = () => {
                         <p>🔥 Streak: <strong>{streak} days</strong></p>
                     </div>
                 </div>
+
+                {/* Delete Confirmation Modal */}
+                {deleteModalOpen && (
+                    <div className="modal-overlay">
+                        <div className="modal">
+                            <h3>⚠️ Remove Study Session?</h3>
+                            <p>Are you sure you want to remove your study session for "{sessionTitleToDelete}"?</p>
+                            <div className="modal-buttons">
+                                <button onClick={handleRemoveSession} className="confirm">Yes, Remove</button>
+                                <button className="cancel" onClick={() => setDeleteModalOpen(false)}>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
