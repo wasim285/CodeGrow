@@ -1,42 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../styles/NewHomePage.css"; // Make sure this path is correct!
+import "../styles/NewHomePage.css"; // Ensure this path is correct
 
 function HomePage() {
-  console.log("HomePage component rendering"); // Debug log
-  
+  console.log("HomePage component rendering"); // Debugging
+
   return (
     <div className="homepage">
-      {/* Animated Background - Make sure this is the exact structure */}
-      <div className="animated-bg">
-        <span className="code-particle">&lt;div&gt;</span>
-        <span className="code-particle">function()</span>
-        <span className="code-particle">{"{}"}</span>
-        <span className="code-particle">return</span>
-        <span className="code-particle">import React</span>
-        <span className="leaf-particle">🍃</span>
-        <span className="leaf-particle">🌱</span>
-        <span className="leaf-particle">🌿</span>
-        <span className="code-particle">&lt;/&gt;</span>
-        <span className="code-particle">const app =</span>
-        <span className="leaf-particle">🌿</span>
-        <span className="leaf-particle">🍃</span>
-      </div>
-
       <nav className="navbar">
         <div className="logo">
           <span className="logo-icon">{"</>"}</span>
           CodeGrow
         </div>
-
-        <div className="nav-links">
-          {/* Features and About links removed */}
-          <Link to="/login" className="login-button">Login</Link>
-        </div>
       </nav>
 
       <div className="container">
+        {/* Left Section: Heading and Buttons */}
         <motion.div
           className="left-content"
           initial={{ opacity: 0, x: -30 }}
@@ -46,9 +26,10 @@ function HomePage() {
           <div className="text-box">
             <h1 className="title">Master Python.<br />Level Up With AI.</h1>
             <p className="subtitle">
-              Unlock personalised lessons, coding challenges, and real-world projects to grow your skills.
+              Unlock personalized lessons, coding challenges, and real-world projects to grow your skills.
             </p>
 
+            {/* Buttons - Replaced Learn More with Login */}
             <div className="buttons">
               <motion.div whileHover={{ scale: 1.05 }}>
                 <Link to="/register" className="btn btn-green">
@@ -56,14 +37,15 @@ function HomePage() {
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }}>
-                <Link to="/login" className="btn btn-outline">
-                  Learn More
+                <Link to="/login" className="btn btn-outline login-button">
+                  Login
                 </Link>
               </motion.div>
             </div>
           </div>
         </motion.div>
 
+        {/* Right Section: Code Editor and Lesson Cards */}
         <div className="right-content">
           {/* Code Editor Preview */}
           <motion.div 
@@ -100,6 +82,7 @@ function HomePage() {
             </div>
           </motion.div>
           
+          {/* Lesson Cards */}
           <motion.div
             className="lesson-box completed"
             initial={{ opacity: 0, x: 30 }}
@@ -136,6 +119,7 @@ function HomePage() {
         </div>
       </div>
 
+      {/* Statistics Section */}
       <motion.div 
         className="stats-section"
         initial={{ opacity: 0, y: 30 }}
@@ -156,6 +140,7 @@ function HomePage() {
         </div>
       </motion.div>
       
+      {/* Footer Section */}
       <motion.footer 
         className="footer"
         initial={{ opacity: 0 }}
