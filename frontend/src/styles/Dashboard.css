@@ -87,44 +87,44 @@
     padding: 0 20px;
 }
 
-/* Left section (Lessons & Study Sessions) */
+/* Left section alignment - reduced gap */
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 30px; /* Reduced from 40px to bring boxes closer */
+    gap: 10px; /* Smaller gap between elements */
     width: 65%;
-    padding-left: 30px; /* Added to move content right */
+    padding-left: 30px;
 }
 
-/* Lesson box styling */
-.lesson-box {
+/* Common exact dimensions for both boxes */
+.lesson-box,
+.study-sessions-box {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
     padding: 30px;
-    width: 100%; /* Changed from 90% to match study sessions */
-    margin: 0 auto;
+    width: 100%;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    min-height: 300px; /* Exact same height */
+    height: 300px; /* Force exact height */
     display: flex;
     flex-direction: column;
-    align-items: center;
-    min-height: 250px; /* Set fixed minimum height */
+    margin: 0 auto;
 }
 
-.lesson-box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* Study sessions box specific styles */
+.study-sessions-box {
+    background: linear-gradient(145deg, #222232, #1e1e2e);
+    margin-top: 10px; /* Small gap between boxes */
 }
 
-/* Center the button container */
-.lesson-box .button-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: auto; /* Push button to bottom */
+/* Study sessions content wrapper */
+.study-sessions-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-top: 10px;
 }
 
 /* Lesson box title */
@@ -190,7 +190,9 @@
     min-height: 250px; /* Match lesson box height */
     display: flex;
     flex-direction: column;
-    margin-top: -10px; /* Added negative margin to move up */
+    margin-top: 0; /* Remove negative margin */
+    height: 250px; /* Fixed height to match lesson box */
+    overflow: hidden; /* Handle overflow content */
 }
 
 .study-sessions-box h3 {
@@ -401,7 +403,7 @@ p.streak-display strong {
     margin: 0 auto; /* Changed from 30px auto 0 */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: -10px; /* Added negative margin to move up */
+    margin-top: 15px; /* Reduced from 20px */
 }
 
 .recommendations-box h3 {
@@ -552,9 +554,14 @@ p.streak-display strong {
     .study-sessions-box,
     .recommendations-box {
         width: 95%;
-        min-height: 200px;
         padding: 25px;
         margin: 0 auto;
+        min-height: 250px; /* Slightly smaller on mobile */
+        height: 250px; /* Force exact height on mobile */
+    }
+    
+    .study-sessions-box {
+        margin-top: 10px;
     }
 }
 
