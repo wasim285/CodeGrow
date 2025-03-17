@@ -1,27 +1,397 @@
-/* Lesson Box Styling */
-.lesson-box {
-    background: linear-gradient(145deg, #2a2a3d, #262636);
-    padding: 20px 25px;
-    border-radius: 12px;
-    font-size: 16px;
-    width: 320px;
-    text-align: left;
-    transition: all 0.3s ease;
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+/* Enhanced Homepage Styling */
+.homepage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    background: radial-gradient(circle at top right, #1a1a2e, #121220);
+    color: white;
+    font-family: "Outfit", "Inter", sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Modern Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 18px 40px;
+    z-index: 1000;
+    display: flex;
+    justify-content: center; /* Center the logo since nav-links is empty */
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto; /* Center the logo */
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+    display: none; /* Hide the nav-links completely as shown in your JS */
+}
+
+/* Main container */
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    width: 90%;
+    padding: 30px;
+    margin-top: 100px;
+    gap: 60px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Left content styling */
+.left-content {
+    max-width: 550px;
+    animation: fadeInUp 1s ease-out;
+}
+
+.text-box {
+    background: linear-gradient(145deg, #23233f, #1d1d36);
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.text-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 25px 50px rgba(0, 0, 0, 0.4);
+}
+
+/* Heading and Subtitle */
+.title {
+    font-size: 3.8rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    line-height: 1.2;
+    font-family: "Outfit", sans-serif;
+    background: linear-gradient(90deg, #fff, #b8b8d0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    z-index: 1;
+}
+
+.subtitle {
+    font-size: 1.4rem;
+    margin-bottom: 35px;
+    color: #b8b8d0;
+    line-height: 1.6;
+    font-family: "Inter", sans-serif;
+    position: relative;
+    z-index: 1;
+}
+
+/* Enhanced button styling */
+.buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: flex-start;
+    position: relative;
+    z-index: 1;
+}
+
+.btn {
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+    min-width: 160px;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+}
+
+/* Get Started Button */
+.btn-green {
+    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    box-shadow: 0px 8px 15px rgba(76, 175, 80, 0.3);
+}
+
+.btn-green:hover {
+    background: linear-gradient(135deg, #3da142, #7cb342);
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* Login Button (Replaces "Learn More") */
+.login-button {
+    padding: 16px 32px;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-decoration: none;
+    min-width: 160px;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+    background: linear-gradient(135deg, #3a8eff, #4361ee);
+    box-shadow: 0px 8px 15px rgba(58, 142, 255, 0.3);
+}
+
+.login-button:hover {
+    background: linear-gradient(135deg, #2e7bff, #3b51e0);
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 20px rgba(58, 142, 255, 0.4);
+}
+
+/* Right Content */
+.right-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeInRight 1s ease-out;
+}
+
+/* Stats Section */
+.stats-section {
+    display: flex;
+    gap: 40px;
+    margin-top: 80px;
+    justify-content: center;
+    width: 100%;
+    padding: 0 40px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #b8b8d0;
+    font-family: "Inter", sans-serif;
+}
+
+/* Footer */
+.footer {
+    margin-top: 120px;
+    width: 100%;
+    padding: 40px;
+    background: rgba(26, 26, 46, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.footer-links {
+    display: flex;
+    gap: 30px;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 14px;
+    font-family: "Inter", sans-serif;
+    transition: all 0.3s ease;
+}
+
+.footer-link:hover {
+    color: white;
+}
+
+.copyright {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: "Inter", sans-serif;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .title {
+        font-size: 2.8rem;
+    }
+    
+    .subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 15px;
+    }
+    
+    .btn, .login-button {
+        width: 100%;
+        text-align: center;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-section {
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+}
+
+/* Animated background styles (in case they're missing) */
+.animated-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    opacity: 0.15;
+}
+
+.code-particle,
+.leaf-particle {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: "Fira Code", monospace;
+    font-size: 18px;
+    display: block;
+    user-select: none;
+    pointer-events: none;
+}
+
+.leaf-particle {
+    font-size: 22px;
+    opacity: 0.8;
+}
+
+/* Generate multiple code particles with different animations */
+@keyframes floatDown {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(100vh) rotate(15deg);
+        opacity: 0.1;
+    }
+}
+
+@keyframes floatAcross {
+    0% {
+        transform: translateX(-100vw) translateY(10vh);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateX(100vw) translateY(30vh);
+        opacity: 0.1;
+    }
+}
+
+@keyframes floatDiagonal {
+    0% {
+        transform: translate(-100vw, -50vh) rotate(-10deg);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translate(100vw, 50vh) rotate(10deg);
+        opacity: 0.1;
+    }
+}
+
+/* Create code particles with animations */
+.code-particle:nth-child(1) { left: 10%; top: -50px; animation: floatDown 25s linear infinite; animation-delay: 0s; }
+.code-particle:nth-child(2) { left: 25%; top: -50px; animation: floatDown 20s linear infinite; animation-delay: 2s; }
+.code-particle:nth-child(3) { left: 40%; top: -50px; animation: floatDown 22s linear infinite; animation-delay: 4s; }
+.code-particle:nth-child(4) { left: 65%; top: -50px; animation: floatDown 28s linear infinite; animation-delay: 0s; }
+.code-particle:nth-child(5) { left: 80%; top: -50px; animation: floatDown 15s linear infinite; animation-delay: 3s; }
+
+/* Create leaf particles with animations */
+.leaf-particle:nth-child(6) { left: -50px; top: 15%; animation: floatAcross 30s linear infinite; animation-delay: 0s; }
+.leaf-particle:nth-child(7) { left: -50px; top: 45%; animation: floatAcross 25s linear infinite; animation-delay: 4s; }
+.leaf-particle:nth-child(8) { left: -50px; top: 75%; animation: floatAcross 20s linear infinite; animation-delay: 8s; }
+
+/* Create diagonal particles with animations */
+.code-particle:nth-child(9) { left: -50px; top: -50px; animation: floatDiagonal 35s linear infinite; animation-delay: 0s; }
+.code-particle:nth-child(10) { left: -50px; top: -50px; animation: floatDiagonal 40s linear infinite; animation-delay: 5s; }
+.leaf-particle:nth-child(11) { left: -50px; top: -50px; animation: floatDiagonal 28s linear infinite; animation-delay: 12s; }
+.leaf-particle:nth-child(12) { left: -50px; top: -50px; animation: floatDiagonal 32s linear infinite; animation-delay: 18s; }
+
+/* Lesson box styles */
+.lesson-box {
+    background: linear-gradient(145deg, #23233f, #1d1d36);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lesson-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.3);
 }
 
 .lesson-title {
+    font-size: 20px;
     font-weight: 700;
-    font-size: 18px;
-    color: white;
+    margin-bottom: 12px;
+    font-family: "Outfit", sans-serif;
+    color: #fff;
 }
 
 .lesson-description {
     font-size: 14px;
-    color: #b8b8d0;
-    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 18px;
+    line-height: 1.5;
 }
 
 .lesson-stats {
@@ -31,26 +401,34 @@
 }
 
 .lesson-level {
-    font-size: 12px;
-    color: #b8b8d0;
-}
-
-.lesson-box.completed {
-    border-left: 5px solid #4caf50;
-}
-
-.lesson-box.in-progress {
-    border-left: 5px solid #ff9800;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
 }
 
 .completion-indicator {
-    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
 }
 
 .completed-icon {
     color: #4caf50;
+    font-size: 16px;
 }
 
 .in-progress-icon {
-    color: #ff9800;
+    color: #ffab40;
+    font-size: 18px;
+}
+
+.completed {
+    border-left: 3px solid #4caf50;
+}
+
+.in-progress {
+    border-left: 3px solid #ffab40;
 }
