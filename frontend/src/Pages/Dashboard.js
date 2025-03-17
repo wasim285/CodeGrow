@@ -177,18 +177,25 @@ const Dashboard = () => {
                             <h3>📚 Recommended Lessons</h3>
                             {recommendedLessons.length > 0 ? (
                                 <ul>
-                                    {recommendedLessons.map((lesson) => (
-                                        <li key={lesson.id}>
-                                            <h4>{lesson.title}</h4>
-                                            <p>{lesson.description}</p>
-                                            <button onClick={() => navigate(`/lessons/${lesson.id}`)}>
-                                                Start Lesson
-                                            </button>
-                                        </li>
-                                    ))}
+                                    {recommendedLessons
+                                        .filter(lesson => lesson.id !== mainLesson?.id)
+                                        .map((lesson) => (
+                                            <li key={lesson.id} className="recommended-lesson">
+                                                <div className="lesson-content">
+                                                    <h4>{lesson.title}</h4>
+                                                    <p>{lesson.description}</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => navigate(`/lessons/${lesson.id}`)}
+                                                    className="start-lesson-btn"
+                                                >
+                                                    Start Lesson
+                                                </button>
+                                            </li>
+                                        ))}
                                 </ul>
                             ) : (
-                                <p>No recommended lessons available.</p>
+                                <p className="no-lessons">No recommended lessons available.</p>
                             )}
                         </div>
                     </div>

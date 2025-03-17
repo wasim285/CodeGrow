@@ -80,28 +80,31 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 70px; /* Further increased gap for better separation */
+    gap: 50px;
     width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 /* Left section (Lessons & Study Sessions) */
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 45px; /* Increased spacing between left section elements */
-    width: 58%; /* Further decreased from 60% to make left section cards narrower */
+    gap: 40px;
+    width: 65%;
 }
 
-/* Lesson box */
+/* Lesson box - updated width and padding */
 .lesson-box {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
-    padding: 35px;
-    width: 100%;
+    padding: 30px;
+    width: 90%;
+    margin: 0 auto;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 0;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -131,13 +134,13 @@
     font-family: "Inter", sans-serif;
 }
 
-/* Start lesson button */
+/* Updated button style for lesson box */
 .lesson-box button {
     background: linear-gradient(to right, #4caf50, #45a049);
     color: white;
     border: none;
     border-radius: 30px;
-    padding: 14px 30px;
+    padding: 12px 28px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
@@ -145,6 +148,9 @@
     box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
     font-family: "Inter", sans-serif;
     letter-spacing: 0.3px;
+    width: auto;
+    min-width: 160px;
+    max-width: 200px;
 }
 
 .lesson-box button:hover {
@@ -157,15 +163,15 @@
     transform: translateY(0) scale(0.98);
 }
 
-/* Study sessions box */
+/* Study sessions box - matched with lesson box */
 .study-sessions-box {
     background: linear-gradient(145deg, #222232, #1e1e2e);
-    padding: 35px;
+    padding: 30px;
     border-radius: 14px;
     text-align: center;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    width: 100%;
-    margin: 0;
+    width: 90%;
+    margin: 0 auto;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -361,62 +367,69 @@ p.streak-display strong {
     font-weight: 600;
 }
 
-/* Recommended lessons box */
+/* Recommended lessons styling */
 .recommendations-box {
-    margin-top: 0;
-    padding: 35px;
-    width: 100%;
-    min-height: 350px; /* Added min-height to prevent content overflow */
-    background: linear-gradient(145deg, #222232, #1e1e2e);
+    background: linear-gradient(145deg, #23233f, #1d1d36);
     border-radius: 14px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    text-align: center;
+    padding: 30px;
+    width: 90%;
+    margin: 30px auto 0;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Recommended lessons title */
 .recommendations-box h3 {
-    font-size: 24px;
-    font-weight: 600;
-    margin-top: 0;
-    margin-bottom: 30px;
-    color: #fff;
+    font-size: 22px;
+    color: white;
+    margin-bottom: 20px;
     font-family: "Outfit", sans-serif;
+    font-weight: 600;
     letter-spacing: -0.3px;
 }
 
-/* Recommended lessons list */
 .recommendations-box ul {
     list-style: none;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 8px;
 }
 
-/* Recommended lesson items */
+/* Scrollbar styling */
+.recommendations-box ul::-webkit-scrollbar {
+    width: 6px;
+}
+
+.recommendations-box ul::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.recommendations-box ul::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
 .recommendations-box li {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 12px;
     padding: 25px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 200px; /* Minimum height for cards */
-    justify-content: space-between;
+    margin-bottom: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: transform 0.3s ease;
 }
 
 .recommendations-box li:hover {
-    transform: translateY(-8px);
-    box-shadow: 0px 12px 22px rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Recommended lesson title */
+/* Recommended lessons title */
 .recommendations-box li h4 {
     font-size: 20px;
     color: white;
@@ -439,22 +452,20 @@ p.streak-display strong {
 
 /* Recommended lesson button */
 .recommendations-box button {
-    background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+    background: linear-gradient(to right, #4caf50, #45a049);
     color: white;
     border: none;
     border-radius: 30px;
-    padding: 12px 22px;
+    padding: 12px 24px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.35);
-    align-self: center;
-    width: 100%;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    width: auto;
+    min-width: 140px;
     max-width: 180px;
-    margin: 0 auto;
-    font-family: "Inter", sans-serif;
-    letter-spacing: 0.2px;
+    margin-top: 15px;
 }
 
 .recommendations-box button:hover {
