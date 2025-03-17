@@ -102,16 +102,16 @@ function HomePage() {
             transition={{ duration: 0.5, delay: 0.7 }}
             whileHover={{ scale: 1.05 }}
           >
-            <div className="lesson-title">Python Basics</div>
-            <div className="lesson-description">Learn fundamentals of Python programming including variables, data types and operators.</div>
+            <div className="lesson-title">Lesson 1</div>
+            <div className="lesson-description">Introduction to Python Programming</div>
             <div className="lesson-stats">
-              <span className="lesson-level">Beginner</span>
+              <span className="lesson-level">Beginner (School)</span>
               <div className="completion-indicator">
                 <span className="completed-icon">✓</span> Completed
               </div>
             </div>
           </motion.div>
-          
+
           <motion.div
             className="lesson-box in-progress"
             initial={{ opacity: 0, x: 30 }}
@@ -119,12 +119,29 @@ function HomePage() {
             transition={{ duration: 0.5, delay: 1 }}
             whileHover={{ scale: 1.05 }}
           >
-            <div className="lesson-title">Functions & Control Flow</div>
-            <div className="lesson-description">Master functions, conditional statements, and loops to control program flow.</div>
+            <div className="lesson-title">Lesson 2</div>
+            <div className="lesson-description">Control Flow and Functions</div>
             <div className="lesson-stats">
-              <span className="lesson-level">Intermediate</span>
+              <span className="lesson-level">Beginner (School)</span>
               <div className="completion-indicator">
                 <span className="in-progress-icon">●</span> In Progress
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            className="lesson-box"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 1.3 }}
+            whileHover={{ scale: 1.05 }}
+          >
+            <div className="lesson-title">Lesson 3</div>
+            <div className="lesson-description">Data Structures</div>
+            <div className="lesson-stats">
+              <span className="lesson-level">Beginner (School)</span>
+              <div className="completion-indicator">
+                <span className="locked-icon">🔒</span> Locked
               </div>
             </div>
           </motion.div>
