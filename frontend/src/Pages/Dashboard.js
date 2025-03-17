@@ -154,22 +154,24 @@ const Dashboard = () => {
                         <div className="study-sessions-box">
                             <h3>📅 Upcoming Study Sessions</h3>
                             <p className="click-info">Click on a session to remove it</p>
-                            {studySessions.length > 0 ? (
-                                <ul>
-                                    {studySessions.map((session, index) => (
-                                        <li 
-                                            key={session.id || index} 
-                                            onClick={() => handleSessionClick(session)}
-                                            className="clickable-session"
-                                        >
-                                            <strong>{session.lesson_title || "No Lesson Name"}</strong>
-                                            <span>{session.date} {session.start_time.slice(0, 5)} - {session.end_time.slice(0, 5)}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>No sessions scheduled. Start learning today! 📌</p>
-                            )}
+                            <div className="study-sessions-content">
+                                {studySessions.length > 0 ? (
+                                    <ul>
+                                        {studySessions.map((session, index) => (
+                                            <li 
+                                                key={session.id || index} 
+                                                onClick={() => handleSessionClick(session)}
+                                                className="clickable-session"
+                                            >
+                                                <strong>{session.lesson_title || "No Lesson Name"}</strong>
+                                                <span>{session.date} {session.start_time.slice(0, 5)} - {session.end_time.slice(0, 5)}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>No sessions scheduled. Start learning today! 📌</p>
+                                )}
+                            </div>
                         </div>
 
                         {/* Recommended Lessons */}
