@@ -1,10 +1,14 @@
+.signup-page {
+    min-height: 100vh;
+    background: radial-gradient(circle at top right, #1a1a2e, #121220);
+    font-family: "Inter", sans-serif;
+}
+
 .signup-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: radial-gradient(circle at top right, #1a1a2e, #121220);
-    font-family: "Inter", sans-serif;
     padding-top: 80px; /* Account for fixed navbar */
 }
 
@@ -60,7 +64,7 @@
     box-shadow: 0 0 0 2px rgba(255, 95, 86, 0.1);
 }
 
-.signup-box button {
+.signup-button {
     width: 85%;
     padding: 14px;
     background: linear-gradient(135deg, #4caf50, #8bc34a);
@@ -76,13 +80,13 @@
     margin-top: 10px;
 }
 
-.signup-box button:hover {
+.signup-button:hover {
     transform: translateY(-2px);
     box-shadow: 0px 10px 20px rgba(76, 175, 80, 0.4);
     background: linear-gradient(135deg, #3da142, #7cb342);
 }
 
-.signup-box button:disabled {
+.signup-button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
@@ -106,23 +110,22 @@
     text-align: center;
 }
 
-.signup-box p {
+.login-link {
     margin-top: 20px;
     color: #b8b8d0;
     font-size: 15px;
     font-family: "Inter", sans-serif;
 }
 
-.signup-box a {
+.login-link a {
     color: #4caf50;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
-.signup-box a:hover {
+.login-link a:hover {
     color: #8bc34a;
-    text-decoration: none;
 }
 
 /* Auth Navbar styling */
@@ -145,10 +148,7 @@
     font-weight: 700;
     font-family: "Outfit", sans-serif;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #4caf50, #8bc34a);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: white;
     text-decoration: none;
     display: flex;
     align-items: center;

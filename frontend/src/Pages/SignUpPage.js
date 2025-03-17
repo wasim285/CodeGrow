@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import "../styles/SignUpPage.css";
 
 const SignupPage = () => {
     const navigate = useNavigate();
@@ -103,7 +104,7 @@ const SignupPage = () => {
     };
 
     return (
-        <div>
+        <div className="signup-page">
             <nav className="auth-navbar">
                 <Link to="/" className="navbar-logo">
                     <span className="logo-icon">{"</>"}</span>
@@ -168,12 +169,18 @@ const SignupPage = () => {
                             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
                         </div>
 
-                        <button type="submit" disabled={isLoading}>
+                        <button 
+                            type="submit" 
+                            disabled={isLoading}
+                            className="signup-button"
+                        >
                             {isLoading ? 'Creating Account...' : 'Sign Up'}
                         </button>
                     </form>
 
-                    <p>Already have an account? <Link to="/login">Login here</Link></p>
+                    <p className="login-link">
+                        Already have an account? <Link to="/login">Login here</Link>
+                    </p>
                 </div>
             </div>
         </div>
