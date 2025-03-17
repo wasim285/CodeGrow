@@ -96,7 +96,7 @@
     padding-left: 30px;
 }
 
-/* Common exact dimensions for both boxes */
+/* Lesson box styling */
 .lesson-box {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
@@ -107,22 +107,24 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    /* No height specified - keep its natural height */
+    height: 280px; /* Fixed height for consistent sizing */
+    min-height: 280px;
 }
 
+/* Study sessions box - matched exactly with lesson box */
 .study-sessions-box {
     background: linear-gradient(145deg, #222232, #1e1e2e);
     border-radius: 14px;
     padding: 30px;
-    width: 100%; 
+    width: 100%;
     margin: 10px auto 0;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    min-height: 250px;
-    height: 250px;
+    height: 280px; /* Exactly match lesson box height */
+    min-height: 280px;
     overflow: hidden;
 }
 
@@ -172,6 +174,7 @@
     min-width: 160px;
     max-width: 200px;
     margin: 0 auto; /* Center the button */
+    margin-top: auto; /* Push to bottom */
 }
 
 .lesson-box button:hover {
@@ -388,11 +391,10 @@ p.streak-display strong {
     background: linear-gradient(145deg, #23233f, #1d1d36);
     border-radius: 14px;
     padding: 30px;
-    width: 100%; /* Changed from 90% */
-    margin: 0 auto; /* Changed from 30px auto 0 */
+    width: 100%; 
+    margin: 15px auto 0;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: 15px; /* Reduced from 20px */
 }
 
 .recommendations-box h3 {
@@ -486,9 +488,9 @@ p.streak-display strong {
 }
 
 .recommendations-box button:hover {
-    background: linear-gradient(to right, #ff5252, #ff7b7b);
+    background: linear-gradient(to right, #45a049, #388e3c);
     transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.45);
+    box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
 }
 
 .recommendations-box button:active {
@@ -545,8 +547,8 @@ p.streak-display strong {
         width: 95%;
         padding: 25px;
         margin: 0 auto;
-        min-height: 250px; /* Slightly smaller on mobile */
-        height: 250px; /* Force exact height on mobile */
+        min-height: 250px;
+        height: 250px;
     }
     
     .study-sessions-box {
