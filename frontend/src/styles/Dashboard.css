@@ -91,8 +91,9 @@
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 30px; /* Reduced from 40px to bring boxes closer */
     width: 65%;
+    padding-left: 30px; /* Added to move content right */
 }
 
 /* Lesson box styling */
@@ -100,7 +101,7 @@
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
     padding: 30px;
-    width: 90%;
+    width: 100%; /* Changed from 90% to match study sessions */
     margin: 0 auto;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
@@ -183,12 +184,13 @@
     border-radius: 14px;
     text-align: center;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    width: 90%;
+    width: 100%; /* Changed from 90% to match lesson box */
     margin: 0 auto;
     border: 1px solid rgba(255, 255, 255, 0.05);
     min-height: 250px; /* Match lesson box height */
     display: flex;
     flex-direction: column;
+    margin-top: -10px; /* Added negative margin to move up */
 }
 
 .study-sessions-box h3 {
@@ -395,10 +397,11 @@ p.streak-display strong {
     background: linear-gradient(145deg, #23233f, #1d1d36);
     border-radius: 14px;
     padding: 30px;
-    width: 90%;
-    margin: 30px auto 0;
+    width: 100%; /* Changed from 90% */
+    margin: 0 auto; /* Changed from 30px auto 0 */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: -10px; /* Added negative margin to move up */
 }
 
 .recommendations-box h3 {
@@ -526,6 +529,7 @@ p.streak-display strong {
     
     .left-section {
         gap: 35px;
+        padding-left: 0;
     }
     
     .recommendations-box ul {
@@ -545,10 +549,12 @@ p.streak-display strong {
     }
 
     .lesson-box,
-    .study-sessions-box {
+    .study-sessions-box,
+    .recommendations-box {
         width: 95%;
         min-height: 200px;
         padding: 25px;
+        margin: 0 auto;
     }
 }
 
