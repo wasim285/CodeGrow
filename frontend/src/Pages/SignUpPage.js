@@ -8,6 +8,7 @@ const SignupPage = () => {
         email: '',
         username: '',
         password: '',
+        password2: '', // Added second password field for backend validation
         confirmPassword: ''
     });
     const [errors, setErrors] = useState({});
@@ -71,6 +72,7 @@ const SignupPage = () => {
                     email: formData.email,
                     username: formData.username,
                     password: formData.password,
+                    password2: formData.password, // Send password2 to match backend requirements
                 }),
             });
 
@@ -86,6 +88,12 @@ const SignupPage = () => {
                 }
                 if (data.password) {
                     setErrors(prev => ({ ...prev, password: data.password[0] }));
+                }
+                if (data.password2) {
+                    setErrors(prev => ({ ...prev, confirmPassword: data.password2[0] }));
+                }
+                if (data.non_field_errors) {
+                    setErrors(prev => ({ ...prev, submit: data.non_field_errors[0] }));
                 }
                 throw new Error(data.detail || 'Registration failed');
             }
