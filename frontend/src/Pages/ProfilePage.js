@@ -37,7 +37,7 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="profile-info">
-                    {["first_name", "last_name", "username", "email", "learning_goal", "difficulty_level"].map((field) => (
+                    {["username", "email", "learning_goal", "difficulty_level"].map((field) => (
                         <div className="profile-field" key={field}>
                             <label>{field.replace("_", " ")}:</label>
                             <input type="text" value={userData[field] || "Not Set"} disabled />

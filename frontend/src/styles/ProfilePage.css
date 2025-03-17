@@ -23,21 +23,6 @@
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.08);
     animation: fadeIn 0.5s ease forwards;
-    overflow: hidden;
-}
-
-/* Accent glow effect */
-.profile-box::before {
-    content: "";
-    position: absolute;
-    top: -100px;
-    left: -100px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(76, 175, 80, 0.3), transparent 70%);
-    opacity: 0.5;
-    z-index: 0;
-    pointer-events: none;
 }
 
 .profile-header {
@@ -46,7 +31,6 @@
     align-items: center;
     margin-bottom: 30px;
     position: relative;
-    z-index: 1;
 }
 
 .profile-header h2 {
@@ -55,10 +39,6 @@
     color: white;
     margin-bottom: 15px;
     font-family: "Outfit", sans-serif;
-    background: linear-gradient(90deg, #fff, #b8b8d0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
     letter-spacing: -0.3px;
 }
 
@@ -75,15 +55,8 @@
     justify-content: center;
     margin-bottom: 20px;
     box-shadow: 0 8px 16px rgba(76, 175, 80, 0.4);
-    position: relative;
-    overflow: hidden;
     border: 3px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
-}
-
-.profile-pic:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 20px rgba(76, 175, 80, 0.5);
 }
 
 .profile-info {
@@ -91,7 +64,6 @@
     flex-direction: column;
     gap: 20px;
     position: relative;
-    z-index: 1;
 }
 
 .profile-field {
@@ -101,14 +73,13 @@
 }
 
 .profile-field label {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     color: #b8b8d0;
     margin-bottom: 8px;
     font-family: "Inter", sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    font-size: 12px;
 }
 
 .profile-field input {
@@ -121,142 +92,6 @@
     font-family: "Inter", sans-serif;
     transition: all 0.3s ease;
     cursor: not-allowed;
-}
-
-.profile-field input:focus {
-    outline: none;
-    border-color: #4caf50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
-
-/* Add Profile Stats Section */
-.profile-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-
-.stat-box {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 15px 10px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.stat-number {
-    font-size: 24px;
-    font-weight: 700;
-    color: #4caf50;
-    margin-bottom: 5px;
-    font-family: "Outfit", sans-serif;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: #b8b8d0;
-    font-family: "Inter", sans-serif;
-}
-
-/* Add Profile Actions */
-.profile-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-    justify-content: center;
-}
-
-.profile-btn {
-    background: linear-gradient(to right, #4caf50, #45a049);
-    color: white;
-    border: none;
-    border-radius: 30px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: "Inter", sans-serif;
-    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.profile-btn:hover {
-    background: linear-gradient(to right, #45a049, #388e3c);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
-}
-
-.profile-btn.outline {
-    background: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    box-shadow: none;
-}
-
-.profile-btn.outline:hover {
-    border-color: #4caf50;
-    background: rgba(76, 175, 80, 0.1);
-    transform: translateY(-2px);
-}
-
-/* Add achievement badges */
-.profile-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.badge {
-    background: linear-gradient(145deg, #323d4a, #2c3e50);
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: #f8c358;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.badge:hover {
-    transform: translateY(-5px);
-}
-
-.badge.locked {
-    background: linear-gradient(145deg, #3a3a4a, #2a2a3a);
-    color: rgba(255, 255, 255, 0.2);
-}
-
-.badge-tooltip {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.badge:hover .badge-tooltip {
-    opacity: 1;
-    visibility: visible;
-    bottom: calc(100% + 10px);
 }
 
 /* Animation keyframes */
@@ -287,28 +122,5 @@
         width: 80px;
         height: 80px;
         font-size: 28px;
-    }
-    
-    .profile-stats {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
-    
-    .stat-number {
-        font-size: 20px;
-    }
-    
-    .stat-label {
-        font-size: 11px;
-    }
-    
-    .profile-actions {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .profile-btn {
-        width: 100%;
-        justify-content: center;
     }
 }
