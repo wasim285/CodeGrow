@@ -91,28 +91,37 @@
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Smaller gap between elements */
+    gap: 10px; /* Small gap between elements */
     width: 65%;
     padding-left: 30px;
 }
 
 /* Common exact dimensions for both boxes */
 .lesson-box {
-    /* Keep existing styling but set exact height for reference */
-    min-height: 250px;
-    height: 250px;
+    background: linear-gradient(145deg, #2a2a3d, #262636);
+    border-radius: 14px;
+    padding: 30px;
+    width: 100%;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
+    /* No height specified - keep its natural height */
 }
 
 .study-sessions-box {
-    /* Match the lesson box exactly */
-    min-height: 250px;
-    height: 250px;
-    margin-top: 10px;
+    background: linear-gradient(145deg, #222232, #1e1e2e);
+    border-radius: 14px;
+    padding: 30px;
+    width: 100%; /* Exactly match lesson box width */
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Prevent content overflow */
+    /* No height specified - this is important */
+    margin-top: 10px; /* Small gap between boxes */
 }
 
 /* Study sessions content wrapper */
