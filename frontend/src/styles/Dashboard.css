@@ -87,37 +87,34 @@
     padding: 0 20px;
 }
 
-/* Left section alignment */
+/* Left section alignment - reduced gap */
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Reduced gap between boxes */
+    gap: 15px; /* Reduced from 20px */
     width: 65%;
     padding-left: 30px;
 }
 
-/* Common styles for lesson and study session boxes */
+/* Common box dimensions for lesson and study sessions */
 .lesson-box,
 .study-sessions-box {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
     padding: 30px;
     width: 100%;
-    margin: 0 auto;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    min-height: 250px;
+    height: 280px; /* Fixed height for both boxes */
     display: flex;
     flex-direction: column;
 }
 
 /* Study sessions box specific styles */
 .study-sessions-box {
-    margin-top: 0; /* Remove negative margin */
     background: linear-gradient(145deg, #222232, #1e1e2e);
-    height: 250px; /* Fixed height to match lesson box */
-    overflow: hidden; /* Handle overflow content */
+    margin-top: -5px; /* Move box up slightly */
 }
 
 /* Study sessions content wrapper */
@@ -126,7 +123,9 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    margin-top: 10px;
     padding-right: 8px;
+    height: calc(100% - 60px); /* Account for header space */
 }
 
 /* Lesson box title */
@@ -405,7 +404,7 @@ p.streak-display strong {
     margin: 0 auto; /* Changed from 30px auto 0 */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: 20px; /* Add space between study sessions and recommendations */
+    margin-top: 15px; /* Reduced from 20px */
 }
 
 .recommendations-box h3 {
@@ -555,6 +554,8 @@ p.streak-display strong {
     .lesson-box,
     .study-sessions-box,
     .recommendations-box {
+        height: auto;
+        min-height: 280px;
         width: 95%;
         min-height: 200px;
         height: auto;
