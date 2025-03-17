@@ -30,19 +30,16 @@ function HomePage() {
           CodeGrow
         </div>
 
-        <div className="nav-links">
-          {/* Features and About links removed */}
-          <Link to="/login" className="login-button">Login</Link>
-        </div>
+        {/* Completely removed nav-links section with login button */}
       </nav>
 
       <div className="container">
-        <motion.div
+        <motion.div>
           className="left-content"
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
-        >
+        {'>'}
           <div className="text-box">
             <h1 className="title">Master Python.<br />Level Up With AI.</h1>
             <p className="subtitle">
@@ -56,8 +53,8 @@ function HomePage() {
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }}>
-                <Link to="/login" className="btn btn-outline">
-                  Learn More
+                <Link to="/login" className="login-button">
+                  Login
                 </Link>
               </motion.div>
             </div>
