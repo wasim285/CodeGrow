@@ -23,7 +23,7 @@
     padding: 18px 40px;
     z-index: 1000;
     display: flex;
-    justify-content: center; /* Center the logo since nav-links is empty */
+    justify-content: flex-start; /* Change from center to flex-start */
     align-items: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0 auto; /* Center the logo */
+    margin: 0; /* Remove the auto margins that were centering it */
 }
 
 .logo-icon {
@@ -368,10 +368,13 @@
 .lesson-box {
     background: linear-gradient(145deg, #23233f, #1d1d36);
     border-radius: 12px;
-    padding: 24px;
+    padding: 18px 24px; /* Slightly reduced padding for simpler content */
     box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.05);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .lesson-box:hover {
@@ -382,16 +385,14 @@
 .lesson-title {
     font-size: 20px;
     font-weight: 700;
-    margin-bottom: 12px;
     font-family: "Outfit", sans-serif;
     color: #fff;
+    margin-bottom: 0; /* Remove bottom margin since we're simplifying */
 }
 
+/* Hide the lesson description */
 .lesson-description {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 18px;
-    line-height: 1.5;
+    display: none;
 }
 
 .lesson-stats {

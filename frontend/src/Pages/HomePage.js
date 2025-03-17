@@ -33,7 +33,7 @@ function HomePage() {
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }}>
-                <Link to="/login" className="btn login-button">
+                <Link to="/login" className="login-button">
                   Login
                 </Link>
               </motion.div>
@@ -41,43 +41,22 @@ function HomePage() {
           </div>
         </motion.div>
 
-        {/* Right Content */}
+        {/* Right Content - Code editor removed */}
         <div className="right-content">
-          {/* Code Editor Preview */}
-          <motion.div 
-            className="code-editor"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="editor-header">
-              <div className="editor-title">main.py</div>
-              <div className="editor-actions">
-                <div className="action-dot dot-red"></div>
-                <div className="action-dot dot-yellow"></div>
-                <div className="action-dot dot-green"></div>
-              </div>
-            </div>
-            <div className="code-content">
-              <div className="code-line"><span className="line-number">1</span> <span className="keyword">def</span> <span className="function">learn_python</span>():</div>
-              <div className="code-line"><span className="line-number">2</span> skills = [<span className="string">"basics"</span>, <span className="string">"functions"</span>, <span className="string">"classes"</span>]</div>
-              <div className="code-line"><span className="line-number">3</span> <span className="keyword">return</span> <span className="string">"Ready to grow!"</span></div>
-              <div className="code-line"><span className="line-number">4</span> <span className="comment"># Start your coding journey today</span></div>
-            </div>
-          </motion.div>
-
-          {/* Lessons Appear One-by-One */}
+          {/* Simplified Lesson Boxes */}
           <motion.div
             className="lesson-box completed"
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{ scale: 1.05 }}
           >
-            <div className="lesson-title">Lesson 1: Python Basics</div>
-            <div className="lesson-description">Learn fundamentals of Python programming including variables, data types, and operators.</div>
+            <div className="lesson-title">Lesson 1</div>
             <div className="lesson-stats">
               <span className="lesson-level">Beginner</span>
-              <div className="completion-indicator"><span className="completed-icon">✓</span> Completed</div>
+              <div className="completion-indicator">
+                <span className="completed-icon">✓</span> Completed
+              </div>
             </div>
           </motion.div>
 
@@ -85,13 +64,31 @@ function HomePage() {
             className="lesson-box in-progress"
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 1 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            whileHover={{ scale: 1.05 }}
           >
-            <div className="lesson-title">Lesson 2: Functions & Control Flow</div>
-            <div className="lesson-description">Master functions, conditional statements, and loops to control program flow.</div>
+            <div className="lesson-title">Lesson 2</div>
             <div className="lesson-stats">
               <span className="lesson-level">Intermediate</span>
-              <div className="completion-indicator"><span className="in-progress-icon">●</span> In Progress</div>
+              <div className="completion-indicator">
+                <span className="in-progress-icon">●</span> In Progress
+              </div>
+            </div>
+          </motion.div>
+          
+          <motion.div
+            className="lesson-box"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+            whileHover={{ scale: 1.05 }}
+          >
+            <div className="lesson-title">Lesson 3</div>
+            <div className="lesson-stats">
+              <span className="lesson-level">Advanced</span>
+              <div className="completion-indicator">
+                <span className="locked-icon">🔒</span> Locked
+              </div>
             </div>
           </motion.div>
         </div>
@@ -102,7 +99,7 @@ function HomePage() {
         className="stats-section"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 1.2 }}
+        transition={{ duration: 0.7, delay: 0.9 }}
       >
         <div className="stat-item"><div className="stat-number">5,000+</div><div className="stat-label">Active Learners</div></div>
         <div className="stat-item"><div className="stat-number">200+</div><div className="stat-label">Coding Lessons</div></div>
@@ -114,7 +111,7 @@ function HomePage() {
         className="footer"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 1.5 }}
+        transition={{ duration: 0.5, delay: 1.2 }}
       >
         <div className="footer-links">
           <a href="#about" className="footer-link">About Us</a>
