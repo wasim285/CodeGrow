@@ -24,14 +24,13 @@
     padding: 18px 40px;
     z-index: 1000;
     display: flex;
-    justify-content: center; /* Center the logo */
+    justify-content: space-between;
     align-items: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Homepage logo styling */
-.homepage .navbar .logo {
+.logo {
     font-size: 26px;
     font-weight: 700;
     font-family: "Outfit", sans-serif;
@@ -40,19 +39,48 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0; /* Remove any margin */
 }
 
-.homepage .navbar .logo-icon {
+.logo-icon {
     background: linear-gradient(135deg, #4caf50, #8bc34a);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* Hide nav-links on homepage */
-.homepage .navbar .nav-links {
-    display: none;
+.nav-links {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    font-family: "Inter", sans-serif;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: white;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(135deg, #3a8eff, #4361ee);
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
 }
 
 /* Main container */
@@ -165,29 +193,19 @@
     box-shadow: 0px 10px 20px rgba(76, 175, 80, 0.4);
 }
 
-/* Update Login Button to match Get Started button */
-.login-button {
-    padding: 16px 32px;
-    font-size: 18px;
-    font-weight: 600;
+.btn-outline {
+    background: transparent;
+    border: 2px solid rgba(58, 142, 255, 0.3);
+    box-shadow: 0px 8px 15px rgba(58, 142, 255, 0.05);
     color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 30px;
-    transition: all 0.3s ease;
-    display: inline-block;
     text-decoration: none;
-    min-width: 160px;
-    text-align: center;
-    font-family: "Inter", sans-serif;
-    background: linear-gradient(135deg, #3a8eff, #4361ee);
-    box-shadow: 0px 8px 15px rgba(58, 142, 255, 0.3);
 }
 
-.login-button:hover {
-    background: linear-gradient(135deg, #2e7bff, #3b51e0);
+.btn-outline:hover {
+    border-color: rgba(58, 142, 255, 0.6);
+    background: rgba(58, 142, 255, 0.05);
     transform: translateY(-3px);
-    box-shadow: 0px 10px 20px rgba(58, 142, 255, 0.4);
+    box-shadow: 0px 10px 20px rgba(58, 142, 255, 0.1);
 }
 
 /* Right content styling */
@@ -708,43 +726,3 @@
 .code-particle:nth-child(10) { left: -50px; top: -50px; animation: floatDiagonal 40s linear infinite; animation-delay: 5s; }
 .leaf-particle:nth-child(11) { left: -50px; top: -50px; animation: floatDiagonal 28s linear infinite; animation-delay: 12s; }
 .leaf-particle:nth-child(12) { left: -50px; top: -50px; animation: floatDiagonal 32s linear infinite; animation-delay: 18s; }
-
-/* Ensure dashboard navbar is not affected */
-.dashboard .navbar {
-    justify-content: space-between;
-}
-
-.dashboard .navbar .nav-links {
-    display: flex;
-    gap: 25px;
-    align-items: center;
-}
-
-.dashboard .nav-links a {
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    font-family: "Inter", sans-serif;
-    position: relative;
-}
-
-.dashboard .nav-links a:hover {
-    color: white;
-}
-
-.dashboard .nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(135deg, #4caf50, #8bc34a);
-    transition: all 0.3s ease;
-}
-
-.dashboard .nav-links a:hover::after {
-    width: 100%;
-}
