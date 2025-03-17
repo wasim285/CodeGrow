@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const SignupPage = () => {
     const navigate = useNavigate();
@@ -103,60 +103,79 @@ const SignupPage = () => {
     };
 
     return (
-        <div className="signup-container">
-            <form onSubmit={handleSubmit} className="signup-form">
-                <h2>Create Account</h2>
-                
-                <div className="form-group">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className={errors.email ? 'error' : ''}
-                    />
-                    {errors.email && <span className="error-message">{errors.email}</span>}
+        <div>
+            <nav className="auth-navbar">
+                <Link to="/" className="navbar-logo">
+                    <span className="logo-icon">{"</>"}</span>
+                    CodeGrow
+                </Link>
+            </nav>
+
+            <div className="signup-container">
+                <div className="signup-box">
+                    <h2>Create Account</h2>
+                    
+                    {errors.submit && (
+                        <div className="error-message general">{errors.submit}</div>
+                    )}
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                className={errors.email ? 'error' : ''}
+                                disabled={isLoading}
+                            />
+                            {errors.email && <span className="error-message">{errors.email}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <input
+                                type="text"
+                                placeholder="Username"
+                                value={formData.username}
+                                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                                className={errors.username ? 'error' : ''}
+                                disabled={isLoading}
+                            />
+                            {errors.username && <span className="error-message">{errors.username}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                value={formData.password}
+                                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                className={errors.password ? 'error' : ''}
+                                disabled={isLoading}
+                            />
+                            {errors.password && <span className="error-message">{errors.password}</span>}
+                        </div>
+
+                        <div className="form-group">
+                            <input
+                                type="password"
+                                placeholder="Confirm Password"
+                                value={formData.confirmPassword}
+                                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                                className={errors.confirmPassword ? 'error' : ''}
+                                disabled={isLoading}
+                            />
+                            {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                        </div>
+
+                        <button type="submit" disabled={isLoading}>
+                            {isLoading ? 'Creating Account...' : 'Sign Up'}
+                        </button>
+                    </form>
+
+                    <p>Already have an account? <Link to="/login">Login here</Link></p>
                 </div>
-
-                <div className="form-group">
-                    <input
-                        type="text"
-                        placeholder="Username"
-                        value={formData.username}
-                        onChange={(e) => setFormData({...formData, username: e.target.value})}
-                        className={errors.username ? 'error' : ''}
-                    />
-                    {errors.username && <span className="error-message">{errors.username}</span>}
-                </div>
-
-                <div className="form-group">
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                        className={errors.password ? 'error' : ''}
-                    />
-                    {errors.password && <span className="error-message">{errors.password}</span>}
-                </div>
-
-                <div className="form-group">
-                    <input
-                        type="password"
-                        placeholder="Confirm Password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                        className={errors.confirmPassword ? 'error' : ''}
-                    />
-                    {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-                </div>
-
-                {errors.submit && <div className="error-message submit-error">{errors.submit}</div>}
-
-                <button type="submit" disabled={isLoading}>
-                    {isLoading ? 'Creating Account...' : 'Sign Up'}
-                </button>
-            </form>
+            </div>
         </div>
     );
 };
