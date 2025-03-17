@@ -97,26 +97,22 @@
 }
 
 /* Common exact dimensions for both boxes */
-.lesson-box,
-.study-sessions-box {
-    background: linear-gradient(145deg, #2a2a3d, #262636);
-    border-radius: 14px;
-    padding: 30px;
-    width: 100%;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    min-height: 300px; /* Exact same height */
-    height: 300px; /* Force exact height */
+.lesson-box {
+    /* Keep existing styling but set exact height for reference */
+    min-height: 250px;
+    height: 250px;
     display: flex;
     flex-direction: column;
-    margin: 0 auto;
 }
 
-/* Study sessions box specific styles */
 .study-sessions-box {
-    background: linear-gradient(145deg, #222232, #1e1e2e);
-    margin-top: 10px; /* Small gap between boxes */
+    /* Match the lesson box exactly */
+    min-height: 250px;
+    height: 250px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content overflow */
 }
 
 /* Study sessions content wrapper */
