@@ -7,16 +7,43 @@ import "../styles/LoginPage.css";
 const LoginPage = () => {
     const { login } = useContext(AuthContext);
     const [formData, setFormData] = useState({ username: "", password: "" });
-    const [error, setError] = useState("");
+    const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        // Clear errors when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: "" }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!formData.username.trim()) {
+            newErrors.username = "Username is required";
+        }
+
+        if (!formData.password) {
+            newErrors.password = "Password is required";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("");
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        setIsLoading(true);
+        setErrors({});
 
         try {
             const response = await loginUser(formData);
@@ -27,11 +54,30 @@ const LoginPage = () => {
                 localStorage.setItem("token", data.token);
                 navigate("/pathways");
             } else {
-                setError(response.data?.error || "Invalid credentials. Please try again.");
+                // Handle specific error cases
+                if (response.data?.non_field_errors) {
+                    setErrors({ general: response.data.non_field_errors[0] });
+                } else if (response.data?.username) {
+                    setErrors({ username: response.data.username[0] });
+                } else if (response.data?.password) {
+                    setErrors({ password: response.data.password[0] });
+                } else {
+                    setErrors({ general: "Invalid credentials. Please check your username and password." });
+                }
             }
         } catch (error) {
-            console.error("Login Error:", error.response?.data || error.message);
-            setError("Network error. Please try again.");
+            console.error("Login Error:", error);
+            if (error.response?.status === 401) {
+                setErrors({ general: "Invalid username or password." });
+            } else if (error.response?.status === 429) {
+                setErrors({ general: "Too many login attempts. Please try again later." });
+            } else if (!navigator.onLine) {
+                setErrors({ general: "No internet connection. Please check your network." });
+            } else {
+                setErrors({ general: "Unable to connect to server. Please try again later." });
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -45,26 +91,47 @@ const LoginPage = () => {
                 <div className="login-box">
                     <h2>Login to CodeGrow</h2>
 
-                    {error && <p className="error-message">{error}</p>}
+                    {errors.general && (
+                        <div className="error-message general">{errors.general}</div>
+                    )}
 
                     <form onSubmit={handleSubmit}>
-                        <input 
-                            type="text" 
-                            name="username" 
-                            placeholder="Username" 
-                            value={formData.username} 
-                            onChange={handleChange} 
-                            required 
-                        />
-                        <input 
-                            type="password" 
-                            name="password" 
-                            placeholder="Password" 
-                            value={formData.password} 
-                            onChange={handleChange} 
-                            required 
-                        />
-                        <button type="submit">Login</button>
+                        <div className="form-group">
+                            <input 
+                                type="text" 
+                                name="username" 
+                                placeholder="Username" 
+                                value={formData.username} 
+                                onChange={handleChange} 
+                                className={errors.username ? 'error' : ''}
+                                disabled={isLoading}
+                            />
+                            {errors.username && (
+                                <span className="error-message">{errors.username}</span>
+                            )}
+                        </div>
+
+                        <div className="form-group">
+                            <input 
+                                type="password" 
+                                name="password" 
+                                placeholder="Password" 
+                                value={formData.password} 
+                                onChange={handleChange} 
+                                className={errors.password ? 'error' : ''}
+                                disabled={isLoading}
+                            />
+                            {errors.password && (
+                                <span className="error-message">{errors.password}</span>
+                            )}
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Logging in...' : 'Login'}
+                        </button>
                     </form>
 
                     <p>Don't have an account? <Link to="/register">Sign up here</Link></p>
