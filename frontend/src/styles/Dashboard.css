@@ -361,113 +361,110 @@ p.streak-display strong {
     font-weight: 600;
 }
 
-/* Recommended lessons box - updated for flexible sizing */
+/* Recommended lessons box */
 .recommendations-box {
     margin-top: 0;
     padding: 35px;
     width: 100%;
+    min-height: 350px; /* Added min-height to prevent content overflow */
     background: linear-gradient(145deg, #222232, #1e1e2e);
     border-radius: 14px;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    min-height: 350px;
 }
 
-/* Recommended lessons list - updated for better spacing */
+/* Recommended lessons title */
+.recommendations-box h3 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #fff;
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.3px;
+}
+
+/* Recommended lessons list */
 .recommendations-box ul {
     list-style: none;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
     margin: 0;
-    flex: 1;
-    overflow-y: auto;
-    max-height: calc(100vh - 400px); /* Adjustable height */
-    padding-right: 10px; /* Space for scrollbar */
 }
 
-/* Scrollbar styling */
-.recommendations-box ul::-webkit-scrollbar {
-    width: 8px;
-}
-
-.recommendations-box ul::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.recommendations-box ul::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-/* Recommended lesson items - updated for consistent sizing */
+/* Recommended lesson items */
 .recommendations-box li {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 12px;
-    padding: 20px;
+    padding: 25px;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
-    min-height: 160px;
+    height: 100%;
+    min-height: 200px; /* Minimum height for cards */
     justify-content: space-between;
     border: 1px solid rgba(255, 255, 255, 0.03);
-    margin: 0;
 }
 
-/* Recommended lesson content wrapper */
-.lesson-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.recommendations-box li:hover {
+    transform: translateY(-8px);
+    box-shadow: 0px 12px 22px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Recommended lesson title - updated for better spacing */
+/* Recommended lesson title */
 .recommendations-box li h4 {
-    font-size: 18px;
+    font-size: 20px;
     color: white;
-    margin: 0 0 10px 0;
+    margin-top: 0;
+    margin-bottom: 15px;
     font-family: "Outfit", sans-serif;
     letter-spacing: -0.2px;
     font-weight: 600;
 }
 
-/* Recommended lesson description - updated for flexible height */
+/* Recommended lesson description */
 .recommendations-box li p {
-    font-size: 14px;
+    font-size: 15px;
     color: #b8b8d0;
-    line-height: 1.5;
-    margin: 0;
+    line-height: 1.6;
+    flex-grow: 1;
+    margin-bottom: 25px;
     font-family: "Inter", sans-serif;
-    flex: 1;
 }
 
-/* Media queries for responsive design */
-@media (max-width: 1200px) {
-    .recommendations-box ul {
-        max-height: calc(100vh - 300px);
-    }
+/* Recommended lesson button */
+.recommendations-box button {
+    background: linear-gradient(to right, #ff6b6b, #ff8e8e);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.35);
+    align-self: center;
+    width: 100%;
+    max-width: 180px;
+    margin: 0 auto;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.2px;
 }
 
-@media (max-width: 768px) {
-    .recommendations-box {
-        min-height: 300px;
-    }
+.recommendations-box button:hover {
+    background: linear-gradient(to right, #ff5252, #ff7b7b);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 15px rgba(255, 107, 107, 0.45);
+}
 
-    .recommendations-box ul {
-        max-height: none;
-    }
-
-    .recommendations-box li {
-        min-height: 140px;
-    }
+.recommendations-box button:active {
+    transform: translateY(0) scale(0.98);
 }
 
 /* Empty state messages */
