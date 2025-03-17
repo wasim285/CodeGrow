@@ -4,25 +4,41 @@ from .models import CustomUser, UserProgress, Lesson, StudySession
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8, required=True)
-    password2 = serializers.CharField(write_only=True, min_length=8, required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = CustomUser
-        fields = ["first_name", "last_name", "username", "email", "password", "password2"]
+        fields = ["username", "email", "password"]
+        extra_kwargs = {
+            'email': {'required': True}
+        }
 
     def validate_username(self, value):
+        if len(value) < 3:
+            raise serializers.ValidationError("Username must be at least 3 characters long.")
         if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError("A user with that username already exists.")
+            raise serializers.ValidationError("This username is already taken.")
         return value
 
-    def validate(self, data):
-        if data["password"] != data["password2"]:
-            raise serializers.ValidationError({"password": "Passwords do not match."})
-        return data
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("Email is required.")
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already registered.")
+        return value
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        if not any(c.isupper() for c in value):
+            raise serializers.ValidationError("Password must contain at least one uppercase letter.")
+        if not any(c.islower() for c in value):
+            raise serializers.ValidationError("Password must contain at least one lowercase letter.")
+        if not any(c.isdigit() for c in value):
+            raise serializers.ValidationError("Password must contain at least one number.")
+        return value
 
     def create(self, validated_data):
-        validated_data.pop("password2")
         user = CustomUser.objects.create_user(**validated_data)
         UserProgress.objects.get_or_create(user=user)
         return user

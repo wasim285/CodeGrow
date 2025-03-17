@@ -6,8 +6,8 @@ from django.conf import settings
 from django.db.models import CASCADE
 from datetime import timedelta, date
 
-
 class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)  # Make email required and unique
     LEARNING_GOALS = [
         ("School", "For School"),
         ("Portfolio", "Build a Portfolio"),
@@ -27,6 +27,7 @@ class CustomUser(AbstractUser):
         max_length=50, choices=DIFFICULTY_LEVELS, blank=True, null=True
     )
 
+    # Update related_name to avoid clashes
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='customuser_groups',
@@ -42,9 +43,16 @@ class CustomUser(AbstractUser):
         verbose_name='user permissions',
     )
 
+    # Add USERNAME_FIELD and REQUIRED_FIELDS
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
+
     def __str__(self):
         return self.username
 
+    class Meta:
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
 
 class Lesson(models.Model):
     title = models.CharField(max_length=255)

@@ -32,14 +32,56 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             try:
+                # Validate password requirements
+                password = serializer.validated_data.get('password')
+                if len(password) < 8:
+                    return Response(
+                        {"password": ["Password must be at least 8 characters long."]},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # Check for at least one uppercase, one lowercase, and one number
+                if not any(c.isupper() for c in password):
+                    return Response(
+                        {"password": ["Password must contain at least one uppercase letter."]},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                if not any(c.islower() for c in password):
+                    return Response(
+                        {"password": ["Password must contain at least one lowercase letter."]},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                if not any(c.isdigit() for c in password):
+                    return Response(
+                        {"password": ["Password must contain at least one number."]},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                # Create user if all validations pass
                 user = serializer.save()
                 token, _ = Token.objects.get_or_create(user=user)
-                Lesson.create_default_lessons(user)
-                return Response({"token": token.key, "message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+                
+                return Response({
+                    "token": token.key,
+                    "message": "User registered successfully!"
+                }, status=status.HTTP_201_CREATED)
+                
             except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({
+                    "error": str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Handle validation errors
+        errors = {}
+        for field, error_list in serializer.errors.items():
+            if field == 'username' and 'unique' in str(error_list[0]).lower():
+                errors[field] = ["This username is already taken."]
+            elif field == 'email' and 'unique' in str(error_list[0]).lower():
+                errors[field] = ["This email is already registered."]
+            else:
+                errors[field] = error_list
+
+        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
