@@ -29,11 +29,6 @@ function HomePage() {
           <span className="logo-icon">{"</>"}</span>
           CodeGrow
         </div>
-
-        <div className="nav-links">
-          {/* Features and About links removed */}
-          <Link to="/login" className="login-button">Login</Link>
-        </div>
       </nav>
 
       <div className="container">
@@ -56,8 +51,8 @@ function HomePage() {
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }}>
-                <Link to="/login" className="btn btn-outline">
-                  Learn More
+                <Link to="/login" className="login-button">
+                  Login
                 </Link>
               </motion.div>
             </div>

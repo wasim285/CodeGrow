@@ -30,6 +30,22 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Modern Navbar - Homepage specific */
+.homepage .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 18px 40px;
+    z-index: 1000;
+    display: flex;
+    justify-content: center; /* Center the logo */
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .logo {
     font-size: 26px;
     font-weight: 700;
@@ -41,7 +57,26 @@
     gap: 10px;
 }
 
+.homepage .logo {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0; /* Remove any margin */
+}
+
 .logo-icon {
+    background: linear-gradient(135deg, #4caf50, #8bc34a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.homepage .logo-icon {
     background: linear-gradient(135deg, #4caf50, #8bc34a);
     -webkit-background-clip: text;
     background-clip: text;
@@ -52,6 +87,11 @@
     display: flex;
     gap: 25px;
     align-items: center;
+}
+
+/* Hide nav-links specifically on homepage */
+.homepage .nav-links {
+    display: none;
 }
 
 .nav-link {
@@ -647,82 +687,13 @@
     box-shadow: 0px 10px 20px rgba(58, 142, 255, 0.1);
 }
 
-/* Animated Code/Leaves Background */
-.animated-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 0;
-    opacity: 0.15;
-}
-
+/* Remove animated background styles */
+.animated-bg,
+.code-particle,
+.leaf-particle,
+/* Remove animated background styles */
+.animated-bg,
 .code-particle,
 .leaf-particle {
-    position: absolute;
-    color: rgba(255, 255, 255, 0.6);
-    font-family: "Fira Code", monospace;
-    font-size: 18px;
-    display: block;
-    user-select: none;
-    pointer-events: none;
+    display: none;
 }
-
-.leaf-particle {
-    font-size: 22px;
-    opacity: 0.8;
-}
-
-/* Generate multiple code particles with different animations */
-@keyframes floatDown {
-    0% {
-        transform: translateY(-100vh) rotate(0deg);
-        opacity: 0.3;
-    }
-    100% {
-        transform: translateY(100vh) rotate(15deg);
-        opacity: 0.1;
-    }
-}
-
-@keyframes floatAcross {
-    0% {
-        transform: translateX(-100vw) translateY(10vh);
-        opacity: 0.3;
-    }
-    100% {
-        transform: translateX(100vw) translateY(30vh);
-        opacity: 0.1;
-    }
-}
-
-@keyframes floatDiagonal {
-    0% {
-        transform: translate(-100vw, -50vh) rotate(-10deg);
-        opacity: 0.3;
-    }
-    100% {
-        transform: translate(100vw, 50vh) rotate(10deg);
-        opacity: 0.1;
-    }
-}
-
-/* Create code particles */
-.code-particle:nth-child(1) { left: 10%; top: -50px; animation: floatDown 25s linear infinite; animation-delay: 0s; }
-.code-particle:nth-child(2) { left: 25%; top: -50px; animation: floatDown 20s linear infinite; animation-delay: 2s; }
-.code-particle:nth-child(3) { left: 40%; top: -50px; animation: floatDown 22s linear infinite; animation-delay: 4s; }
-.code-particle:nth-child(4) { left: 65%; top: -50px; animation: floatDown 28s linear infinite; animation-delay: 0s; }
-.code-particle:nth-child(5) { left: 80%; top: -50px; animation: floatDown 15s linear infinite; animation-delay: 3s; }
-
-/* Create leaf particles */
-.leaf-particle:nth-child(6) { left: -50px; top: 15%; animation: floatAcross 30s linear infinite; animation-delay: 0s; }
-.leaf-particle:nth-child(7) { left: -50px; top: 45%; animation: floatAcross 25s linear infinite; animation-delay: 4s; }
-.leaf-particle:nth-child(8) { left: -50px; top: 75%; animation: floatAcross 20s linear infinite; animation-delay: 8s; }
-
-/* Create diagonal particles */
-.code-particle:nth-child(9) { left: -50px; top: -50px; animation: floatDiagonal 35s linear infinite; animation-delay: 0s; }
-.code-particle:nth-child(10) { left: -50px; top: -50px; animation: floatDiagonal 40s linear infinite; animation-delay: 5s; }
-.leaf-particle:nth-child(11) { left: -50px; top: -50px; animation: floatDiagonal 28s linear infinite; animation-delay: 12s; }
-.leaf-particle:nth-child(12) { left: -50px; top: -50px; animation: floatDiagonal 32s linear infinite; animation-delay: 18s; }
