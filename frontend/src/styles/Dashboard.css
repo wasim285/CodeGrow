@@ -1,6 +1,9 @@
 /* Main container */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
+/* Main container */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
 .dashboard-container {
     display: flex;
     flex-direction: column;
@@ -20,61 +23,6 @@
     text-align: center;
 }
 
-/* Welcome banner - updated to make it stand out better */
-.welcome-box {
-    background: linear-gradient(145deg, #2a2a3d, #262636);
-    border-radius: 16px;
-    padding: 25px 30px;
-    margin-bottom: 30px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    text-align: center; /* Center the text instead of left-aligned */
-    position: relative;
-    overflow: hidden; /* Contains the glow effect */
-    width: 90%; /* Make it narrower */
-    max-width: 800px; /* Maximum width */
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Add a subtle glow accent */
-.welcome-box::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle,
-        rgba(76, 175, 80, 0.15),
-        transparent 70%
-    );
-    opacity: 0.8;
-    pointer-events: none;
-}
-
-.welcome-box h2 {
-    font-size: 28px;
-    margin-bottom: 10px;
-    color: white;
-    font-family: "Outfit", sans-serif;
-    font-weight: 700;
-    background: linear-gradient(90deg, #fff, #b8b8d0);
-    -webkit-background-clip: text;
-    background-clip: text;  /* Add the standard property */
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.3px;
-    margin-top: 0;
-}
-
-.welcome-box p {
-    font-size: 18px;
-    color: #b8b8d0;
-    margin: 0;
-    font-family: "Inter", sans-serif;
-}
-
 /* Dashboard layout grid */
 .dashboard-grid {
     display: flex;
@@ -87,165 +35,138 @@
     padding: 0 20px;
 }
 
-/* Left section alignment - reduced gap */
+/* Left section alignment */
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Small gap between elements */
+    gap: 10px;
     width: 65%;
     padding-left: 30px;
 }
 
-/* Lesson box styling */
-.lesson-box {
+/* Lesson box and Study sessions box - Identical Dimensions */
+.lesson-box,
+.study-sessions-box {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
-    padding: 30px;
-    width: 100%;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+    padding: 25px;
+    width: 85%; /* Reduced width */
+    margin: 0 auto;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    height: 280px; /* Fixed height for consistent sizing */
-    min-height: 280px;
+    height: 220px; /* Reduced height */
+    min-height: 220px;
 }
 
-/* Study sessions box - matched exactly with lesson box */
+/* Study Sessions Box */
 .study-sessions-box {
     background: linear-gradient(145deg, #222232, #1e1e2e);
-    border-radius: 14px;
-    padding: 30px;
-    width: 100%;
-    margin: 10px auto 0;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    height: 280px; /* Exactly match lesson box height */
-    min-height: 280px;
+    margin-top: 15px;
     overflow: hidden;
 }
 
-/* Study sessions content wrapper */
-.study-sessions-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 5px;
-    margin-top: 10px;
-}
-
-/* Lesson box title */
+/* Lesson Title */
 .lesson-box h3 {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 700;
     margin-top: 0;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     color: #fff;
     font-family: "Outfit", sans-serif;
     letter-spacing: -0.3px;
 }
 
-/* Lesson description */
+/* Lesson Description */
 .lesson-box p {
-    font-size: 16px;
+    font-size: 15px;
     color: #b8b8d0;
-    margin-bottom: 30px;
-    line-height: 1.7;
+    margin-bottom: 20px;
+    line-height: 1.6;
     font-family: "Inter", sans-serif;
 }
 
-/* Updated button style for lesson box */
+/* Study Sessions Box Title */
+.study-sessions-box h3 {
+    font-size: 24px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #fff;
+    font-family: "Outfit", sans-serif;
+    letter-spacing: -0.3px;
+    font-weight: 600;
+}
+
+/* Updated Button for Lesson Box */
 .lesson-box button {
     background: linear-gradient(to right, #4caf50, #45a049);
     color: white;
     border: none;
     border-radius: 30px;
-    padding: 12px 28px;
-    font-size: 16px;
+    padding: 10px 25px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
     font-family: "Inter", sans-serif;
-    letter-spacing: 0.3px;
     width: auto;
-    min-width: 160px;
-    max-width: 200px;
-    margin: 0 auto; /* Center the button */
-    margin-top: auto; /* Push to bottom */
+    min-width: 140px;
+    max-width: 180px;
+    margin: auto;
 }
 
 .lesson-box button:hover {
     background: linear-gradient(to right, #45a049, #388e3c);
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 7px 20px rgba(76, 175, 80, 0.5);
+    transform: translateY(-2px);
 }
 
-.lesson-box button:active {
-    transform: translateY(0) scale(0.98);
-}
-
-.study-sessions-box h3 {
-    font-size: 24px;
-    margin-top: 0;
-    margin-bottom: 25px;
-    color: #fff;
-    font-family: "Outfit", sans-serif;
-    letter-spacing: -0.3px;
-    font-weight: 600;
-}
-
-/* Adjust study sessions list container */
-.study-sessions-box .sessions-container {
+/* Study Sessions Content */
+.study-sessions-content {
     flex: 1;
     overflow-y: auto;
-    margin-top: 20px;
+    padding-right: 5px;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #b8b8d0;
 }
 
-/* Study sessions list */
-.study-sessions-box ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+/* Right Section */
+.progress-section {
+    width: 34%;
+    background: linear-gradient(145deg, #2a2a3d, #262636);
+    border-radius: 14px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.study-sessions-box li {
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(145deg, #323d4a, #2c3e50);
-    color: white;
-    padding: 18px 22px;
-    border-radius: 10px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 0;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-}
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        flex-direction: column;
+        gap: 30px;
+    }
 
-.study-sessions-box li:hover {
-    transform: translateX(5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
+    .left-section,
+    .progress-section {
+        width: 100%;
+    }
 
-.study-sessions-box li strong {
-    color: #f8c358;
-    font-size: 17px;
-    display: block;
-    margin-bottom: 6px;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-}
+    .lesson-box,
+    .study-sessions-box {
+        width: 90%;
+        padding: 20px;
+        margin: 0 auto;
+        height: 200px;
+    }
 
-.study-sessions-box li span {
-    font-size: 15px;
-    color: #adbdcc;
-    font-family: "Inter", sans-serif;
+    .study-sessions-box {
+        margin-top: 10px;
+    }
 }
 
 /* Right section (Progress tracker) */
