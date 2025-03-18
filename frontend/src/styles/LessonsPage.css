@@ -1,6 +1,7 @@
-/* Enhanced Lessons Page - Premium Design */
+/* Import Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
+/* Lessons Page - Background & Layout */
 .lessons-page {
     background: radial-gradient(circle, #121220, #0a0a1a);
     color: white;
@@ -12,7 +13,7 @@
     position: relative;
 }
 
-/* Background accent elements */
+/* Background Accent Elements */
 .lessons-page::before {
     content: "";
     position: absolute;
@@ -26,6 +27,7 @@
     pointer-events: none;
 }
 
+/* Lessons Container */
 .lessons-container {
     width: 90%;
     max-width: 1400px;
@@ -35,6 +37,7 @@
     z-index: 1;
 }
 
+/* Header Section */
 .lessons-header {
     margin-bottom: 50px;
     position: relative;
@@ -55,8 +58,6 @@
 .lessons-title {
     font-size: 36px;
     font-weight: 700;
-    color: white;
-    margin-bottom: 15px;
     font-family: "Outfit", sans-serif;
     letter-spacing: -0.5px;
     background: linear-gradient(90deg, #fff, #b8b8d0);
@@ -77,7 +78,7 @@
     animation: fadeIn 1s 0.2s both;
 }
 
-/* Enhanced filters */
+/* Lesson Filters */
 .lesson-filters {
     display: flex;
     justify-content: center;
@@ -114,67 +115,42 @@
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Enhanced grid layout */
+/* Lesson Grid Layout */
 .lessons-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
     justify-content: center;
-    padding: 20px 0;
-    perspective: 1000px;
+    padding: 30px 0;
+    max-width: 1300px;
+    margin: 0 auto;
 }
 
-/* Enhanced lesson cards */
+/* Lesson Cards */
 .lesson-card {
     background: linear-gradient(145deg, #2a2a3d, #262636);
-    padding: 30px;
+    padding: 35px;
     border-radius: 16px;
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
     text-align: left;
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    height: 100%;
-    min-height: 250px;
+    min-height: 280px;
     position: relative;
     overflow: hidden;
-    animation: cardAppear 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: cardAppear 0.6s ease both;
     animation-delay: calc(var(--card-index, 0) * 0.1s);
-}
-
-.lesson-card::before {
-    content: "";
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    height: 5px;
-    background: linear-gradient(to right, #4caf50, #8bc34a);
-    border-radius: 16px 16px 0 0;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.lesson-card:hover {
-    transform: translateY(-7px) rotateX(2deg);
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.lesson-card:hover::before {
-    opacity: 1;
+    max-width: 450px;
+    margin: 0 auto;
 }
 
 .lesson-card h3 {
     font-size: 22px;
-    margin-top: 0;
-    margin-bottom: 15px;
     color: white;
     font-family: "Outfit", sans-serif;
     font-weight: 600;
-    letter-spacing: -0.2px;
-    position: relative;
 }
 
 .lesson-card p {
@@ -183,10 +159,9 @@
     margin-bottom: 25px;
     line-height: 1.7;
     flex-grow: 1;
-    font-family: "Inter", sans-serif;
 }
 
-/* Enhanced lesson button */
+/* Lesson Button */
 .lesson-btn {
     background: linear-gradient(to right, #4caf50, #45a049);
     color: white;
@@ -203,21 +178,6 @@
     display: inline-block;
     font-family: "Inter", sans-serif;
     margin-top: auto;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-}
-
-.lesson-btn::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.2), transparent);
-    transition: all 0.6s ease;
-    z-index: -1;
 }
 
 .lesson-btn:hover {
@@ -226,68 +186,7 @@
     box-shadow: 0 8px 16px rgba(76, 175, 80, 0.4);
 }
 
-.lesson-btn:hover::before {
-    left: 100%;
-}
-
-.lesson-btn:active {
-    transform: scale(0.98);
-}
-
-/* Badge styles */
-.lesson-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    font-size: 12px;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-    border: 1px solid rgba(76, 175, 80, 0.3);
-}
-
-/* Loading state */
-.loading-spinner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 200px;
-}
-
-.loading-spinner::after {
-    content: "";
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    border-top-color: #4caf50;
-    animation: spin 1s linear infinite;
-}
-
-/* Empty state */
-.empty-lessons {
-    text-align: center;
-    padding: 60px 30px;
-    color: #8989a3;
-    font-style: italic;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
-    margin: 30px auto;
-    max-width: 500px;
-    font-family: "Inter", sans-serif;
-    border: 1px dashed rgba(255, 255, 255, 0.1);
-}
-
 /* Animations */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -298,7 +197,7 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive adjustments */
+/* Responsive Design */
 @media (max-width: 768px) {
     .lessons-title {
         font-size: 28px;
@@ -314,25 +213,12 @@
         padding: 10px;
         gap: 25px;
     }
-    
-    .lesson-card {
-        padding: 25px;
-        min-height: 220px;
-    }
-    
-    .lesson-card h3 {
-        font-size: 20px;
-    }
-
-    .filter-btn {
-        padding: 10px 18px;
-        font-size: 14px;
-    }
 }
 
-/* Tablet adjustments */
-@media (min-width: 769px) and (max-width: 1024px) {
+/* Tablet Adjustments */
+@media (min-width: 769px) and (max-width: 1200px) {
     .lessons-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 35px;
     }
 }
