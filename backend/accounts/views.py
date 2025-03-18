@@ -408,3 +408,61 @@ class CodeFeedbackView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LessonFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_code = request.data.get("code", "").strip()
+        expected_output = request.data.get("expected_output", "").strip()
+        user_output = request.data.get("user_output", "").strip()
+        question = request.data.get("question", "").strip()
+        
+        if not user_code or not expected_output:
+            return Response(
+                {"error": "Missing required fields"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get API key from environment variables
+        HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+        API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
+
+        # Prepare prompt with context about the error
+        prompt = f"""
+        The student was asked to solve this question:
+        {question}
+        
+        They wrote this code:
+        ```python
+        {user_code}
+        ```
+        
+        Expected output: {expected_output}
+        Actual output: {user_output}
+        
+        Please explain what's wrong with their code, where they went wrong, and provide a helpful hint to fix it. 
+        Do not provide the full solution, just guidance to help them learn.
+        """
+
+        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+        payload = {"inputs": prompt}
+
+        try:
+            response = requests.post(API_URL, headers=headers, json=payload)
+            feedback = response.json()
+
+            if "error" in feedback:
+                return Response(
+                    {"error": "AI feedback failed"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            return Response({"feedback": feedback}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

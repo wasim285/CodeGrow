@@ -81,7 +81,18 @@ class ProfileSerializer(serializers.ModelSerializer):
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "step1_content", "step2_content", "step3_challenge", "code_snippet"]
+        fields = [
+            "id", 
+            "title", 
+            "description", 
+            "step1_content", 
+            "step2_content", 
+            "step3_challenge", 
+            "code_snippet",
+            "expected_output",
+            "difficulty_level",
+            "learning_goal"
+        ]
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
@@ -106,4 +117,21 @@ class StudySessionSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data["end_time"] <= data["start_time"]:
             raise serializers.ValidationError("End time must be after start time.")
+        return data
+
+
+class LessonFeedbackSerializer(serializers.Serializer):
+    """
+    Serializer for the lesson feedback API endpoint.
+    """
+    code = serializers.CharField(required=True)
+    expected_output = serializers.CharField(required=True)
+    user_output = serializers.CharField(required=True)
+    question = serializers.CharField(required=True)
+    
+    def validate(self, data):
+        # Basic validation to ensure all fields have content
+        for field in ['code', 'expected_output', 'question']:
+            if not data.get(field, '').strip():
+                raise serializers.ValidationError(f"{field} cannot be empty")
         return data
