@@ -26,10 +26,6 @@ const LessonPage = () => {
     const [running, setRunning] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const [step, setStep] = useState(1);
-    const [feedback, setFeedback] = useState("");
-    const [feedbackLoading, setFeedbackLoading] = useState(false);
-    const [expectedOutput, setExpectedOutput] = useState("");
-    const [checkingAnswer, setCheckingAnswer] = useState(false);
 
     useEffect(() => {
         if (!user) {
@@ -50,18 +46,10 @@ const LessonPage = () => {
                 });
 
                 setLesson(response.data);
-                setExpectedOutput(response.data.expected_output || "");
 
                 if (response.data.code_snippet && step === 2 && userCode.trim() === "") {
                     setUserCode(response.data.code_snippet);
                 }
-                
-                // Check if lesson is already completed
-                const completionResponse = await api.get(`check-lesson-completion/${lessonId}/`, {
-                    headers: { Authorization: `Token ${token}` },
-                });
-                setIsCompleted(completionResponse.data.is_completed);
-                
             } catch (error) {
                 setError(error.response?.data?.error || "Lesson not found.");
             } finally {
@@ -82,6 +70,7 @@ const LessonPage = () => {
 
             if (response.status === 200) {
                 setIsCompleted(true);
+
                 window.dispatchEvent(new CustomEvent("lessonCompleted", { detail: response.data.progress }));
             }
         } catch (error) {
@@ -93,7 +82,6 @@ const LessonPage = () => {
         if (running) return;
         setRunning(true);
         setOutput("Running...");
-        setFeedback(""); // Clear previous feedback
 
         try {
             const token = localStorage.getItem("token");
@@ -111,47 +99,6 @@ const LessonPage = () => {
             setOutput("Error executing code.");
         } finally {
             setRunning(false);
-        }
-    };
-
-    const checkAnswer = async () => {
-        if (checkingAnswer || running) return;
-        setCheckingAnswer(true);
-        setFeedbackLoading(true);
-        
-        try {
-            // First run the code
-            await runCode();
-            
-            // Compare with expected output
-            if (output.trim() === expectedOutput.trim()) {
-                // Correct answer
-                setFeedback("");
-                markAsCompleted();
-            } else {
-                // Wrong answer - get AI feedback
-                const token = localStorage.getItem("token");
-                if (!token) throw new Error("User not authenticated.");
-                
-                const response = await api.post(
-                    `lesson-feedback/`,
-                    { 
-                        code: userCode.trim(),
-                        expected_output: expectedOutput,
-                        user_output: output,
-                        question: lesson.step3_challenge
-                    },
-                    { headers: { Authorization: `Token ${token}` } }
-                );
-                
-                setFeedback(response.data.feedback);
-            }
-        } catch (error) {
-            console.error("Check Answer Error:", error);
-            setFeedback("Error analyzing your code. Please try again.");
-        } finally {
-            setCheckingAnswer(false);
-            setFeedbackLoading(false);
         }
     };
 
@@ -211,35 +158,13 @@ const LessonPage = () => {
                                                     onChange={(value) => setUserCode(value)}
                                                 />
                                             </div>
-                                            <div className="button-group">
-                                                <button className="run-btn" onClick={runCode} disabled={running}>
-                                                    {running ? "Running..." : "Run Code"}
-                                                </button>
-                                                <button className="check-btn" onClick={checkAnswer} disabled={checkingAnswer || running}>
-                                                    {checkingAnswer ? "Checking..." : "Check Answer"}
-                                                </button>
-                                            </div>
+                                            <button className="run-btn" onClick={runCode} disabled={running}>
+                                                {running ? "Running..." : "Run Code"}
+                                            </button>
                                             <div className="output">
                                                 <h3>Output:</h3>
                                                 <pre>{output}</pre>
                                             </div>
-                                            
-                                            {/* AI Feedback Section */}
-                                            {feedbackLoading && (
-                                                <div className="feedback-loading">
-                                                    <div className="spinner"></div>
-                                                    <p>Getting AI feedback...</p>
-                                                </div>
-                                            )}
-                                            
-                                            {feedback && !feedbackLoading && (
-                                                <div className="feedback-container">
-                                                    <h3>AI Feedback</h3>
-                                                    <div className="feedback-content">
-                                                        {feedback}
-                                                    </div>
-                                                </div>
-                                            )}
                                         </>
                                     ) : (
                                         <p className="error-message">No challenge available for this lesson.</p>
