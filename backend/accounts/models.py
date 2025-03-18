@@ -64,8 +64,6 @@ class Lesson(models.Model):
     learning_goal = models.CharField(max_length=50, choices=CustomUser.LEARNING_GOALS)
     order = models.PositiveIntegerField()
     code_snippet = models.TextField(blank=True, null=True)
-    expected_output = models.TextField(blank=True, null=True, 
-                                      help_text="Expected output for the challenge - used for automated checking and AI feedback")
 
     class Meta:
         ordering = ["order"]
@@ -90,17 +88,15 @@ class Lesson(models.Model):
                         "step3_challenge": "<h3>Mini Challenge</h3><p>Write a Python program that prints 'Hello, World!'.</p>",
                         "order": 1,
                         "code_snippet": "print('Hello, Python!')",
-                        "expected_output": "Hello, World!",
                     },
                     {
                         "title": "Variables & Data Types",
                         "description": "Learn about variables and data types.",
                         "step1_content": "<h3>Understanding Variables</h3><p>Variables store data in Python.</p>",
                         "step2_content": "<h3>Working with Variables</h3><p>Define a variable and assign a value.</p>",
-                        "step3_challenge": "<h3>Mini Challenge</h3><p>Declare a variable 'name' and assign your name to it. Then print 'My name is' followed by your name.</p>",
+                        "step3_challenge": "<h3>Mini Challenge</h3><p>Declare a variable 'name' and assign your name to it.</p>",
                         "order": 2,
-                        "code_snippet": "age = 25\nname = 'John'\n\n# Print your name below\n",
-                        "expected_output": "My name is",  # The actual name will be dynamically checked in the frontend
+                        "code_snippet": "age = 25\nname = 'John'",
                     },
                 ],
             },
@@ -123,7 +119,6 @@ class Lesson(models.Model):
                     "step3_challenge": lesson_data["step3_challenge"],
                     "order": lesson_data["order"],
                     "code_snippet": lesson_data["code_snippet"],
-                    "expected_output": lesson_data.get("expected_output", ""),
                 },
             )
 
