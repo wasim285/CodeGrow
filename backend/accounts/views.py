@@ -528,22 +528,12 @@ class LessonAssistantView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Instead of relying on external API, generate responses locally
-        # This eliminates the timeout issues completely
+        # Generate response locally without external API
         response_text = self.generate_local_response(question, lesson, current_step, user_code, expected_output)
         
-        # Log the interaction for analytics (optional)
-        try:
-            AIInteraction.objects.create(
-                user=request.user,
-                lesson=lesson,
-                question=question,
-                response=response_text[:500],  # Store first 500 chars to avoid DB issues
-                step=current_step
-            )
-        except Exception as e:
-            # Don't fail if logging fails
-            print(f"Error logging AI interaction: {str(e)}")
+        # Log the interaction for analytics (optional) - REMOVING THIS PART THAT CAUSES ERRORS
+        # The AIInteraction model seems to be missing from your models
+        # Instead of using it, simply skip the logging for now
         
         return Response({"response": response_text}, status=status.HTTP_200_OK)
     

@@ -153,6 +153,38 @@ const AILearningAssistant = ({
       return `In programming, it's important to break down complex problems into smaller, manageable parts. For "${lessonTitle}", focus on understanding the fundamental concepts presented, practice with examples, and don't hesitate to experiment. What specific concept would you like me to explain in more detail?`;
     }
     
+    // For specific Python syntax questions
+    if (questionLower.includes("how do i write") || 
+        questionLower.includes("how to write") || 
+        questionLower.includes("syntax for")) {
+      
+      // Check for common Python operations
+      if (questionLower.includes("print")) {
+        let content = "Hello, World!";
+        
+        // Extract what they want to print if mentioned
+        if (questionLower.includes("print hello")) {
+          content = "Hello";
+        }
+        if (questionLower.includes("print hello python")) {
+          content = "Hello Python";
+        }
+        
+        return `In Python, you can print text to the console using the print() function. Here's how to write it:\n\n\`\`\`python\nprint("${content}")\n\`\`\`\n\nMake sure to put your text inside quotes. When you run this code, it will display: ${content}`;
+      }
+      
+      if (questionLower.includes("variable") || questionLower.includes("assign")) {
+        return `To create a variable in Python, you simply write the variable name, an equal sign, and the value. For example:\n\n\`\`\`python\nname = "John"\nage = 25\n\`\`\`\n\nPython variables don't need to be declared with a type - the type is inferred from the value.`;
+      }
+      
+      if (questionLower.includes("function") || questionLower.includes("def")) {
+        return `To define a function in Python, use the 'def' keyword, followed by the function name and parentheses. For example:\n\n\`\`\`python\ndef greet(name):\n    print(f"Hello, {name}!")\n\n# Call the function\ngreet("Alice")  # Displays: Hello, Alice!\n\`\`\`\n\nThe indented code block after the colon is the function body.`;
+      }
+      
+      // Generic syntax guidance
+      return `In Python, syntax is designed to be readable and clean. Most statements are written one per line, with proper indentation used to define code blocks. For example, to write ${questionLower.replace("how do i write", "").replace("how to write", "").trim()}, you can use:\n\n\`\`\`python\n# Your Python code here\n# Start with basic syntax and build from there\n\`\`\`\n\nCould you be more specific about what you're trying to achieve?`;
+    }
+    
     // For lesson-specific questions
     if (questionLower.includes("what will i learn") || 
         questionLower.includes("this lesson about") || 
@@ -235,8 +267,17 @@ const AILearningAssistant = ({
     setInputValue('');
     setIsLoading(true);
 
+    // Generate local response first as fallback
+    const localResponse = generateLessonSpecificResponse(
+      userMessage.content, 
+      lessonTitle, 
+      currentStep, 
+      userCode, 
+      expectedOutput
+    );
+
     try {
-      // Try to get response from API first
+      // Try to get response from API
       const token = localStorage.getItem("token");
       if (!token) throw new Error("User not authenticated");
 
@@ -255,19 +296,33 @@ const AILearningAssistant = ({
         }
       );
 
-      // Process response
+      // Process response - check that it's not a greeting response
+      // when we already have a greeting shown
       if (response.data && response.data.response && 
           typeof response.data.response === 'string' &&
           !response.data.response.includes("<!DOCTYPE") &&
           !response.data.response.includes("dialog_finished_docstring")) {
         
-        // Valid API response
+        // Check if it's just a greeting response that doesn't answer the question
+        const apiResponse = response.data.response;
+        const isJustGreeting = apiResponse.toLowerCase().includes("hello") && 
+                              apiResponse.toLowerCase().includes("how can i help") &&
+                              !apiResponse.toLowerCase().includes(questionLower);
+        
+        if (isJustGreeting && 
+            !(questionLower.includes("hello") || questionLower.includes("hi ") || 
+              questionLower.includes("hey") || questionLower.includes("greetings"))) {
+          // If it's just a greeting and user wasn't greeting, use local response instead
+          throw new Error("API returned just a greeting");
+        }
+        
+        // Valid, non-greeting API response
         setMessages(prev => [
           ...prev, 
           { 
             id: prev.length + 1, 
             type: 'assistant', 
-            content: response.data.response
+            content: apiResponse
           }
         ]);
       } else {
@@ -277,15 +332,7 @@ const AILearningAssistant = ({
     } catch (error) {
       console.error('AI Assistant Error:', error);
       
-      // Generate response locally without API
-      const localResponse = generateLessonSpecificResponse(
-        userMessage.content, 
-        lessonTitle, 
-        currentStep, 
-        userCode, 
-        expectedOutput
-      );
-      
+      // Use the pre-generated local response
       setMessages(prev => [
         ...prev, 
         { 
@@ -345,7 +392,7 @@ const AILearningAssistant = ({
       <div className="ai-assistant-header" onClick={handleExpand}>
         <div className="ai-icon">🤖</div>
         <h3>AI Learning Assistant</h3>
-        <div className="expand-icon">{isExpanded ? '▼' : '▲'}</div>
+        <div class="expand-icon">{isExpanded ? '▼' : '▲'}</div>
       </div>
 
       {isExpanded && (
