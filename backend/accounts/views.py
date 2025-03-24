@@ -499,9 +499,6 @@ class LessonFeedbackView(APIView):
 
 
 class LessonAssistantView(APIView):
-    """
-    AI Learning Assistant for interactive guidance during lessons
-    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -524,60 +521,33 @@ class LessonAssistantView(APIView):
                 {"error": "Lesson not found"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+        # Prepare a simplified response based on the question type
+        # This avoids API timeouts by using predefined responses for common questions
+        simplified_response = self.get_simplified_response(question, lesson, current_step, user_code, expected_output)
+        if simplified_response:
+            return Response({"response": simplified_response}, status=status.HTTP_200_OK)
             
-        # Prepare context for the AI
-        context = f"""
-        You are an AI learning assistant helping a student with a Python programming lesson.
-        Lesson: {lesson.title}
-        
-        Respond in plain text format only. Do not include HTML, markdown or code formatting.
-        """
-        
-        # Add step-specific context
-        if current_step == 1:
-            context += f"The student is currently in Step 1: Introduction. Content: {lesson.step1_content}"
-        elif current_step == 2:
-            context += f"The student is currently in Step 2: Guided Example. Content: {lesson.step2_content}"
-        elif current_step == 3:
-            context += f"""
-            The student is currently in Step 3: Challenge. 
-            Challenge: {lesson.step3_challenge}
-            Expected output: {expected_output}
-            
-            Current code:
-            ```python
-            {user_code}
-            ```
-            """
-        
-        # Add the student's question
-        context += f"\nThe student's question is: {question}"
-        
-        # Prepare the AI prompt
-        prompt = f"""
-        {context}
-        
-        Provide a helpful, concise response to guide the student without directly solving the problem for them.
-        Explain concepts clearly, address their specific question, and provide hints if they are stuck.
-        Keep your response conversational and encouraging.
-        
-        IMPORTANT: Return only plain text in your response. Do not use HTML, markdown, or other formatting.
-        """
-        
-        HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-        API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-
-        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
-        payload = {"inputs": prompt}
-
         try:
-            response = requests.post(API_URL, headers=headers, json=payload)
+            # If no simplified response is available, use a simpler prompt for the API
+            # that is less likely to cause timeouts
+            prompt = self.create_simplified_prompt(question, lesson, current_step, user_code, expected_output)
+            
+            HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+            API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
+
+            headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+            payload = {"inputs": prompt, "wait_for_model": False}  # Don't wait for model to load
+
+            # Set a shorter timeout to avoid worker timeouts
+            response = requests.post(API_URL, headers=headers, json=payload, timeout=5)
             
             if response.status_code != 200:
-                return Response(
-                    {"error": f"API request failed with status code {response.status_code}"}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                # Fallback to simplified response if API fails
+                return Response({
+                    "response": "I'm having trouble connecting to my knowledge base right now. Let me provide a simpler answer:\n\n" + 
+                                self.generate_fallback_response(question, lesson, current_step)
+                }, status=status.HTTP_200_OK)
                 
             feedback_data = response.json()
             
@@ -587,27 +557,96 @@ class LessonAssistantView(APIView):
             else:
                 response_text = feedback_data.get("generated_text", "")
             
-            # Clean up the response to remove any duplicated prompt text
-            if response_text.startswith(prompt):
-                response_text = response_text[len(prompt):].strip()
-                
-            # Clean HTML or malformed content
-            response_text = response_text.replace("<!DOCTYPE html>", "")
-            response_text = response_text.replace("<html>", "")
-            response_text = response_text.replace("</html>", "")
-            response_text = response_text.replace("<body>", "")
-            response_text = response_text.replace("</body>", "")
+            # Clean up the response
+            response_text = self.clean_response_text(response_text, prompt)
             
-            # Remove any dialogue docstring
-            if "dialog_finished_docstring" in response_text:
-                response_text = "I'm here to help with your Python lesson. What specific part are you struggling with?"
-
             return Response({"response": response_text}, status=status.HTTP_200_OK)
 
-        except Exception as e:
+        except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as e:
             import traceback
+            print(f"AI Assistant Error: {str(e)}")
             print(traceback.format_exc())
-            return Response(
-                {"error": f"Failed to get AI response: {str(e)}"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            
+            # Return a fallback response instead of an error
+            return Response({
+                "response": "I'm having trouble processing your question right now. Let me provide a simpler answer:\n\n" + 
+                            self.generate_fallback_response(question, lesson, current_step)
+            }, status=status.HTTP_200_OK)
+    
+    def create_simplified_prompt(self, question, lesson, current_step, user_code, expected_output):
+        """Create a much simpler prompt that's less likely to cause timeouts"""
+        prompt = f"Help a student with: {question}\n\nLesson: {lesson.title}\n"
+        
+        if current_step == 3 and user_code:
+            prompt += f"Their code: {user_code[:300]}...\n"  # Limit code size
+            
+        prompt += "Keep your response short, simple, and encouraging."
+        return prompt
+    
+    def clean_response_text(self, text, prompt):
+        """Clean the response text to remove HTML, docstrings, etc."""
+        if not text:
+            return "I'm sorry, I couldn't generate a response. Please try a different question."
+            
+        # Remove the prompt if it's repeated in the response
+        if text.startswith(prompt):
+            text = text[len(prompt):].strip()
+            
+        # Remove HTML and docstrings
+        text = re.sub(r'<!DOCTYPE.*?>', '', text, flags=re.DOTALL)
+        text = re.sub(r'<html>.*?</html>', '', text, flags=re.DOTALL)
+        text = re.sub(r'""".*?"""', '', text, flags=re.DOTALL)
+        text = re.sub(r"'''.*?'''", '', text, flags=re.DOTALL)
+        
+        # If after cleaning we have little text left, provide a fallback
+        if len(text.strip()) < 20:
+            return "I understand your question. Could you try rephrasing it so I can help you better?"
+            
+        return text.strip()
+    
+    def get_simplified_response(self, question, lesson, current_step, user_code, expected_output):
+        """Check if the question matches common patterns and return a pre-defined response"""
+        question_lower = question.lower()
+        
+        # Check for common question patterns
+        if any(keyword in question_lower for keyword in ["hello", "hi ", "hey", "greetings"]):
+            return f"Hello! I'm here to help you with your '{lesson.title}' lesson. What would you like to know?"
+            
+        if any(keyword in question_lower for keyword in ["what will i learn", "what is this lesson about"]):
+            return f"In this lesson on '{lesson.title}', you'll learn about {lesson.description}"
+            
+        if "explain" in question_lower and "concept" in question_lower:
+            if current_step == 1:
+                return f"Let me explain this concept in simpler terms: {lesson.step1_content[:300]}..."
+            elif current_step == 2:
+                return f"This concept involves: {lesson.step2_content[:300]}..."
+                
+        if "stuck" in question_lower and current_step == 3:
+            return f"Let's break down the challenge step by step. The goal is to {lesson.step3_challenge[:150]}... Try starting by understanding what inputs you need and what output is expected."
+            
+        if "hint" in question_lower and current_step == 3:
+            return f"Here's a hint: Make sure you're handling the input correctly and check that your output format matches what's expected ({expected_output})."
+            
+        # No simplified response available
+        return None
+        
+    def generate_fallback_response(self, question, lesson, current_step):
+        """Generate a fallback response based on the question and context"""
+        if "explain" in question.lower():
+            return f"This is a concept in {lesson.title} that involves understanding how to process data and perform operations in Python. Would you like me to break it down into smaller steps?"
+            
+        if "error" in question.lower() or "not working" in question.lower():
+            return "When debugging code, focus on checking your syntax, making sure variable names match throughout your code, and verifying that your logic handles all possible inputs."
+            
+        if "how to" in question.lower():
+            return "To approach this problem, break it into smaller steps: 1) Understand what inputs you need, 2) Process the data step by step, 3) Format your output correctly."
+            
+        # Generic fallback based on current step
+        if current_step == 1:
+            return "This introductory section helps build your foundation. Try re-reading the explanation and think about how these concepts connect to what you already know."
+        elif current_step == 2:
+            return "In the guided example, focus on understanding each line of code. Try changing small parts to see how it affects the output."
+        elif current_step == 3:
+            return "For this challenge, start by planning your approach on paper before coding. Think about what inputs you have and what steps you need to take to get the expected output."
+        else:
+            return "I'm here to help with this lesson. Could you tell me more specifically what you're struggling with?"
