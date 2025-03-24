@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import CodeFeedbackView
+from .views import CodeFeedbackView, LessonFeedbackView, LessonAssistantView
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
@@ -18,5 +18,9 @@ urlpatterns = [
     path("complete_lesson/", views.complete_lesson, name="complete_lesson"),
     path("complete-lesson/<int:lesson_id>/", views.complete_lesson, name="complete-lesson"),
     path("check-lesson-completion/<int:lesson_id>/", views.check_lesson_completion, name="check-lesson-completion"),
-    path("ai-feedback/", CodeFeedbackView.as_view(), name="ai-feedback"),
+    
+    # AI feedback endpoints
+    path("ai-feedback/", CodeFeedbackView.as_view(), name="ai-feedback"),  # Keep for backward compatibility
+    path("lesson-feedback/", LessonFeedbackView.as_view(), name="lesson-feedback"),  # New endpoint for challenge feedback
+    path("lesson-assistant/", LessonAssistantView.as_view(), name="lesson-assistant"),  # New endpoint for AI assistant
 ]

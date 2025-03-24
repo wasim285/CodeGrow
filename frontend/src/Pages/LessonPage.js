@@ -7,7 +7,8 @@ import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import api from "../utils/api";
-import { getGeneralAIFeedback, getLessonFeedback } from "../services/feedbackService";
+import { getLessonFeedback } from "../services/feedbackService";
+import AILearningAssistant from "../components/AILearningAssistant";
 
 const API_BASE_URL =
   window.location.hostname.includes("onrender.com")
@@ -28,7 +29,7 @@ const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [step, setStep] = useState(1);
 
-  // Enhanced AI feedback states
+  // Feedback states
   const [aiFeedback, setAiFeedback] = useState("");
   const [loadingFeedback, setLoadingFeedback] = useState(false);
   const [expectedOutput, setExpectedOutput] = useState("");
@@ -120,27 +121,6 @@ const LessonPage = () => {
       return "Error"; // Return error for checkAnswer function
     } finally {
       setRunning(false);
-    }
-  };
-
-  // Manual AI feedback request for general feedback
-  const getAIFeedback = async () => {
-    setLoadingFeedback(true);
-    setAiFeedback("Generating feedback...");
-    
-    try {
-      const result = await getGeneralAIFeedback(userCode, lessonId);
-      
-      if (result.success) {
-        setAiFeedback(result.feedback);
-      } else {
-        setAiFeedback("Failed to get AI feedback. Please try again.");
-      }
-    } catch (error) {
-      console.error("AI Feedback Error:", error);
-      setAiFeedback("Failed to fetch AI feedback.");
-    } finally {
-      setLoadingFeedback(false);
     }
   };
 
@@ -275,7 +255,7 @@ const LessonPage = () => {
                         <pre>{output}</pre>
                       </div>
                       
-                      {/* AI Feedback Section */}
+                      {/* AI Feedback Section (will be shown inline for immediate feedback) */}
                       {loadingFeedback && !aiFeedback && (
                         <div className="feedback-loading">
                           <div className="spinner"></div>
@@ -322,6 +302,17 @@ const LessonPage = () => {
             </>
           )}
         </div>
+        
+        {/* AI Learning Assistant (always available) */}
+        {lesson && (
+          <AILearningAssistant 
+            lessonId={lessonId}
+            lessonTitle={lesson.title}
+            currentStep={step}
+            userCode={userCode}
+            expectedOutput={expectedOutput}
+          />
+        )}
       </div>
     </div>
   );

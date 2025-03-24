@@ -496,3 +496,112 @@ class LessonFeedbackView(APIView):
                 {"error": f"Failed to get AI feedback: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class LessonAssistantView(APIView):
+    """
+    AI Learning Assistant for interactive guidance during lessons
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        lesson_id = request.data.get("lessonId")
+        current_step = request.data.get("currentStep")
+        user_code = request.data.get("userCode", "")
+        expected_output = request.data.get("expectedOutput", "")
+        question = request.data.get("question", "")
+        
+        if not lesson_id or not question:
+            return Response(
+                {"error": "Missing lesson ID or question"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        try:
+            lesson = Lesson.objects.get(id=lesson_id)
+        except Lesson.DoesNotExist:
+            return Response(
+                {"error": "Lesson not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+            
+        # Prepare context for the AI
+        context = f"""
+        You are an AI learning assistant helping a student with the following Python lesson:
+        Lesson: {lesson.title}
+        
+        """
+        
+        # Add step-specific context
+        if current_step == 1:
+            context += f"The student is currently in Step 1: Introduction. Content: {lesson.step1_content}"
+        elif current_step == 2:
+            context += f"The student is currently in Step 2: Guided Example. Content: {lesson.step2_content}"
+        elif current_step == 3:
+            context += f"""
+            The student is currently in Step 3: Challenge. 
+            Challenge: {lesson.step3_challenge}
+            Expected output: {expected_output}
+            
+            Current code:
+            ```python
+            {user_code}
+            ```
+            """
+        
+        # Add the student's question
+        context += f"\nThe student's question is: {question}"
+        
+        # Prepare the AI prompt
+        prompt = f"""
+        {context}
+        
+        Provide a helpful, concise response to guide the student without directly solving the problem for them.
+        Explain concepts clearly, address their specific question, and provide hints if they are stuck.
+        Keep your response conversational and encouraging.
+        """
+        
+        HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+        API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
+
+        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+        payload = {"inputs": prompt}
+
+        try:
+            response = requests.post(API_URL, headers=headers, json=payload)
+            
+            if response.status_code != 200:
+                return Response(
+                    {"error": f"API request failed with status code {response.status_code}"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+                
+            feedback_data = response.json()
+            
+            # Extract the generated text
+            if isinstance(feedback_data, list) and len(feedback_data) > 0:
+                response_text = feedback_data[0].get("generated_text", "")
+            else:
+                response_text = feedback_data.get("generated_text", "")
+            
+            # Clean up the response to remove any duplicated prompt text
+            if response_text.startswith(prompt):
+                response_text = response_text[len(prompt):].strip()
+                
+            # Track the interaction for analytics (optional)
+            # AssistantInteraction.objects.create(
+            #     user=request.user,
+            #     lesson_id=lesson_id,
+            #     question=question,
+            #     response=response_text
+            # )
+
+            return Response({"response": response_text}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return Response(
+                {"error": f"Failed to get AI response: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
