@@ -81,7 +81,7 @@
 .dashboard-grid {
     display: flex;
     justify-content: space-between;
-    gap: 50px;
+    gap: 40px;
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
@@ -109,18 +109,18 @@
     width: 35%;
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
-    padding: 35px;
+    padding: 25px;
     text-align: center;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    margin-left: 0; /* Remove left margin */
-    margin-right: 0; /* Remove right margin */
     height: auto;
-    min-height: 790px;
+    /* Remove min-height to let it size naturally */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 30px;
+    gap: 20px;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    /* Set align-self to start to prevent stretching */
+    align-self: flex-start;
 }
 
 /* Study sessions box - now below progress section */
@@ -135,8 +135,8 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    height: 220px;
-    min-height: 220px;
+    height: auto;
+    min-height: 180px;
     overflow: hidden;
 }
 
@@ -155,8 +155,8 @@
     justify-content: center;
     align-items: center;
     gap: 15px;
-    height: 220px;
-    min-height: 220px;
+    height: auto;
+    min-height: 180px;
 }
 
 /* Recommendations box */
@@ -169,7 +169,7 @@
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    min-height: 300px;
+    min-height: 200px;
 }
 
 /* Study sessions content */
@@ -177,6 +177,7 @@
     flex: 1;
     overflow-y: auto;
     margin-top: 10px;
+    max-height: 120px; /* Limit height to prevent excessive stretching */
 }
 
 /* Responsive adjustments for mobile */
@@ -318,10 +319,10 @@
 
 /* Progress circle container */
 .progress-circle {
-    width: 140px;
-    height: 140px;
-    margin: 20px auto;
     position: relative;
+    width: 130px;
+    height: 130px;
+    margin: 10px auto 20px;
 }
 
 /* Progress wrapper to allow text overlay */
@@ -370,6 +371,7 @@
     justify-content: center;
     align-items: center;
     z-index: 2;
+    font-size: 20px;
 }
 
 .percentage-display span {
@@ -702,9 +704,10 @@ input[type="number"]::-webkit-outer-spin-button {
 .clickable-session {
     cursor: pointer;
     transition: all 0.2s ease;
-    padding: 12px 15px;
+    padding: 8px 12px;
     border-radius: 8px;
     position: relative;
+    margin-bottom: 8px;
 }
 
 .clickable-session:hover {
