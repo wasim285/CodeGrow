@@ -63,13 +63,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
+# Check if running on Render
+IS_RENDER = 'RENDER' in os.environ
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=600, ssl_require=True
-    )
-}
+# Database configuration
+if IS_RENDER or os.getenv("DATABASE_URL", ""):
+    # Production database settings
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600, 
+            ssl_require=True
+        )
+    }
+else:
+    # Local SQLite database
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -118,7 +132,13 @@ REST_FRAMEWORK = {
 }
 
 # Hugging Face AI Model Settings
-HF_API_KEY = os.getenv("HF_API_KEY")  # Remove hardcoded key
+HF_API_KEY = os.getenv("HF_API_KEY") 
 HF_MODEL_ID = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct-v0.2")
 HF_API_URL = "https://api-inference.huggingface.co/models/"
 HF_REQUEST_TIMEOUT = 15  # seconds
+
+# Import local settings if present
+try:
+    from .local_settings import *
+except ImportError:
+    pass
