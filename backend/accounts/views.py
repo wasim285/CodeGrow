@@ -509,7 +509,7 @@ class LessonAssistantView(APIView):
     def post(self, request):
         # Extract data from the request
         lesson_id = request.data.get("lessonId")
-        current_step = request.data.get("currentStep")
+        current_step = request.data.get("currentStep", 1)
         user_code = request.data.get("userCode", "")
         expected_output = request.data.get("expectedOutput", "")
         question = request.data.get("question", "")
@@ -528,44 +528,273 @@ class LessonAssistantView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Parse the question to generate a specific response
-        response_text = self.generate_response(question, lesson, current_step, user_code, expected_output)
+        # Build a more detailed prompt to get better AI responses
+        prompt = self.build_detailed_prompt(
+            question, 
+            lesson, 
+            current_step, 
+            user_code, 
+            expected_output
+        )
         
-        # Skip the AIInteraction logging that was causing errors
+        try:
+            # Get an API key from settings or use an environment variable
+            # This is a placeholder - you'll need to add your actual API key setup
+            openai_api_key = getattr(settings, 'OPENAI_API_KEY', None)
+            
+            if openai_api_key:
+                # Use OpenAI API if available
+                response_text = self.get_openai_response(prompt, openai_api_key)
+            else:
+                # Fallback to a structured, contextual response generator
+                response_text = self.generate_structured_response(
+                    question, 
+                    lesson, 
+                    current_step, 
+                    user_code, 
+                    expected_output
+                )
+        except Exception as e:
+            print(f"Error generating AI response: {str(e)}")
+            # Fallback to a structured response if API call fails
+            response_text = self.generate_structured_response(
+                question, 
+                lesson, 
+                current_step, 
+                user_code, 
+                expected_output
+            )
+        
         return Response({"response": response_text}, status=status.HTTP_200_OK)
     
-    def generate_response(self, question, lesson, current_step, user_code, expected_output):
-        """Generate a response based on the question and context"""
+    def build_detailed_prompt(self, question, lesson, current_step, user_code, expected_output):
+        """Build a detailed prompt with all relevant context for the AI"""
+        # Get the appropriate content based on the step
+        step_content = ""
+        if current_step == 1:
+            step_content = lesson.step1_content
+        elif current_step == 2:
+            step_content = lesson.step2_content
+        elif current_step == 3:
+            step_content = lesson.step3_challenge
+        
+        # Clean HTML from content
+        step_content = re.sub(r'<[^>]+>', ' ', step_content)
+        step_content = re.sub(r'\s+', ' ', step_content).strip()
+        
+        # Build a comprehensive prompt
+        prompt = f"""You are an AI learning assistant helping a student learn Python programming.
+
+CONTEXT:
+- Lesson: {lesson.title}
+- Description: {lesson.description}
+- Current step: {current_step} ({'Introduction' if current_step == 1 else 'Guided Example' if current_step == 2 else 'Challenge'})
+- Step content: {step_content[:500]}...
+
+{f"- Student's code: {user_code}" if user_code else ""}
+{f"- Expected output: {expected_output}" if expected_output else ""}
+
+STUDENT'S QUESTION:
+{question}
+
+Please provide a helpful, educational response that addresses the specific question. Be concise but thorough, focusing on teaching programming concepts with clear explanations and examples where appropriate. Avoid generic greetings like "How can I help you today?" and directly answer the question.
+"""
+        return prompt
+    
+    def get_openai_response(self, prompt, api_key):
+        """Get a response from OpenAI API"""
+        try:
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+            
+            payload = {
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {"role": "system", "content": "You are a helpful programming tutor specializing in Python."},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 500,
+                "temperature": 0.7
+            }
+            
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                json=payload,
+                timeout=10
+            )
+            
+            response_data = response.json()
+            if "choices" in response_data and len(response_data["choices"]) > 0:
+                return response_data["choices"][0]["message"]["content"].strip()
+            else:
+                raise Exception("Invalid response format from OpenAI API")
+                
+        except Exception as e:
+            print(f"OpenAI API error: {str(e)}")
+            raise
+    
+    def generate_structured_response(self, question, lesson, current_step, user_code, expected_output):
+        """Generate a structured response based on question analysis"""
         question_lower = question.lower()
         
-        # For 'how to write/print' questions
-        if ("how do i" in question_lower or "how to" in question_lower or "syntax for" in question_lower):
-            if "print" in question_lower:
-                content = "Hello, World!"
+        # 1. Check for print-related questions
+        if "print" in question_lower and ("how" in question_lower or "write" in question_lower):
+            # Extract what they want to print if mentioned
+            content = "Hello, World!"
+            if "hello python" in question_lower:
+                content = "Hello Python"
+            elif "hello" in question_lower:
+                content = "Hello"
                 
-                # Extract what they want to print if mentioned
-                if "print hello" in question_lower:
-                    content = "Hello"
-                if "print hello python" in question_lower:
-                    content = "Hello Python"
-                
-                return f"In Python, you can print text to the console using the print() function. Here's how to write it:\n\n```python\nprint(\"{content}\")\n```\n\nMake sure to put your text inside quotes. When you run this code, it will display: {content}"
+            return f"""In Python, you use the print() function to display text on the screen. Here's how to print '{content}':
+
+```python
+print("{content}")
+```
+
+When you run this code, it will display: {content}
+
+Make sure to:
+- Enclose your text in quotes (single or double)
+- Include parentheses after print
+- Check that the quotes match (don't mix single and double quotes)"""
+        
+        # 2. Check for syntax questions
+        if any(word in question_lower for word in ["syntax", "how to", "how do i"]):
+            if "variable" in question_lower:
+                return """Python variable syntax is simple:
+
+```python
+variable_name = value
+```
+
+Examples:
+```python
+name = "John"       # String variable
+age = 25            # Integer variable
+price = 19.99       # Float variable
+is_student = True   # Boolean variable
+```
+
+Python is dynamically typed, so you don't need to declare the variable type. The interpreter determines the type based on the assigned value."""
             
-            if "variable" in question_lower or "assign" in question_lower:
-                return "To create a variable in Python, you simply write the variable name, an equal sign, and the value. For example:\n\n```python\nname = \"John\"\nage = 25\n```\n\nPython variables don't need to be declared with a type - the type is inferred from the value."
-            
-            # Add more specific syntax responses here
-            
-        # For 'what does this code do' questions
+            if "function" in question_lower or "def" in question_lower:
+                return """To define a function in Python, use the 'def' keyword:
+
+```python
+def function_name(parameter1, parameter2, ...):
+    # Function body
+    # Code to execute
+    return result  # Optional return statement
+```
+
+Example:
+```python
+def greet(name):
+    return f"Hello, {name}!"
+    
+# Call the function
+message = greet("Alice")
+print(message)  # Displays: Hello, Alice!
+```
+
+Functions help you organize and reuse code. The 'return' statement is optional - if omitted, the function returns None."""
+        
+        # 3. Check for code analysis questions
         if "what does this code do" in question_lower or "explain this code" in question_lower:
-            if user_code and "print(" in user_code:
-                return "Your code uses the print() function to display output to the console. In Python, print() is a built-in function that displays the specified message. For example, `print(\"Hello\")` will show \"Hello\" when you run the program."
-            
-            # Add more code explanation responses
+            if user_code:
+                code_explanation = "Your code "
+                
+                if "print(" in user_code:
+                    code_explanation += "displays text to the console using the print() function. "
+                
+                if "=" in user_code and "==" not in user_code:
+                    code_explanation += "assigns values to variables. "
+                    
+                if "if" in user_code:
+                    code_explanation += "uses conditional statements to make decisions based on certain conditions. "
+                    
+                if "for" in user_code or "while" in user_code:
+                    code_explanation += "utilizes loops to repeat actions. "
+                    
+                if "def" in user_code:
+                    code_explanation += "defines a custom function that can be called later. "
+                    
+                code_explanation += "\n\nTo understand your code better, let's break it down line by line:\n"
+                
+                # Add a simple line-by-line analysis
+                lines = user_code.strip().split('\n')
+                for i, line in enumerate(lines[:5]):  # Limit to first 5 lines for brevity
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        code_explanation += f"\nLine {i+1}: `{line}`"
+                        if "print" in line:
+                            code_explanation += " - This displays output to the console."
+                        elif "=" in line and "==" not in line and "!=" not in line:
+                            code_explanation += " - This assigns a value to a variable."
+                        elif "if" in line:
+                            code_explanation += " - This starts a conditional block that only executes if the condition is True."
+                        elif "else" in line:
+                            code_explanation += " - This provides an alternative code block to execute when the if condition is False."
+                        elif "for" in line:
+                            code_explanation += " - This starts a loop that iterates over a sequence."
+                        elif "def" in line:
+                            code_explanation += " - This defines a function."
+                
+                return code_explanation
+            else:
+                return "I don't see any code to analyze. Please write some Python code first, and then I can explain what it does."
         
-        # For 'how can I modify' questions
-        if "modify" in question_lower or "change" in question_lower:
-            return "There are several ways to modify the example:\n\n1. Change the values or variables\n2. Add new functionality\n3. Combine it with other Python concepts\n\nFor example, if you have a print statement, try changing the text, adding a calculation, or using a variable in the output."
+        # 4. Handle challenge-related questions
+        if current_step == 3 and any(word in question_lower for word in ["hint", "stuck", "help", "challenge"]):
+            if expected_output:
+                hint = f"For this challenge, you need to write code that produces this output: '{expected_output}'. "
+                
+                if "hello" in expected_output.lower():
+                    hint += "Try using the print() function with the appropriate string."
+                elif any(op in expected_output for op in ["+", "-", "*", "/"]):
+                    hint += "This appears to involve mathematical operations. Make sure your code performs the correct calculation and displays the result."
+                
+                return hint
+            else:
+                return """To approach this challenge:
+
+1. Understand what you're being asked to do
+2. Break it down into smaller steps
+3. Think about which Python concepts you need (variables, loops, conditionals, etc.)
+4. Write your solution step by step
+5. Test your code with different inputs if possible
+
+What specific part of the challenge are you struggling with?"""
         
-        # Default response based on the lesson topic
-        return f"I'm here to help with this '{lesson.title}' lesson. Could you provide more specific details about what you'd like to know or what you're trying to accomplish?"
+        # 5. Default responses for different steps
+        if current_step == 1:
+            return f"""In this introduction to "{lesson.title}", we're covering the fundamental concepts needed for the lesson. 
+
+The key points to understand are:
+- Python syntax basics
+- How code statements are structured
+- How the concepts relate to practical programming
+
+Is there a specific part of the introduction you'd like me to explain in more detail?"""
+        elif current_step == 2:
+            return f"""The guided example in this lesson demonstrates how to apply the concepts in practice. 
+
+When analyzing this example, pay attention to:
+- How the code is structured
+- The relationship between different lines of code
+- How the output is produced
+
+Feel free to experiment by modifying parts of the example to see how it changes the behavior."""
+        else:
+            return f"""For this challenge in "{lesson.title}", you'll need to apply what you've learned to solve a programming problem.
+
+Remember to:
+- Plan before you code
+- Test your solution with different inputs
+- Make sure your output format matches exactly what's expected
+
+Could you tell me which specific aspect of the challenge you need help with?"""

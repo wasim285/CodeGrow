@@ -267,15 +267,6 @@ const AILearningAssistant = ({
     setInputValue('');
     setIsLoading(true);
 
-    // Generate local response first as fallback
-    const localResponse = generateLessonSpecificResponse(
-      userMessage.content, 
-      lessonTitle, 
-      currentStep, 
-      userCode, 
-      expectedOutput
-    );
-
     try {
       // Try to get response from API
       const token = localStorage.getItem("token");
@@ -292,50 +283,71 @@ const AILearningAssistant = ({
         },
         { 
           headers: { Authorization: `Token ${token}` },
-          timeout: 8000
+          timeout: 10000 // Extend timeout to 10 seconds
         }
       );
 
-      // Process response more intelligently
-      if (response.data && response.data.response) {
+      // Process response
+      if (response.data && response.data.response && 
+          typeof response.data.response === 'string') {
+        
         const apiResponse = response.data.response;
         
-        // Check if it's just a generic greeting that doesn't address the question
+        // Check if it's just a generic greeting without substance
         const isGenericGreeting = 
-          (apiResponse.toLowerCase().includes("hello") || 
-           apiResponse.toLowerCase().includes("hi there")) &&
           apiResponse.toLowerCase().includes("how can i help") &&
-          !apiResponse.toLowerCase().includes(questionLower.substring(0, 5));
+          !apiResponse.toLowerCase().includes(questionLower.substring(0, 4)) &&
+          apiResponse.length < 100; // Very short responses are likely generic
         
-        const isUserGreeting = 
-          questionLower.includes("hello") || 
-          questionLower.includes("hi ") || 
-          questionLower.includes("hey") || 
-          questionLower.includes("greetings");
-        
-        if (isGenericGreeting && !isUserGreeting) {
-          // If API returned just a greeting but user asked a specific question,
-          // use our local response instead which is likely more helpful
-          throw new Error("API returned generic greeting for specific question");
+        if (isGenericGreeting && 
+            !(questionLower.includes("hello") || 
+              questionLower.includes("hi ") || 
+              questionLower.includes("hey"))) {
+          // If it's just a generic greeting, use local response
+          
+          // Generate a local response as backup
+          const localResponse = generateLessonSpecificResponse(
+            userMessage.content, 
+            lessonTitle, 
+            currentStep, 
+            userCode, 
+            expectedOutput
+          );
+          
+          setMessages(prev => [
+            ...prev, 
+            { 
+              id: prev.length + 1, 
+              type: 'assistant', 
+              content: localResponse
+            }
+          ]);
+        } else {
+          // Valid response that's not just a generic greeting
+          setMessages(prev => [
+            ...prev, 
+            { 
+              id: prev.length + 1, 
+              type: 'assistant', 
+              content: apiResponse
+            }
+          ]);
         }
-        
-        // Valid, contextual API response
-        setMessages(prev => [
-          ...prev, 
-          { 
-            id: prev.length + 1, 
-            type: 'assistant', 
-            content: apiResponse
-          }
-        ]);
       } else {
-        // Invalid response format, use local generation
         throw new Error("Invalid response format");
       }
     } catch (error) {
       console.error('AI Assistant Error:', error);
       
-      // Use the pre-generated local response
+      // Generate a local response when API fails
+      const localResponse = generateLessonSpecificResponse(
+        userMessage.content, 
+        lessonTitle, 
+        currentStep, 
+        userCode, 
+        expectedOutput
+      );
+      
       setMessages(prev => [
         ...prev, 
         { 
