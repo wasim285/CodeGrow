@@ -188,19 +188,26 @@ def assign_lessons_on_signup(sender, instance, created, **kwargs):
     if instance.learning_goal and instance.difficulty_level:
         Lesson.create_default_lessons(instance)
 
-# Combined LessonFeedback model with all needed fields
 class LessonFeedback(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    code_submitted = models.TextField()
+    ai_feedback = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    code = models.TextField()
-    code_submitted = models.TextField(blank=True, null=True)  # Preserved from first definition
-    question = models.TextField(blank=True, null=True)
-    expected_output = models.TextField(blank=True, null=True)
-    actual_output = models.TextField(blank=True, null=True)
-    feedback = models.TextField(blank=True, null=True)
-    ai_feedback = models.TextField(blank=True, null=True)  # Preserved from first definition
 
     def __str__(self):
-        lesson_title = self.lesson.title if self.lesson else "Unknown"
-        return f"Feedback for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')} - {lesson_title}"
+        return f"Feedback by {self.user.username} for {self.lesson.title} on {self.created_at.date()}"
+
+# Add to models.py if you want to save feedback history
+
+class LessonFeedback(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    code = models.TextField()
+    question = models.TextField()
+    expected_output = models.TextField()
+    actual_output = models.TextField()
+    feedback = models.TextField()
+
+    def __str__(self):
+        return f"Feedback for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"

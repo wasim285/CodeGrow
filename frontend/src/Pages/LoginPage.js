@@ -61,17 +61,15 @@ const LoginPage = () => {
                     setErrors({ username: response.data.username[0] });
                 } else if (response.data?.password) {
                     setErrors({ password: response.data.password[0] });
+                } else if (response.data?.error) {
+                    setErrors({ general: response.data.error });
                 } else {
                     setErrors({ general: "Invalid credentials. Please check your username and password." });
                 }
             }
         } catch (error) {
             console.error("Login Error:", error);
-            if (error.response?.status === 401) {
-                setErrors({ general: "Invalid username or password." });
-            } else if (error.response?.status === 429) {
-                setErrors({ general: "Too many login attempts. Please try again later." });
-            } else if (!navigator.onLine) {
+            if (!navigator.onLine) {
                 setErrors({ general: "No internet connection. Please check your network." });
             } else {
                 setErrors({ general: "Unable to connect to server. Please try again later." });
