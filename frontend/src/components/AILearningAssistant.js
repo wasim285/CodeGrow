@@ -16,7 +16,7 @@ const AILearningAssistant = ({
     { 
       id: 1, 
       type: 'assistant', 
-      content: `Hi there! I'm your AI learning assistant for this lesson. How can I help you with "${lessonTitle}"?` 
+      content: `Hi there! I'm your AI learning assistant for this lesson. How can I help you with "${lessonTitle || 'this lesson'}"?` 
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -79,14 +79,26 @@ const AILearningAssistant = ({
       );
 
       // Add AI response to chat
-      setMessages(prev => [
-        ...prev, 
-        { 
-          id: prev.length + 1, 
-          type: 'assistant', 
-          content: response.data.response || "I'm sorry, I couldn't generate a response. Please try again."
-        }
-      ]);
+      if (response.data && response.data.response) {
+        setMessages(prev => [
+          ...prev, 
+          { 
+            id: prev.length + 1, 
+            type: 'assistant', 
+            content: response.data.response
+          }
+        ]);
+      } else {
+        // Handle empty response
+        setMessages(prev => [
+          ...prev, 
+          { 
+            id: prev.length + 1, 
+            type: 'assistant', 
+            content: "I'm sorry, I couldn't generate a response. Please try again."
+          }
+        ]);
+      }
     } catch (error) {
       console.error('AI Assistant Error:', error);
       
@@ -113,7 +125,9 @@ const AILearningAssistant = ({
 
   // Quick suggestions based on current step
   const getQuickSuggestions = () => {
-    switch(currentStep) {
+    const step = Number(currentStep) || 1;
+    
+    switch(step) {
       case 1:
         return [
           "Can you explain this concept more simply?",
