@@ -137,46 +137,30 @@ const Dashboard = () => {
 
                 {/* Dashboard Layout */}
                 <div className="dashboard-grid">
-                    {/* Left Section: Lessons & Study Sessions */}
+                    {/* Left Section with Lesson Box */}
                     <div className="left-section">
-                        {/* Current Lesson */}
                         <div className="lesson-box">
-                            <h3>{mainLesson ? mainLesson.title : "No Lesson Available"}</h3>
-                            <p>{mainLesson ? mainLesson.description : "Check your pathway settings."}</p>
-                            {mainLesson && (
-                                <button onClick={() => navigate(`/lessons/${mainLesson.id}`)}>
-                                    Start Lesson
-                                </button>
+                            <h3>Continue Learning</h3>
+                            {mainLesson ? (
+                                <>
+                                    <p>{mainLesson.title}</p>
+                                    <button onClick={() => navigate(`/lessons/${mainLesson.id}`)}>
+                                        Continue Lesson
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <p>Ready to start your Python journey?</p>
+                                    <button onClick={() => navigate(`/lessons/1`)}>
+                                        Start First Lesson
+                                    </button>
+                                </>
                             )}
                         </div>
 
-                        {/* Study Sessions */}
-                        <div className="study-sessions-box">
-                            <h3>📅 Upcoming Study Sessions</h3>
-                            <p className="click-info">Click on a session to remove it</p>
-                            <div className="study-sessions-content">
-                                {studySessions.length > 0 ? (
-                                    <ul>
-                                        {studySessions.map((session, index) => (
-                                            <li 
-                                                key={session.id || index} 
-                                                onClick={() => handleSessionClick(session)}
-                                                className="clickable-session"
-                                            >
-                                                <strong>{session.lesson_title || "No Lesson Name"}</strong>
-                                                <span>{session.date} {session.start_time.slice(0, 5)} - {session.end_time.slice(0, 5)}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No sessions scheduled. Start learning today! 📌</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Recommended Lessons */}
+                        {/* Any other content you want in the left section */}
                         <div className="recommendations-box">
-                            <h3>📚 Recommended Lessons</h3>
+                            <h3>Recommended Lessons</h3>
                             {recommendedLessons.length > 0 ? (
                                 <ul>
                                     {recommendedLessons
@@ -202,41 +186,68 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Right Section: Progress Tracker */}
-                    <div className="progress-section">
-                        <h3>📊 Your Progress</h3>
-                        <div className="progress-circle">
-                            <div className="progress-wrapper">
-                                <svg viewBox="0 0 100 100">
-                                    <defs>
-                                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                            <stop offset="0%" stopColor="#4caf50" />
-                                            <stop offset="100%" stopColor="#8bc34a" />
-                                        </linearGradient>
-                                    </defs>
-                                    <circle 
-                                        className="progress-bg" 
-                                        cx="50" 
-                                        cy="50" 
-                                        r="40"
-                                    ></circle>
-                                    <circle
-                                        className="progress-fill"
-                                        cx="50"
-                                        cy="50"
-                                        r="40"
-                                        strokeDasharray={circumference}
-                                        strokeDashoffset={circleStroke}
-                                        style={{ stroke: 'url(#progressGradient)' }}
-                                    ></circle>
-                                </svg>
-                                <div className="percentage-display">
-                                    <span>{progressPercentage}%</span>
+                    {/* Right Section with Progress and Study Sessions */}
+                    <div className="right-section">
+                        {/* Progress Section */}
+                        <div className="progress-section">
+                            <h3>Your Progress</h3>
+                            {/* Your progress circle and stats */}
+                            <div className="progress-circle">
+                                <div className="progress-wrapper">
+                                    <svg viewBox="0 0 100 100">
+                                        <defs>
+                                            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stopColor="#4caf50" />
+                                                <stop offset="100%" stopColor="#8bc34a" />
+                                            </linearGradient>
+                                        </defs>
+                                        <circle 
+                                            className="progress-bg" 
+                                            cx="50" 
+                                            cy="50" 
+                                            r="40"
+                                        ></circle>
+                                        <circle
+                                            className="progress-fill"
+                                            cx="50"
+                                            cy="50"
+                                            r="40"
+                                            strokeDasharray={circumference}
+                                            strokeDashoffset={circleStroke}
+                                            style={{ stroke: 'url(#progressGradient)' }}
+                                        ></circle>
+                                    </svg>
+                                    <div className="percentage-display">
+                                        <span>{progressPercentage}%</span>
+                                    </div>
                                 </div>
                             </div>
+                            <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
+                            <p>🔥 Current Streak: <strong>{streak} {streak === 1 ? 'day' : 'days'}</strong></p>
                         </div>
-                        <p>Lessons Completed: <strong>{lessonsCompleted}/{totalLessons}</strong></p>
-                        <p>🔥 Current Streak: <strong>{streak} {streak === 1 ? 'day' : 'days'}</strong></p>
+
+                        {/* Study Sessions Box */}
+                        <div className="study-sessions-box">
+                            <h3>Upcoming Study Sessions</h3>
+                            <div className="study-sessions-content">
+                                {studySessions.length > 0 ? (
+                                    <ul>
+                                        {studySessions.map((session, index) => (
+                                            <li 
+                                                key={session.id || index} 
+                                                onClick={() => handleSessionClick(session)}
+                                                className="clickable-session"
+                                            >
+                                                <strong>{session.lesson_title || "No Lesson Name"}</strong>
+                                                <span>{session.date} {session.start_time.slice(0, 5)} - {session.end_time.slice(0, 5)}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="empty-state">No upcoming study sessions.</p>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
