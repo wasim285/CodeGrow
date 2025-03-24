@@ -90,10 +90,10 @@
 
 /* Left section for lesson box */
 .left-section {
-    width: 55%; /* Reduced width to make space for progress section */
+    width: 65%;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 }
 
 /* Right section with progress and study sessions stacked */
@@ -106,7 +106,7 @@
 
 /* Progress section - now in the right column */
 .progress-section {
-    width: 100%; /* Full width of the right column */
+    width: 35%;
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
     padding: 35px;
@@ -115,10 +115,11 @@
     margin-left: 0; /* Remove left margin */
     margin-right: 0; /* Remove right margin */
     height: auto;
-    min-height: 520px;
+    min-height: 790px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 30px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -127,15 +128,16 @@
     width: 100%; /* Full width of the right column */
     background: linear-gradient(145deg, #222232, #1e1e2e);
     border-radius: 14px;
-    padding: 20px;
+    padding: 25px;
     margin: 0; /* Remove margin */
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    height: 250px; /* Slightly taller than lesson box */
-    min-height: 250px;
+    height: 220px;
+    min-height: 220px;
+    overflow: hidden;
 }
 
 /* Lesson box - now in the left column */
@@ -150,8 +152,31 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    height: 250px;
-    min-height: 250px;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    height: 220px;
+    min-height: 220px;
+}
+
+/* Recommendations box */
+.recommendations-box {
+    width: 100%;
+    background: linear-gradient(145deg, #2a2a3d, #262636);
+    border-radius: 14px;
+    padding: 25px;
+    margin: 0;
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-height: 300px;
+}
+
+/* Study sessions content */
+.study-sessions-content {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 10px;
 }
 
 /* Responsive adjustments for mobile */
@@ -162,19 +187,20 @@
     }
     
     .left-section, 
-    .right-section {
+    .progress-section {
         width: 100%;
     }
     
-    .progress-section,
-    .lesson-box,
-    .study-sessions-box {
-        width: 95%;
-        margin: 0 auto;
+    .progress-section {
+        min-height: 500px;
+        order: -1; /* Move progress to top on mobile */
     }
     
-    .right-section {
-        gap: 25px;
+    .lesson-box,
+    .study-sessions-box,
+    .recommendations-box {
+        min-height: auto;
+        height: auto;
     }
 }
 
@@ -292,9 +318,9 @@
 
 /* Progress circle container */
 .progress-circle {
-    width: 200px;
-    height: 200px;
-    margin: 0 auto 40px;
+    width: 140px;
+    height: 140px;
+    margin: 20px auto;
     position: relative;
 }
 
