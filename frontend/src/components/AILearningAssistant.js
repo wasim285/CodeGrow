@@ -65,7 +65,7 @@ const AILearningAssistant = ({
       // Get context information to send to the AI
       const contextInfo = {
         lessonId,
-        currentStep,
+        currentStep: Number(currentStep) || 1,
         userCode: userCode || '',
         expectedOutput: expectedOutput || '',
         question: userMessage.content
@@ -78,27 +78,36 @@ const AILearningAssistant = ({
         { headers: { Authorization: `Token ${token}` } }
       );
 
-      // Add AI response to chat
-      if (response.data && response.data.response) {
-        setMessages(prev => [
-          ...prev, 
-          { 
-            id: prev.length + 1, 
-            type: 'assistant', 
-            content: response.data.response
+      // Process the response data safely
+      let aiResponseText = "I'm sorry, I couldn't generate a response. Please try again.";
+      
+      if (response.data && typeof response.data === 'object') {
+        if (response.data.response && typeof response.data.response === 'string') {
+          aiResponseText = response.data.response.trim();
+          
+          // Clean up any HTML tags or formatting issues
+          aiResponseText = aiResponseText
+            .replace(/<\/?[^>]+(>|$)/g, "") // Remove HTML tags
+            .replace(/&lt;/g, "<").replace(/&gt;/g, ">") // Fix encoded brackets
+            .replace(/\\n/g, "\n").replace(/\n{3,}/g, "\n\n"); // Normalize newlines
+          
+          // If we still have weird formatting, use a fallback
+          if (aiResponseText.includes("<!DOCTYPE html>") || 
+              aiResponseText.includes("dialog_finished_docstring")) {
+            aiResponseText = "I understand your question about this lesson. Let me help you with that. What specific part are you having trouble with?";
           }
-        ]);
-      } else {
-        // Handle empty response
-        setMessages(prev => [
-          ...prev, 
-          { 
-            id: prev.length + 1, 
-            type: 'assistant', 
-            content: "I'm sorry, I couldn't generate a response. Please try again."
-          }
-        ]);
+        }
       }
+
+      // Add AI response to chat
+      setMessages(prev => [
+        ...prev, 
+        { 
+          id: prev.length + 1, 
+          type: 'assistant', 
+          content: aiResponseText
+        }
+      ]);
     } catch (error) {
       console.error('AI Assistant Error:', error);
       

@@ -285,18 +285,18 @@ const LessonPage = () => {
             </>
           )}
         </div>
-        
-        {/* AI Learning Assistant */}
-        {lesson && (
-          <AILearningAssistant 
-            lessonId={lessonId}
-            lessonTitle={lesson.title}
-            currentStep={step}
-            userCode={userCode}
-            expectedOutput={expectedOutput}
-          />
-        )}
       </div>
+      
+      {/* AI Learning Assistant - Now positioned absolutely by CSS */}
+      {lesson && (
+        <AILearningAssistant 
+          lessonId={lessonId}
+          lessonTitle={lesson.title}
+          currentStep={step}
+          userCode={userCode}
+          expectedOutput={expectedOutput}
+        />
+      )}
     </div>
   );
 };
