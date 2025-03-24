@@ -528,152 +528,44 @@ class LessonAssistantView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Generate response locally without external API
-        response_text = self.generate_local_response(question, lesson, current_step, user_code, expected_output)
+        # Parse the question to generate a specific response
+        response_text = self.generate_response(question, lesson, current_step, user_code, expected_output)
         
-        # Log the interaction for analytics (optional) - REMOVING THIS PART THAT CAUSES ERRORS
-        # The AIInteraction model seems to be missing from your models
-        # Instead of using it, simply skip the logging for now
-        
+        # Skip the AIInteraction logging that was causing errors
         return Response({"response": response_text}, status=status.HTTP_200_OK)
     
-    def generate_local_response(self, question, lesson, current_step, user_code, expected_output):
-        """
-        Generate AI assistant responses locally without external API calls
-        This eliminates timeouts and ensures consistent performance
-        """
+    def generate_response(self, question, lesson, current_step, user_code, expected_output):
+        """Generate a response based on the question and context"""
         question_lower = question.lower()
         
-        # Add a small delay to simulate thinking (optional)
-        time.sleep(0.5)
-        
-        # Handle common greeting patterns
-        if any(word in question_lower for word in ["hello", "hi", "hey", "greetings"]):
-            return f"Hello! I'm your AI assistant for this '{lesson.title}' lesson. How can I help you today?"
-        
-        # Handle lesson content questions
-        if "what" in question_lower and any(phrase in question_lower for phrase in ["lesson", "learn", "about", "topic"]):
-            return f"This lesson on '{lesson.title}' is about {lesson.description}. You'll learn key programming concepts and practical skills through guided examples and hands-on challenges."
-        
-        # Handle concept explanation requests
-        if "explain" in question_lower or "understand" in question_lower:
-            if current_step == 1:
-                content = self.extract_clean_content(lesson.step1_content)
-                return f"Let me explain the concept in simpler terms. {content} Does that help clarify things?"
-            elif current_step == 2:
-                content = self.extract_clean_content(lesson.step2_content)
-                return f"In the guided example, we're learning about {content} Pay attention to how the code is structured and the logic flow."
-        
-        # Handle code-specific questions in step 2 or 3
-        if (current_step == 2 or current_step == 3) and any(word in question_lower for word in ["code", "function", "error", "bug", "fix"]):
-            if not user_code:
-                return "I don't see any code to analyze. Please write some code in the editor first, then I can help you review it."
+        # For 'how to write/print' questions
+        if ("how do i" in question_lower or "how to" in question_lower or "syntax for" in question_lower):
+            if "print" in question_lower:
+                content = "Hello, World!"
+                
+                # Extract what they want to print if mentioned
+                if "print hello" in question_lower:
+                    content = "Hello"
+                if "print hello python" in question_lower:
+                    content = "Hello Python"
+                
+                return f"In Python, you can print text to the console using the print() function. Here's how to write it:\n\n```python\nprint(\"{content}\")\n```\n\nMake sure to put your text inside quotes. When you run this code, it will display: {content}"
             
-            code_snippet = user_code[:200] + "..." if len(user_code) > 200 else user_code
+            if "variable" in question_lower or "assign" in question_lower:
+                return "To create a variable in Python, you simply write the variable name, an equal sign, and the value. For example:\n\n```python\nname = \"John\"\nage = 25\n```\n\nPython variables don't need to be declared with a type - the type is inferred from the value."
             
-            # Generic code analysis
-            if "what does" in question_lower or "explain" in question_lower:
-                return f"Let me explain what your code does:\n\nYour code takes input, processes it using variables and operations, and produces an output. The key part is how you're handling the computation logic. Make sure your variables are properly initialized and your operations are performing the intended calculations."
+            # Add more specific syntax responses here
             
-            if "error" in question_lower or "bug" in question_lower or "fix" in question_lower:
-                # Check for common programming errors
-                common_issues = self.identify_common_issues(user_code)
-                if common_issues:
-                    return f"I spotted a few potential issues in your code:\n\n{common_issues}\n\nTry fixing these and see if it helps!"
-                else:
-                    return "Your code looks syntactically correct, but you might have a logical error. Check that your algorithm correctly implements the requirements. Make sure you're handling all possible input cases correctly."
+        # For 'what does this code do' questions
+        if "what does this code do" in question_lower or "explain this code" in question_lower:
+            if user_code and "print(" in user_code:
+                return "Your code uses the print() function to display output to the console. In Python, print() is a built-in function that displays the specified message. For example, `print(\"Hello\")` will show \"Hello\" when you run the program."
+            
+            # Add more code explanation responses
         
-        # Handle challenge-specific help in step 3
-        if current_step == 3:
-            if "stuck" in question_lower or "hint" in question_lower or "help" in question_lower:
-                challenge = self.extract_clean_content(lesson.step3_challenge)
-                return f"Let's break down the challenge: {challenge}\n\nHere's a hint: start by understanding the expected input and output format. Then, write pseudocode to outline your approach before coding. Focus on one requirement at a time."
-            
-            if "output" in question_lower or "expected" in question_lower:
-                return f"The expected output should be: {expected_output}\n\nMake sure your code produces output in exactly this format, including any spacing, punctuation, or formatting details."
+        # For 'how can I modify' questions
+        if "modify" in question_lower or "change" in question_lower:
+            return "There are several ways to modify the example:\n\n1. Change the values or variables\n2. Add new functionality\n3. Combine it with other Python concepts\n\nFor example, if you have a print statement, try changing the text, adding a calculation, or using a variable in the output."
         
-        # Handle general programming questions
-        programming_concepts = {
-            "loop": "Loops allow you to repeat a block of code multiple times. Common types are 'for' loops (for a specific number of iterations) and 'while' loops (until a condition is met).",
-            "variable": "Variables store data values that can be used and modified throughout your program. In Python, you don't need to declare the type - it's dynamically typed.",
-            "function": "Functions are reusable blocks of code that perform specific tasks. They help organize your code and follow the DRY (Don't Repeat Yourself) principle.",
-            "if": "Conditional statements (if/elif/else) allow your program to make decisions based on certain conditions, executing different code blocks accordingly.",
-            "list": "Lists are ordered, changeable collections that can store multiple items, even of different types. They use square brackets [].",
-            "dictionary": "Dictionaries store data in key-value pairs, allowing fast lookups by key. They use curly braces {} with key:value syntax.",
-            "error": "Errors happen when your code can't execute properly. Common types include SyntaxError (incorrect syntax), TypeError (operation on incorrect data type), and IndexError (accessing non-existent index)."
-        }
-        
-        for concept, explanation in programming_concepts.items():
-            if concept in question_lower:
-                return explanation
-        
-        # Default responses based on current step
-        step_responses = {
-            1: [
-                f"The introduction to {lesson.title} provides the foundation you need. Take your time to understand these concepts as they'll be essential for the next steps.",
-                "It might help to relate these new concepts to something you already know. Can you think of a real-world analogy for this programming concept?",
-                "Don't worry if everything doesn't click immediately. Programming is a skill that develops with practice and experience."
-            ],
-            2: [
-                "Try to understand the guided example line by line. What does each statement do? How do they work together?",
-                "The best way to learn is by experimenting! Try modifying the code example slightly and see how it changes the output.",
-                "This example demonstrates fundamental programming patterns that you'll use frequently. Pay attention to the structure and problem-solving approach."
-            ],
-            3: [
-                "For this challenge, break down the problem into smaller steps. What inputs do you need? What operations should you perform? What's the expected output format?",
-                "Think about edge cases in your solution. What happens with unexpected inputs? Have you handled all possible scenarios?",
-                "If you're stuck, try writing pseudocode first - outline your solution in plain English steps before converting to Python code."
-            ]
-        }
-        
-        # Return a random appropriate response for the current step
-        step_num = int(current_step) if str(current_step).isdigit() else 1
-        return random.choice(step_responses.get(step_num, step_responses[1]))
-    
-    def extract_clean_content(self, html_content):
-        """Extract readable text from HTML content"""
-        if not html_content:
-            return "the key programming concepts covered in this lesson."
-            
-        # Simple regex to remove HTML tags
-        text = re.sub(r'<[^>]+>', ' ', html_content)
-        # Clean up extra whitespace
-        text = re.sub(r'\s+', ' ', text).strip()
-        
-        # Limit length
-        if len(text) > 200:
-            text = text[:200] + "..."
-            
-        return text
-    
-    def identify_common_issues(self, code):
-        """Identify common programming issues in code"""
-        issues = []
-        
-        # Check for indentation issues (simplified check)
-        if "    " in code and "\t" in code:
-            issues.append("- You're mixing tabs and spaces for indentation, which can cause issues in Python")
-            
-        # Check for unclosed brackets/parentheses
-        if code.count('(') != code.count(')'):
-            issues.append("- You have mismatched parentheses () in your code")
-        if code.count('[') != code.count(']'):
-            issues.append("- You have mismatched square brackets [] in your code")
-        if code.count('{') != code.count('}'):
-            issues.append("- You have mismatched curly braces {} in your code")
-            
-        # Check for common syntax issues
-        if "print" in code and "print " not in code and "print(" not in code:
-            issues.append("- Check your print statements. In Python 3, print requires parentheses: print()")
-            
-        if ";" in code:
-            issues.append("- Python doesn't require semicolons (;) at the end of lines. They're optional but rarely used.")
-            
-        # Check for logical errors
-        if "==" not in code and "if" in code:
-            issues.append("- For comparisons in if statements, use == (double equals) not = (single equals)")
-            
-        # Return formatted issues or None
-        if issues:
-            return "\n".join(issues)
-        return None
+        # Default response based on the lesson topic
+        return f"I'm here to help with this '{lesson.title}' lesson. Could you provide more specific details about what you'd like to know or what you're trying to accomplish?"

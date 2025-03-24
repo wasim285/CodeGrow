@@ -296,27 +296,30 @@ const AILearningAssistant = ({
         }
       );
 
-      // Process response - check that it's not a greeting response
-      // when we already have a greeting shown
-      if (response.data && response.data.response && 
-          typeof response.data.response === 'string' &&
-          !response.data.response.includes("<!DOCTYPE") &&
-          !response.data.response.includes("dialog_finished_docstring")) {
-        
-        // Check if it's just a greeting response that doesn't answer the question
+      // Process response more intelligently
+      if (response.data && response.data.response) {
         const apiResponse = response.data.response;
-        const isJustGreeting = apiResponse.toLowerCase().includes("hello") && 
-                              apiResponse.toLowerCase().includes("how can i help") &&
-                              !apiResponse.toLowerCase().includes(questionLower);
         
-        if (isJustGreeting && 
-            !(questionLower.includes("hello") || questionLower.includes("hi ") || 
-              questionLower.includes("hey") || questionLower.includes("greetings"))) {
-          // If it's just a greeting and user wasn't greeting, use local response instead
-          throw new Error("API returned just a greeting");
+        // Check if it's just a generic greeting that doesn't address the question
+        const isGenericGreeting = 
+          (apiResponse.toLowerCase().includes("hello") || 
+           apiResponse.toLowerCase().includes("hi there")) &&
+          apiResponse.toLowerCase().includes("how can i help") &&
+          !apiResponse.toLowerCase().includes(questionLower.substring(0, 5));
+        
+        const isUserGreeting = 
+          questionLower.includes("hello") || 
+          questionLower.includes("hi ") || 
+          questionLower.includes("hey") || 
+          questionLower.includes("greetings");
+        
+        if (isGenericGreeting && !isUserGreeting) {
+          // If API returned just a greeting but user asked a specific question,
+          // use our local response instead which is likely more helpful
+          throw new Error("API returned generic greeting for specific question");
         }
         
-        // Valid, non-greeting API response
+        // Valid, contextual API response
         setMessages(prev => [
           ...prev, 
           { 
@@ -326,8 +329,8 @@ const AILearningAssistant = ({
           }
         ]);
       } else {
-        // Invalid or problematic API response, use local generation
-        throw new Error("Invalid response format or problematic content");
+        // Invalid response format, use local generation
+        throw new Error("Invalid response format");
       }
     } catch (error) {
       console.error('AI Assistant Error:', error);
@@ -392,7 +395,7 @@ const AILearningAssistant = ({
       <div className="ai-assistant-header" onClick={handleExpand}>
         <div className="ai-icon">🤖</div>
         <h3>AI Learning Assistant</h3>
-        <div class="expand-icon">{isExpanded ? '▼' : '▲'}</div>
+        <div className="expand-icon">{isExpanded ? '▼' : '▲'}</div>
       </div>
 
       {isExpanded && (
