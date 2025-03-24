@@ -527,9 +527,10 @@ class LessonAssistantView(APIView):
             
         # Prepare context for the AI
         context = f"""
-        You are an AI learning assistant helping a student with the following Python lesson:
+        You are an AI learning assistant helping a student with a Python programming lesson.
         Lesson: {lesson.title}
         
+        Respond in plain text format only. Do not include HTML, markdown or code formatting.
         """
         
         # Add step-specific context
@@ -559,6 +560,8 @@ class LessonAssistantView(APIView):
         Provide a helpful, concise response to guide the student without directly solving the problem for them.
         Explain concepts clearly, address their specific question, and provide hints if they are stuck.
         Keep your response conversational and encouraging.
+        
+        IMPORTANT: Return only plain text in your response. Do not use HTML, markdown, or other formatting.
         """
         
         HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
@@ -588,13 +591,16 @@ class LessonAssistantView(APIView):
             if response_text.startswith(prompt):
                 response_text = response_text[len(prompt):].strip()
                 
-            # Track the interaction for analytics (optional)
-            # AssistantInteraction.objects.create(
-            #     user=request.user,
-            #     lesson_id=lesson_id,
-            #     question=question,
-            #     response=response_text
-            # )
+            # Clean HTML or malformed content
+            response_text = response_text.replace("<!DOCTYPE html>", "")
+            response_text = response_text.replace("<html>", "")
+            response_text = response_text.replace("</html>", "")
+            response_text = response_text.replace("<body>", "")
+            response_text = response_text.replace("</body>", "")
+            
+            # Remove any dialogue docstring
+            if "dialog_finished_docstring" in response_text:
+                response_text = "I'm here to help with your Python lesson. What specific part are you struggling with?"
 
             return Response({"response": response_text}, status=status.HTTP_200_OK)
 
