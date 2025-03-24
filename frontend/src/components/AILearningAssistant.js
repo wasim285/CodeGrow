@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/AILearningAssistant.css';
-import api, { getAIAssistantResponse } from '../utils/api'; // Import the function
+import api from '../utils/api';
 
 const AILearningAssistant = ({ 
   lessonId, 
@@ -16,10 +16,11 @@ const AILearningAssistant = ({
     { 
       id: 1, 
       type: 'assistant', 
-      content: `Hi there! I'm your AI learning assistant for this lesson. How can I help you with "${lessonTitle || 'this lesson'}"?` 
+      content: `Hi there! I'm your AI learning assistant for "${lessonTitle || 'this lesson'}". Ask me anything about the concepts or code in this lesson!` 
     }
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [previousQuestions, setPreviousQuestions] = useState(new Set());
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -45,40 +46,184 @@ const AILearningAssistant = ({
     setInputValue(e.target.value);
   };
 
-  // Add this helper function to generate fallback responses
-  const getFallbackResponse = (question, step) => {
+  /**
+   * Generate a lesson-specific response based on the question and context
+   */
+  const generateLessonSpecificResponse = (question, lessonTitle, step, userCode, expectedOutput) => {
     const questionLower = question.toLowerCase();
     
-    // Check for common patterns
-    if (questionLower.includes("explain") || questionLower.includes("what is")) {
-      return "This concept is a fundamental part of programming that helps you solve problems by breaking them down into manageable steps. If you'd like more specific help, try asking about a particular part you're struggling with.";
+    // Don't repeat greetings
+    if (previousQuestions.has(questionLower)) {
+      if (questionLower.includes("hello") || questionLower.includes("hi ")) {
+        return `I'm still here to help with "${lessonTitle}". What specific aspect would you like me to explain?`;
+      }
     }
     
-    if (questionLower.includes("error") || questionLower.includes("not working")) {
-      return "When debugging code, check for these common issues: syntax errors (like missing colons or parentheses), variable naming inconsistencies, and logic errors in your conditions. Reading the error message carefully often gives you clues about what's wrong.";
+    // For "What does this code do" questions
+    if (questionLower.includes("what does this code do") || 
+        questionLower.includes("explain this code") || 
+        questionLower.includes("how does this code work")) {
+      
+      // If we have user code to analyze
+      if (userCode && userCode.trim()) {
+        const codeSnippet = userCode.length > 100 ? userCode.substring(0, 100) + "..." : userCode;
+        
+        // Analyze common Python patterns
+        if (userCode.includes("print(")) {
+          return `Your code uses the print() function to display output to the console. In Python, print() is a built-in function that displays the specified message. For example, \`print("Hello")\` will show "Hello" when you run the program.`;
+        }
+        
+        if (userCode.includes("if ") && userCode.includes("else:")) {
+          return `Your code contains conditional logic with if/else statements. This allows your program to make decisions based on certain conditions. The code inside the if block runs when the condition is True, and the code in the else block runs when it's False.`;
+        }
+        
+        if (userCode.includes("for ") && userCode.includes(" in ")) {
+          return `Your code uses a for loop, which is how Python iterates over sequences like lists, strings, or ranges. For each item in the sequence, the loop executes the indented code block.`;
+        }
+        
+        if (userCode.includes("def ")) {
+          return `Your code defines a function using the 'def' keyword. Functions are reusable blocks of code that perform specific tasks and can accept inputs (parameters) and return outputs. They're essential for organizing and modularizing your code.`;
+        }
+        
+        // Default code explanation
+        return `Your code appears to be a Python program that performs certain operations. It takes inputs, processes them using variables and control structures, and produces output. If you have a specific part you'd like me to explain in more detail, please let me know!`;
+      } else {
+        // No code to analyze
+        return `I don't see any code to analyze yet. Try writing some code in the editor, and then I can explain what it does. In Python, you can start with simple statements like \`print("Hello, World!")\` to display text.`;
+      }
     }
     
-    if (questionLower.includes("hint") || questionLower.includes("stuck")) {
-      return "Try breaking down the problem into smaller steps. First, understand what inputs you're working with. Then, think about what transformations you need to apply. Finally, format your output according to what's expected.";
+    // For "I'm stuck" or "Help" questions
+    if (questionLower.includes("stuck") || 
+        questionLower.includes("help") || 
+        questionLower.includes("hint") || 
+        questionLower.includes("not working")) {
+      
+      // Different responses based on current step
+      if (step == 3) {  // Challenge step
+        if (expectedOutput) {
+          return `For this challenge, you need to create code that produces: "${expectedOutput}"\n\nHere's a hint: ${getHintForOutput(expectedOutput, lessonTitle)}`;
+        } else {
+          return `For this mini-challenge, break down the problem into smaller steps:\n\n1. Understand what the challenge is asking for\n2. Identify what inputs you need to work with\n3. Plan your algorithm before writing code\n4. Test your solution with different inputs\n\nWhat specific part are you struggling with?`;
+        }
+      } else if (step == 2) {  // Guided example
+        return `In this guided example, try to understand each line of code and its purpose. Experiment by modifying small parts to see how they affect the output. What specific aspect of the example is confusing you?`;
+      } else {  // Introduction
+        return `The introduction provides key concepts for this lesson. Try relating these concepts to real-world examples to better understand them. Is there a particular concept that's difficult to grasp?`;
+      }
     }
     
-    // Step-specific fallbacks
-    const stepNum = Number(step) || 1;
-    switch(stepNum) {
-      case 1:
-        return "The introduction is meant to give you a foundation for the concepts in this lesson. Take your time to understand each part, and don't worry if it doesn't all click immediately. Learning programming is a step-by-step process.";
-      case 2:
-        return "In the guided example, try to understand each line of code. What is its purpose? How does it contribute to the overall solution? Experimenting by changing small parts of the code can help you see how it works.";
-      case 3:
-        return "For challenges, start by making sure you understand what the problem is asking. Then sketch a plan before coding. Break down your solution into steps, and implement one step at a time.";
-      default:
-        return "I'm here to help with this lesson. Could you tell me more specifically what you're struggling with?";
+    // For "What approach" questions
+    if (questionLower.includes("approach") || 
+        questionLower.includes("how to solve") || 
+        questionLower.includes("how do i")) {
+      
+      // For challenge step
+      if (step == 3) {
+        return `Here's a systematic approach for this challenge:\n\n1. Understand the problem: What inputs do you have? What output is expected?\n2. Break it into steps: What calculations or transformations do you need?\n3. Write pseudocode: Outline your solution in plain English\n4. Implement your solution: Convert your plan to Python code\n5. Test and debug: Check your solution with different inputs\n\nStart with a simple version that works, then refine it.`;
+      } else {
+        return `To understand the material in this step:\n\n1. Read through the explanation carefully\n2. Try to connect new concepts with things you already know\n3. Write down key points in your own words\n4. Experiment with the examples by slightly modifying them\n5. Ask specific questions about parts you don't understand`;
+      }
     }
+    
+    // For questions about concepts
+    if (questionLower.includes("explain") || 
+        questionLower.includes("what is") || 
+        questionLower.includes("how does") ||
+        questionLower.includes("mean")) {
+      
+      // Try to match common Python concepts
+      if (questionLower.includes("variable") || questionLower.includes("variables")) {
+        return `Variables in Python are containers for storing data values. Unlike some other languages, Python variables don't need explicit declaration or types. Example: \`name = "Alice"\` creates a variable called 'name' that stores the string "Alice". You can then use this variable elsewhere in your code.`;
+      }
+      
+      if (questionLower.includes("function") || questionLower.includes("functions")) {
+        return `Functions in Python are reusable blocks of code that perform specific tasks. They're defined with the \`def\` keyword, can accept inputs (parameters), and can return outputs. Example:\n\n\`\`\`python\ndef greet(name):\n    return f"Hello, {name}!"\n\nresult = greet("Alice")  # result will be "Hello, Alice!"\n\`\`\`\n\nFunctions help organize your code and follow the DRY (Don't Repeat Yourself) principle.`;
+      }
+      
+      if (questionLower.includes("loop") || questionLower.includes("for ") || questionLower.includes("while")) {
+        return `Loops in Python allow you to execute a block of code multiple times. The two main types are:\n\n1. For loops: Iterate over a sequence (like a list or string)\n   Example: \`for item in my_list:\`\n\n2. While loops: Execute as long as a condition is true\n   Example: \`while count < 5:\`\n\nLoops are essential for processing collections of data or repeating tasks efficiently.`;
+      }
+      
+      if (questionLower.includes("list") || questionLower.includes("array")) {
+        return `Lists in Python are ordered, changeable collections that can store multiple items, even of different types. They use square brackets []. Example:\n\n\`\`\`python\nfruits = ["apple", "banana", "cherry"]\nprint(fruits[0])  # Prints "apple"\nfruits.append("orange")  # Adds "orange" to the list\n\`\`\`\n\nLists are one of Python's most versatile data structures.`;
+      }
+      
+      // Generic explanation if no specific concept is matched
+      return `In programming, it's important to break down complex problems into smaller, manageable parts. For "${lessonTitle}", focus on understanding the fundamental concepts presented, practice with examples, and don't hesitate to experiment. What specific concept would you like me to explain in more detail?`;
+    }
+    
+    // For lesson-specific questions
+    if (questionLower.includes("what will i learn") || 
+        questionLower.includes("this lesson about") || 
+        questionLower.includes("objective")) {
+      
+      // Different responses based on common lesson titles
+      if (lessonTitle.toLowerCase().includes("introduction")) {
+        return `In "${lessonTitle}", you'll learn the fundamental concepts of Python programming, including basic syntax, variables, data types, and how to write and run simple programs. These foundations are essential for all further programming you'll do.`;
+      }
+      
+      if (lessonTitle.toLowerCase().includes("function")) {
+        return `In "${lessonTitle}", you'll learn how to create and use functions in Python. Functions are reusable blocks of code that help organize your programs, reduce repetition, and improve readability. You'll learn about parameters, return values, and function scope.`;
+      }
+      
+      if (lessonTitle.toLowerCase().includes("loop")) {
+        return `In "${lessonTitle}", you'll learn about loops, which allow you to repeat code operations efficiently. You'll explore for loops for iterating through sequences and while loops for condition-based repetition. Loops are essential for processing collections of data and automating repetitive tasks.`;
+      }
+      
+      if (lessonTitle.toLowerCase().includes("condition") || lessonTitle.toLowerCase().includes("if")) {
+        return `In "${lessonTitle}", you'll learn about conditional statements (if/elif/else) which allow your program to make decisions based on different conditions. This is a fundamental concept in programming logic that enables your programs to respond differently in various situations.`;
+      }
+      
+      // Generic lesson description
+      return `In "${lessonTitle}", you'll build practical programming skills through explanation, guided examples, and hands-on challenges. This lesson will help you understand key programming concepts and apply them to solve real problems. The skills you learn here will serve as building blocks for more advanced topics.`;
+    }
+    
+    // Default response if no pattern is matched
+    return `I understand you're asking about "${lessonTitle}". To give you the most helpful response, could you clarify which specific aspect of the lesson you're interested in? For example, are you looking for explanations of concepts, help with code, or guidance on the challenge?`;
   };
-
-  // Update the handleSendMessage function to use the new API
+  
+  /**
+   * Get a hint based on expected output
+   */
+  const getHintForOutput = (output, lessonTitle) => {
+    const outputLower = output.toLowerCase();
+    
+    if (outputLower.includes("hello") || outputLower.includes("world")) {
+      return `Try using the print() function to display text. In Python, you can display text using: print("Your text here")`;
+    }
+    
+    if (outputLower.includes("+") || outputLower.includes("sum") || 
+        outputLower.includes("add") || /\d+\s*\+\s*\d+/.test(outputLower)) {
+      return `To perform addition in Python, use the + operator between two numbers. For example: result = 5 + 3`;
+    }
+    
+    if (/\d+\s*\-\s*\d+/.test(outputLower) || outputLower.includes("subtract") || 
+        outputLower.includes("minus") || outputLower.includes("difference")) {
+      return `For subtraction in Python, use the - operator. For example: result = 10 - 4`;
+    }
+    
+    if (/\d+\s*\*\s*\d+/.test(outputLower) || outputLower.includes("multiply") || 
+        outputLower.includes("product") || outputLower.includes("times")) {
+      return `To multiply numbers in Python, use the * operator. For example: result = 6 * 7`;
+    }
+    
+    if (/\d+\s*\/\s*\d+/.test(outputLower) || outputLower.includes("divide") || 
+        outputLower.includes("quotient") || outputLower.includes("division")) {
+      return `For division in Python, use the / operator, which gives a floating-point result. For example: result = 20 / 4`;
+    }
+    
+    // Generic hint if we can't determine the specific operation
+    return `Think about what operations you need to perform to produce the expected output. Make sure you're using the correct Python syntax and that your output format exactly matches what's expected.`;
+  };
+  
+  // Handle sending message
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
+
+    // Save question to prevent repeated greeting responses
+    const questionLower = inputValue.toLowerCase();
+    setPreviousQuestions(prev => new Set(prev).add(questionLower));
 
     // Add user message to chat
     const userMessage = {
@@ -91,7 +236,7 @@ const AILearningAssistant = ({
     setIsLoading(true);
 
     try {
-      // Direct API call as a fallback if imported function has issues
+      // Try to get response from API first
       const token = localStorage.getItem("token");
       if (!token) throw new Error("User not authenticated");
 
@@ -111,7 +256,12 @@ const AILearningAssistant = ({
       );
 
       // Process response
-      if (response.data && response.data.response) {
+      if (response.data && response.data.response && 
+          typeof response.data.response === 'string' &&
+          !response.data.response.includes("<!DOCTYPE") &&
+          !response.data.response.includes("dialog_finished_docstring")) {
+        
+        // Valid API response
         setMessages(prev => [
           ...prev, 
           { 
@@ -121,18 +271,27 @@ const AILearningAssistant = ({
           }
         ]);
       } else {
-        throw new Error("Invalid response format");
+        // Invalid or problematic API response, use local generation
+        throw new Error("Invalid response format or problematic content");
       }
     } catch (error) {
       console.error('AI Assistant Error:', error);
       
-      // Use fallback response
+      // Generate response locally without API
+      const localResponse = generateLessonSpecificResponse(
+        userMessage.content, 
+        lessonTitle, 
+        currentStep, 
+        userCode, 
+        expectedOutput
+      );
+      
       setMessages(prev => [
         ...prev, 
         { 
           id: prev.length + 1, 
           type: 'assistant', 
-          content: getFallbackResponse(userMessage.content, currentStep)
+          content: localResponse
         }
       ]);
     } finally {
@@ -154,15 +313,15 @@ const AILearningAssistant = ({
     switch(step) {
       case 1:
         return [
-          "Can you explain this concept more simply?",
           "What will I learn in this lesson?",
-          "How is this used in real-world applications?"
+          "Explain this concept more simply",
+          "How is this used in real programming?"
         ];
       case 2:
         return [
           "What does this code do?",
-          "Can you explain this syntax?",
-          "How can I improve this code?"
+          "Explain this syntax",
+          "How can I modify this example?"
         ];
       case 3:
         return [
@@ -172,9 +331,9 @@ const AILearningAssistant = ({
         ];
       default:
         return [
-          "How does this work?",
-          "Can you explain this more?",
-          "Give me an example"
+          "Explain this concept",
+          "Give me an example",
+          "How does this work?"
         ];
     }
   };
