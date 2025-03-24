@@ -408,3 +408,91 @@ class CodeFeedbackView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LessonFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Use serializer for validation
+        from .serializers import LessonFeedbackSerializer
+        
+        serializer = LessonFeedbackSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {"error": serializer.errors}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Extract validated data
+        code = serializer.validated_data.get("code")
+        expected_output = serializer.validated_data.get("expected_output")
+        user_output = serializer.validated_data.get("user_output")
+        question = serializer.validated_data.get("question")
+        
+        # Get API key from environment variables
+        HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+        API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
+
+        # Prepare prompt with context about the error
+        prompt = f"""
+        The student was asked to solve this question:
+        {question}
+        
+        They wrote this code:
+        ```python
+        {code}
+        ```
+        
+        Expected output: {expected_output}
+        Actual output: {user_output}
+        
+        Please explain what's wrong with their code, where they went wrong, and provide a helpful hint to fix it. 
+        Do not provide the full solution, just guidance to help them learn.
+        """
+
+        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+        payload = {"inputs": prompt}
+
+        try:
+            response = requests.post(API_URL, headers=headers, json=payload)
+            
+            if response.status_code != 200:
+                return Response(
+                    {"error": f"API request failed with status code {response.status_code}"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+                
+            feedback_data = response.json()
+            
+            # Extract the generated text
+            if isinstance(feedback_data, list) and len(feedback_data) > 0:
+                feedback_text = feedback_data[0].get("generated_text", "")
+            else:
+                feedback_text = feedback_data.get("generated_text", "")
+            
+            if not feedback_text:
+                return Response(
+                    {"error": "No feedback was generated"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            # Optional: You can save the feedback in the database for future reference
+            # LessonFeedback.objects.create(
+            #     user=request.user,
+            #     code=code,
+            #     question=question,
+            #     expected_output=expected_output,
+            #     actual_output=user_output,
+            #     feedback=feedback_text
+            # )
+
+            return Response({"feedback": feedback_text}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return Response(
+                {"error": f"Failed to get AI feedback: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
