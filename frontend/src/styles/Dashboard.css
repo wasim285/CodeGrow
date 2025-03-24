@@ -75,12 +75,9 @@
     font-family: "Inter", sans-serif;
 }
 
-/* Update the dashboard grid layout */
-
 /* Dashboard layout grid */
 .dashboard-grid {
     display: flex;
-    flex-direction: row-reverse; /* Reverse the order to put progress on left */
     justify-content: space-between;
     align-items: flex-start;
     gap: 50px;
@@ -94,10 +91,9 @@
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 25px; /* Space between lesson box and study session box */
+    gap: 10px; /* Small gap between elements */
     width: 65%;
-    padding-left: 0; /* Remove padding */
-    padding-right: 30px; /* Add padding to right instead */
+    padding-left: 30px;
 }
 
 /* Lesson box and Study sessions box with identical dimensions */
@@ -106,21 +102,21 @@
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
     padding: 20px; /* Reduced padding */
-    width: 100%; /* Full width of container */
-    margin: 0; /* Remove margin */
+    width: 80%; /* Reduced width as requested */
+    margin: 0 auto;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    height: 220px; /* Equal height for both */
-    min-height: 220px; /* Ensure minimum height is consistent */
+    height: 200px; /* Reduced height for both */
+    min-height: 200px; /* Ensure minimum height is consistent */
 }
 
 /* Specific styling for study sessions only */
 .study-sessions-box {
     background: linear-gradient(145deg, #222232, #1e1e2e);
-    margin-top: 0; /* Remove margin top */
+    margin-top: 15px; /* Space below lesson box */
     overflow: hidden;
 }
 
@@ -244,18 +240,17 @@
     font-family: "Inter", sans-serif;
 }
 
-/* Progress section - now on the left */
+/* Right section (Progress tracker) */
 .progress-section {
-    width: 34%;
+    width: 34%; /* Further increased from 32% */
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
     padding: 35px;
     text-align: center;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    margin-right: 25px; /* Margin now on right since it's on the left */
-    margin-left: 0; /* Remove left margin */
-    height: auto; /* Allow it to be taller */
-    min-height: 620px; /* Increased minimum height */
+    margin-left: 25px; /* Further increased margin to move it more to the right */
+    height: fit-content;
+    min-height: 520px; /* Further increased minimum height */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -515,12 +510,11 @@ p.streak-display strong {
     .progress-section {
         width: 100%;
         margin-left: 0;
-        margin-right: 0;
-        padding-right: 0;
     }
     
     .left-section {
         gap: 35px;
+        padding-left: 0;
     }
     
     .recommendations-box ul {
@@ -546,7 +540,11 @@ p.streak-display strong {
         padding: 20px; /* Adjusted padding for mobile */
         margin: 0 auto;
         min-height: 200px; /* Adjusted height for mobile */
-        height: auto;
+        height: 200px;
+    }
+    
+    .study-sessions-box {
+        margin-top: 10px;
     }
 }
 
