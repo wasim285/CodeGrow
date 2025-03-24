@@ -267,11 +267,23 @@ const AILearningAssistant = ({
     setInputValue('');
     setIsLoading(true);
 
+    // Add a temporary "thinking" message that we'll replace later
+    const thinkingMessageId = messages.length + 2;
+    setMessages(prev => [
+      ...prev, 
+      { 
+        id: thinkingMessageId, 
+        type: 'assistant', 
+        content: '...' // This will be invisible with the typing indicator
+      }
+    ]);
+
     try {
-      // Try to get response from API
+      // Get user's auth token
       const token = localStorage.getItem("token");
       if (!token) throw new Error("User not authenticated");
 
+      // Make API request with longer timeout for Hugging Face model
       const response = await api.post(
         "lesson-assistant/",
         {
@@ -283,7 +295,7 @@ const AILearningAssistant = ({
         },
         { 
           headers: { Authorization: `Token ${token}` },
-          timeout: 10000 // Extend timeout to 10 seconds
+          timeout: 25000 // 25 second timeout for the Hugging Face model
         }
       );
 
@@ -293,69 +305,50 @@ const AILearningAssistant = ({
         
         const apiResponse = response.data.response;
         
-        // Check if it's just a generic greeting without substance
-        const isGenericGreeting = 
-          apiResponse.toLowerCase().includes("how can i help") &&
-          !apiResponse.toLowerCase().includes(questionLower.substring(0, 4)) &&
-          apiResponse.length < 100; // Very short responses are likely generic
-        
-        if (isGenericGreeting && 
-            !(questionLower.includes("hello") || 
-              questionLower.includes("hi ") || 
-              questionLower.includes("hey"))) {
-          // If it's just a generic greeting, use local response
-          
-          // Generate a local response as backup
-          const localResponse = generateLessonSpecificResponse(
-            userMessage.content, 
-            lessonTitle, 
-            currentStep, 
-            userCode, 
-            expectedOutput
-          );
-          
-          setMessages(prev => [
-            ...prev, 
-            { 
-              id: prev.length + 1, 
-              type: 'assistant', 
-              content: localResponse
-            }
-          ]);
-        } else {
-          // Valid response that's not just a generic greeting
-          setMessages(prev => [
-            ...prev, 
-            { 
-              id: prev.length + 1, 
-              type: 'assistant', 
-              content: apiResponse
-            }
-          ]);
-        }
+        // Remove the temporary thinking message and add the real response
+        setMessages(prev => 
+          prev.filter(msg => msg.id !== thinkingMessageId).concat({
+            id: thinkingMessageId,
+            type: 'assistant',
+            content: apiResponse
+          })
+        );
       } else {
-        throw new Error("Invalid response format");
+        throw new Error("Invalid response format from server");
       }
     } catch (error) {
       console.error('AI Assistant Error:', error);
       
-      // Generate a local response when API fails
-      const localResponse = generateLessonSpecificResponse(
-        userMessage.content, 
-        lessonTitle, 
-        currentStep, 
-        userCode, 
-        expectedOutput
-      );
+      // Determine what type of error occurred
+      let errorMessage = "I'm having trouble connecting to my knowledge base right now.";
       
-      setMessages(prev => [
-        ...prev, 
-        { 
-          id: prev.length + 1, 
-          type: 'assistant', 
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = "The AI is taking longer than expected to respond. Let me think about this differently.";
+      } else if (error.response && error.response.status) {
+        errorMessage = `There was a problem with my thinking process (Error ${error.response.status}).`;
+      }
+      
+      // Remove the temporary thinking message and add error + fallback
+      setMessages(prev => {
+        // Filter out the temporary message
+        const filteredMessages = prev.filter(msg => msg.id !== thinkingMessageId);
+        
+        // Generate a fallback response
+        const localResponse = generateLessonSpecificResponse(
+          userMessage.content, 
+          lessonTitle, 
+          currentStep, 
+          userCode, 
+          expectedOutput
+        );
+        
+        // Add the fallback with the original ID
+        return [...filteredMessages, {
+          id: thinkingMessageId,
+          type: 'assistant',
           content: localResponse
-        }
-      ]);
+        }];
+      });
     } finally {
       setIsLoading(false);
     }

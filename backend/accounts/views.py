@@ -528,47 +528,26 @@ class LessonAssistantView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Build a more detailed prompt to get better AI responses
-        prompt = self.build_detailed_prompt(
-            question, 
-            lesson, 
-            current_step, 
-            user_code, 
-            expected_output
-        )
+        # Build a detailed prompt for the AI model
+        prompt = self.build_prompt(question, lesson, current_step, user_code, expected_output)
         
         try:
-            # Get an API key from settings or use an environment variable
-            # This is a placeholder - you'll need to add your actual API key setup
-            openai_api_key = getattr(settings, 'OPENAI_API_KEY', None)
+            # Get response from Hugging Face model
+            response_text = self.get_hf_response(prompt)
             
-            if openai_api_key:
-                # Use OpenAI API if available
-                response_text = self.get_openai_response(prompt, openai_api_key)
-            else:
-                # Fallback to a structured, contextual response generator
-                response_text = self.generate_structured_response(
-                    question, 
-                    lesson, 
-                    current_step, 
-                    user_code, 
-                    expected_output
-                )
+            # Clean up the response if needed
+            response_text = self.clean_response(response_text, question)
+            
+            return Response({"response": response_text}, status=status.HTTP_200_OK)
+            
         except Exception as e:
-            print(f"Error generating AI response: {str(e)}")
-            # Fallback to a structured response if API call fails
-            response_text = self.generate_structured_response(
-                question, 
-                lesson, 
-                current_step, 
-                user_code, 
-                expected_output
-            )
-        
-        return Response({"response": response_text}, status=status.HTTP_200_OK)
+            print(f"AI model error: {str(e)}")
+            # Fallback to a simple, structured response if API call fails
+            fallback_response = self.get_fallback_response(question, lesson, current_step, user_code, expected_output)
+            return Response({"response": fallback_response}, status=status.HTTP_200_OK)
     
-    def build_detailed_prompt(self, question, lesson, current_step, user_code, expected_output):
-        """Build a detailed prompt with all relevant context for the AI"""
+    def build_prompt(self, question, lesson, current_step, user_code, expected_output):
+        """Build a detailed prompt for the AI model with all context"""
         # Get the appropriate content based on the step
         step_content = ""
         if current_step == 1:
@@ -579,222 +558,179 @@ class LessonAssistantView(APIView):
             step_content = lesson.step3_challenge
         
         # Clean HTML from content
-        step_content = re.sub(r'<[^>]+>', ' ', step_content)
-        step_content = re.sub(r'\s+', ' ', step_content).strip()
+        if step_content:
+            step_content = re.sub(r'<[^>]+>', ' ', step_content)
+            step_content = re.sub(r'\s+', ' ', step_content).strip()
+            # Limit length to avoid token limits
+            step_content = step_content[:500] + "..." if len(step_content) > 500 else step_content
         
-        # Build a comprehensive prompt
-        prompt = f"""You are an AI learning assistant helping a student learn Python programming.
+        # Format for Mistral's instruction format
+        prompt = f"""<s>[INST] You are a helpful AI learning assistant named CodeGrow for a Python programming education platform.
 
 CONTEXT:
-- Lesson: {lesson.title}
-- Description: {lesson.description}
-- Current step: {current_step} ({'Introduction' if current_step == 1 else 'Guided Example' if current_step == 2 else 'Challenge'})
-- Step content: {step_content[:500]}...
+Lesson: {lesson.title}
+Description: {lesson.description}
+Current Step: {current_step} ({'Introduction' if current_step == 1 else 'Guided Example' if current_step == 2 else 'Challenge'})
+Step Content: {step_content}
 
-{f"- Student's code: {user_code}" if user_code else ""}
-{f"- Expected output: {expected_output}" if expected_output else ""}
+{"User's Code: " + user_code if user_code else "The user hasn't written any code yet."}
+{"Expected Output: " + expected_output if expected_output else ""}
 
-STUDENT'S QUESTION:
-{question}
+The student's question is: {question}
 
-Please provide a helpful, educational response that addresses the specific question. Be concise but thorough, focusing on teaching programming concepts with clear explanations and examples where appropriate. Avoid generic greetings like "How can I help you today?" and directly answer the question.
-"""
+Your task:
+1. Give a direct, helpful response to the student's question
+2. Focus on explaining Python concepts clearly with examples
+3. If they ask about code, explain what it does or how to write it
+4. Provide correct Python syntax and educational value
+5. Keep your response under 200 words
+6. Don't repeat the question or use generic greetings like "How can I help you today?"
+7. Address their specific question immediately
+
+Your response: [/INST]"""
+        
         return prompt
     
-    def get_openai_response(self, prompt, api_key):
-        """Get a response from OpenAI API"""
-        try:
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
+    def get_hf_response(self, prompt):
+        """Get a response from the Hugging Face model API"""
+        headers = {
+            "Authorization": f"Bearer {settings.HF_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "inputs": prompt,
+            "parameters": {
+                "max_new_tokens": 500,
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "do_sample": True,
+                "return_full_text": False
             }
-            
-            payload = {
-                "model": "gpt-3.5-turbo",
-                "messages": [
-                    {"role": "system", "content": "You are a helpful programming tutor specializing in Python."},
-                    {"role": "user", "content": prompt}
-                ],
-                "max_tokens": 500,
-                "temperature": 0.7
-            }
-            
-            response = requests.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=10
-            )
-            
-            response_data = response.json()
-            if "choices" in response_data and len(response_data["choices"]) > 0:
-                return response_data["choices"][0]["message"]["content"].strip()
-            else:
-                raise Exception("Invalid response format from OpenAI API")
+        }
+        
+        api_url = f"{settings.HF_API_URL}{settings.HF_MODEL_ID}"
+        
+        # Try multiple times with exponential backoff
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(
+                    api_url, 
+                    headers=headers, 
+                    json=payload,
+                    timeout=settings.HF_REQUEST_TIMEOUT
+                )
                 
-        except Exception as e:
-            print(f"OpenAI API error: {str(e)}")
-            raise
+                # Check for successful response
+                if response.status_code == 200:
+                    response_json = response.json()
+                    
+                    # Handle different response formats from different models
+                    if isinstance(response_json, list) and len(response_json) > 0:
+                        if "generated_text" in response_json[0]:
+                            text = response_json[0]["generated_text"]
+                        else:
+                            text = str(response_json[0])
+                    elif isinstance(response_json, dict):
+                        if "generated_text" in response_json:
+                            text = response_json["generated_text"]
+                        else:
+                            text = str(response_json)
+                    else:
+                        text = str(response_json)
+                    
+                    # Clean up and return the response
+                    text = text.strip()
+                    return text
+                
+                # If model is still loading, wait and retry
+                if response.status_code == 503 and "Model is loading" in response.text:
+                    wait_time = (2 ** attempt) * 2  # Exponential backoff: 2, 4, 8 seconds
+                    print(f"Model is loading, retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                
+                # Other error
+                raise Exception(f"API request failed with status {response.status_code}: {response.text}")
+                
+            except requests.exceptions.Timeout:
+                # Handle timeout specifically
+                wait_time = (2 ** attempt) * 2
+                if attempt < max_retries - 1:  # Don't sleep on the last attempt
+                    print(f"Request timed out, retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                else:
+                    raise Exception("All requests timed out")
+            except Exception as e:
+                # Handle other exceptions
+                if attempt < max_retries - 1:
+                    wait_time = (2 ** attempt) * 2
+                    print(f"Error: {str(e)}, retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                else:
+                    raise
+        
+        # If we got here, all retries failed
+        raise Exception("All requests to the model API failed")
     
-    def generate_structured_response(self, question, lesson, current_step, user_code, expected_output):
-        """Generate a structured response based on question analysis"""
+    def clean_response(self, response, question):
+        """Clean up the model response to ensure it's useful and appropriate"""
+        # Remove any prompt remnants or instruction tokens
+        response = re.sub(r'</?s>|\[/?INST\]', '', response).strip()
+        
+        # Check if response is too short or generic
+        if len(response) < 20:
+            return self.get_fallback_response(question, None, None, None, None)
+        
+        # Check for common generic greeting patterns and remove them
+        greeting_patterns = [
+            r'^Hello!.*How can I help you.*\?',
+            r'^Hi there!.*How can I assist.*\?',
+            r'^Greetings!.*What can I do.*\?'
+        ]
+        
+        for pattern in greeting_patterns:
+            if re.match(pattern, response, re.IGNORECASE):
+                # Replace with empty string and check if what remains is substantial
+                remaining = re.sub(pattern, '', response, flags=re.IGNORECASE).strip()
+                if len(remaining) > 30:  # If there's still substantial content
+                    return remaining
+                else:
+                    return self.get_fallback_response(question, None, None, None, None)
+        
+        return response
+    
+    def get_fallback_response(self, question, lesson, current_step, user_code, expected_output):
+        """Generate a fallback response when the API call fails"""
         question_lower = question.lower()
         
-        # 1. Check for print-related questions
-        if "print" in question_lower and ("how" in question_lower or "write" in question_lower):
-            # Extract what they want to print if mentioned
-            content = "Hello, World!"
-            if "hello python" in question_lower:
-                content = "Hello Python"
-            elif "hello" in question_lower:
-                content = "Hello"
-                
-            return f"""In Python, you use the print() function to display text on the screen. Here's how to print '{content}':
+        # Questions about printing
+        if "print" in question_lower:
+            return """In Python, you use the print() function to display text. For example:
 
 ```python
-print("{content}")
+print("Hello, World!")  # Outputs: Hello, World!
 ```
 
-When you run this code, it will display: {content}
-
-Make sure to:
-- Enclose your text in quotes (single or double)
-- Include parentheses after print
-- Check that the quotes match (don't mix single and double quotes)"""
-        
-        # 2. Check for syntax questions
-        if any(word in question_lower for word in ["syntax", "how to", "how do i"]):
-            if "variable" in question_lower:
-                return """Python variable syntax is simple:
-
+You can also print variables:
 ```python
-variable_name = value
+name = "Python"
+print("Hello,", name)  # Outputs: Hello, Python
 ```
 
-Examples:
-```python
-name = "John"       # String variable
-age = 25            # Integer variable
-price = 19.99       # Float variable
-is_student = True   # Boolean variable
-```
-
-Python is dynamically typed, so you don't need to declare the variable type. The interpreter determines the type based on the assigned value."""
+Make sure to put your text inside quotes (single or double), and use commas to separate multiple items."""
             
-            if "function" in question_lower or "def" in question_lower:
-                return """To define a function in Python, use the 'def' keyword:
-
-```python
-def function_name(parameter1, parameter2, ...):
-    # Function body
-    # Code to execute
-    return result  # Optional return statement
-```
-
-Example:
-```python
-def greet(name):
-    return f"Hello, {name}!"
-    
-# Call the function
-message = greet("Alice")
-print(message)  # Displays: Hello, Alice!
-```
-
-Functions help you organize and reuse code. The 'return' statement is optional - if omitted, the function returns None."""
-        
-        # 3. Check for code analysis questions
-        if "what does this code do" in question_lower or "explain this code" in question_lower:
+        # Questions about code
+        if "what does this code do" in question_lower or "explain" in question_lower:
             if user_code:
-                code_explanation = "Your code "
-                
-                if "print(" in user_code:
-                    code_explanation += "displays text to the console using the print() function. "
-                
-                if "=" in user_code and "==" not in user_code:
-                    code_explanation += "assigns values to variables. "
-                    
-                if "if" in user_code:
-                    code_explanation += "uses conditional statements to make decisions based on certain conditions. "
-                    
-                if "for" in user_code or "while" in user_code:
-                    code_explanation += "utilizes loops to repeat actions. "
-                    
-                if "def" in user_code:
-                    code_explanation += "defines a custom function that can be called later. "
-                    
-                code_explanation += "\n\nTo understand your code better, let's break it down line by line:\n"
-                
-                # Add a simple line-by-line analysis
-                lines = user_code.strip().split('\n')
-                for i, line in enumerate(lines[:5]):  # Limit to first 5 lines for brevity
-                    line = line.strip()
-                    if line and not line.startswith('#'):
-                        code_explanation += f"\nLine {i+1}: `{line}`"
-                        if "print" in line:
-                            code_explanation += " - This displays output to the console."
-                        elif "=" in line and "==" not in line and "!=" not in line:
-                            code_explanation += " - This assigns a value to a variable."
-                        elif "if" in line:
-                            code_explanation += " - This starts a conditional block that only executes if the condition is True."
-                        elif "else" in line:
-                            code_explanation += " - This provides an alternative code block to execute when the if condition is False."
-                        elif "for" in line:
-                            code_explanation += " - This starts a loop that iterates over a sequence."
-                        elif "def" in line:
-                            code_explanation += " - This defines a function."
-                
-                return code_explanation
+                return "Your code appears to be a Python program that processes input and produces output. To give a more specific explanation, I'd need to analyze it in detail, but I'm currently experiencing technical difficulties. Try running your code to see what it does or ask about specific parts you're confused about."
             else:
-                return "I don't see any code to analyze. Please write some Python code first, and then I can explain what it does."
+                return "I don't see any code to analyze. Please write some Python code first, and then I can help explain what it does."
         
-        # 4. Handle challenge-related questions
-        if current_step == 3 and any(word in question_lower for word in ["hint", "stuck", "help", "challenge"]):
-            if expected_output:
-                hint = f"For this challenge, you need to write code that produces this output: '{expected_output}'. "
-                
-                if "hello" in expected_output.lower():
-                    hint += "Try using the print() function with the appropriate string."
-                elif any(op in expected_output for op in ["+", "-", "*", "/"]):
-                    hint += "This appears to involve mathematical operations. Make sure your code performs the correct calculation and displays the result."
-                
-                return hint
-            else:
-                return """To approach this challenge:
-
-1. Understand what you're being asked to do
-2. Break it down into smaller steps
-3. Think about which Python concepts you need (variables, loops, conditionals, etc.)
-4. Write your solution step by step
-5. Test your code with different inputs if possible
-
-What specific part of the challenge are you struggling with?"""
+        # Questions about challenge
+        if "hint" in question_lower or "challenge" in question_lower or "stuck" in question_lower:
+            return "To solve this programming challenge, break it down into steps: understand the requirements, plan your approach, implement one piece at a time, and test your solution. Which specific part are you struggling with?"
         
-        # 5. Default responses for different steps
-        if current_step == 1:
-            return f"""In this introduction to "{lesson.title}", we're covering the fundamental concepts needed for the lesson. 
-
-The key points to understand are:
-- Python syntax basics
-- How code statements are structured
-- How the concepts relate to practical programming
-
-Is there a specific part of the introduction you'd like me to explain in more detail?"""
-        elif current_step == 2:
-            return f"""The guided example in this lesson demonstrates how to apply the concepts in practice. 
-
-When analyzing this example, pay attention to:
-- How the code is structured
-- The relationship between different lines of code
-- How the output is produced
-
-Feel free to experiment by modifying parts of the example to see how it changes the behavior."""
-        else:
-            return f"""For this challenge in "{lesson.title}", you'll need to apply what you've learned to solve a programming problem.
-
-Remember to:
-- Plan before you code
-- Test your solution with different inputs
-- Make sure your output format matches exactly what's expected
-
-Could you tell me which specific aspect of the challenge you need help with?"""
+        # Default fallback
+        return "I understand you're asking about Python programming. Could you provide more specific details about what you're trying to learn or which concept you're having trouble with?"

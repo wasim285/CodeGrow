@@ -54,8 +54,19 @@ const LessonPage = () => {
         setLesson(response.data);
         setExpectedOutput(response.data.expected_output || "");
 
-        if (response.data.code_snippet && step === 2 && userCode.trim() === "") {
-          setUserCode(response.data.code_snippet);
+        // Handle code snippets based on step
+        if (step === 2) {
+          // For guided example, use code snippet if available
+          if (response.data.code_snippet && userCode.trim() === "") {
+            setUserCode(response.data.code_snippet);
+          } 
+          // If no snippet is available but we need some starter code
+          else if (!response.data.code_snippet && userCode.trim() === "") {
+            setUserCode("# Try your code here\n\n");
+          }
+        } else if (step === 3) {
+          // For mini challenge, always start with empty editor
+          setUserCode("");
         }
 
         // Check if lesson is already completed
@@ -154,6 +165,28 @@ const LessonPage = () => {
     }
   };
 
+  // Add these functions to handle step transitions properly
+
+  const goToNextStep = () => {
+    // If moving to challenge step, clear the code editor
+    if (step === 2) {
+      setUserCode("");
+    }
+    setStep(step + 1);
+    setOutput("");  // Clear output
+    setCheckResult(null);  // Clear check results
+  };
+
+  const goToPreviousStep = () => {
+    // If moving from challenge to guided example, load the example code
+    if (step === 3 && lesson.code_snippet) {
+      setUserCode(lesson.code_snippet);
+    }
+    setStep(step - 1);
+    setOutput("");  // Clear output
+    setCheckResult(null);  // Clear check results
+  };
+
   if (loading) return <TreeLoader />;
   if (error) return <p className="error-message">{error}</p>;
 
@@ -222,6 +255,7 @@ const LessonPage = () => {
                           extensions={[python()]}
                           theme="dark"
                           onChange={(value) => setUserCode(value)}
+                          placeholder="Write your solution here..."
                         />
                       </div>
                       
@@ -261,14 +295,15 @@ const LessonPage = () => {
                 </div>
               )}
 
+              {/* Update the step navigation section */}
               <div className="step-navigation">
                 {step > 1 && (
-                  <button className="previous-btn" onClick={() => setStep(step - 1)}>
+                  <button className="previous-btn" onClick={goToPreviousStep}>
                     Previous
                   </button>
                 )}
                 {step < 3 && (
-                  <button className="next-btn" onClick={() => setStep(step + 1)}>
+                  <button className="next-btn" onClick={goToNextStep}>
                     Next
                   </button>
                 )}

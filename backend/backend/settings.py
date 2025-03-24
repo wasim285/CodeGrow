@@ -116,3 +116,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+# Hugging Face AI Model Settings
+HF_API_KEY = os.getenv("HF_API_KEY")  # Remove hardcoded key
+HF_MODEL_ID = os.getenv("HF_MODEL_ID", "mistralai/Mistral-7B-Instruct-v0.2")
+HF_API_URL = "https://api-inference.huggingface.co/models/"
+HF_REQUEST_TIMEOUT = 15  # seconds

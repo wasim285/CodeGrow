@@ -134,66 +134,48 @@ export const getLessonFeedback = async (feedbackData) => {
  * @param {string} assistantData.question - Student's question
  * @returns {Promise<Object>} - Response from the AI assistant
  */
-export const getAIAssistantResponse = async (assistantData) => {
+export const getAIAssistantResponse = async (requestData) => {
   const token = localStorage.getItem("token");
-
   if (!token) {
-    return { 
-      success: false, 
-      error: "Authentication required" 
-    };
+    throw new Error("Authentication required");
   }
 
+  // First attempt with normal timeout
   try {
     const response = await axios.post(
       `${API_BASE_URL}lesson-assistant/`,
-      {
-        lessonId: assistantData.lessonId,
-        currentStep: assistantData.currentStep || 1,
-        userCode: assistantData.userCode || "",
-        expectedOutput: assistantData.expectedOutput || "",
-        question: assistantData.question
-      },
+      requestData,
       {
         headers: { Authorization: `Token ${token}` },
-        timeout: 8000 // 8-second timeout for this specific request
+        timeout: 15000 // 15 second timeout for first attempt
       }
     );
-
-    // Validate response
-    if (response.data && typeof response.data.response === 'string') {
-      return {
-        success: true,
-        response: response.data.response
-      };
-    } else {
-      // If server response is not in expected format
-      return {
-        success: false,
-        error: "Invalid response format from server",
-        fallbackResponse: getFallbackResponse(assistantData.question, assistantData.currentStep)
-      };
-    }
+    
+    return response.data;
   } catch (error) {
-    console.error("AI Assistant API Error:", error);
-    
-    // Provide more detailed error information and a fallback response
-    let errorMessage = "Failed to get AI assistant response.";
-    
+    // If it's a timeout error, try once more with a longer timeout
     if (error.code === 'ECONNABORTED') {
-      errorMessage = "Request timed out. The assistant is taking too long to respond.";
-    } else if (error.response) {
-      errorMessage = error.response.data?.error || 
-                    `Server error (${error.response.status}): ${error.response.statusText}`;
-    } else if (error.request) {
-      errorMessage = "No response received from server. Check your internet connection.";
+      console.log("First attempt timed out, trying again with longer timeout...");
+      
+      try {
+        const retryResponse = await axios.post(
+          `${API_BASE_URL}lesson-assistant/`,
+          requestData,
+          {
+            headers: { Authorization: `Token ${token}` },
+            timeout: 30000 // 30 second timeout for second attempt
+          }
+        );
+        
+        return retryResponse.data;
+      } catch (retryError) {
+        console.error("Retry also failed:", retryError);
+        throw retryError;
+      }
+    } else {
+      // For non-timeout errors, just throw the original error
+      throw error;
     }
-    
-    return { 
-      success: false, 
-      error: errorMessage,
-      fallbackResponse: getFallbackResponse(assistantData.question, assistantData.currentStep)
-    };
   }
 };
 

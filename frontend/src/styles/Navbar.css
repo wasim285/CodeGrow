@@ -99,15 +99,18 @@
     background: linear-gradient(to right, #4caf50, #8bc34a);
 }
 
+/* Update the profile-container styling */
+
 .profile-container {
     display: flex;
     align-items: center;
-    position: absolute;
-    right: 40px;
+    position: relative; /* Change from absolute to relative */
     cursor: pointer;
     padding: 5px;
     border-radius: 50px;
     transition: all 0.3s ease;
+    margin-left: auto; /* Push to the right side, but within the navbar */
+    margin-right: 20px; /* Add right margin to keep it away from the edge */
 }
 
 .profile-container:hover {
@@ -130,6 +133,7 @@
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
 }
 
+/* Also update the dropdown menu positioning */
 .dropdown-menu {
     position: absolute;
     top: 60px;
@@ -252,6 +256,7 @@
     transition: all 0.3s ease;
 }
 
+/* Then update the media query for mobile devices */
 @media (max-width: 768px) {
     .navbar {
         padding: 0 20px;
@@ -264,7 +269,8 @@
     }
     
     .profile-container {
-        right: 80px;
+        position: relative; /* Keep it as relative */
+        margin-right: 60px; /* Increase the right margin to make space for the mobile toggle */
     }
     
     .nav-links {
