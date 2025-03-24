@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/AILearningAssistant.css';
-import api from '../utils/api';
+import api, { getAIAssistantResponse } from '../utils/api'; // Import the function
 
 const AILearningAssistant = ({ 
   lessonId, 
@@ -45,71 +45,6 @@ const AILearningAssistant = ({
     setInputValue(e.target.value);
   };
 
-  // Update the handleSendMessage function to use the new API
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
-    // Add user message to chat
-    const userMessage = {
-      id: messages.length + 1,
-      type: 'user',
-      content: inputValue
-    };
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    setIsLoading(true);
-
-    try {
-      // Use the imported API function
-      const result = await getAIAssistantResponse({
-        lessonId,
-        currentStep: Number(currentStep) || 1,
-        userCode: userCode || '',
-        expectedOutput: expectedOutput || '',
-        question: userMessage.content
-      });
-
-      if (result.success) {
-        // Add AI response to chat
-        setMessages(prev => [
-          ...prev, 
-          { 
-            id: prev.length + 1, 
-            type: 'assistant', 
-            content: result.response
-          }
-        ]);
-      } else {
-        // Use fallback response if provided, otherwise use error message
-        const responseText = result.fallbackResponse || 
-                            `I'm having trouble right now. ${result.error}`;
-        
-        setMessages(prev => [
-          ...prev, 
-          { 
-            id: prev.length + 1, 
-            type: 'assistant', 
-            content: responseText
-          }
-        ]);
-      }
-    } catch (error) {
-      console.error('AI Assistant Error:', error);
-      
-      // Add helpful error message
-      setMessages(prev => [
-        ...prev, 
-        { 
-          id: prev.length + 1, 
-          type: 'assistant', 
-          content: "Something went wrong with my thinking process. Let me try a simpler approach: What specific part of the lesson can I help you understand better?"
-        }
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Add this helper function to generate fallback responses
   const getFallbackResponse = (question, step) => {
     const questionLower = question.toLowerCase();
@@ -138,6 +73,70 @@ const AILearningAssistant = ({
         return "For challenges, start by making sure you understand what the problem is asking. Then sketch a plan before coding. Break down your solution into steps, and implement one step at a time.";
       default:
         return "I'm here to help with this lesson. Could you tell me more specifically what you're struggling with?";
+    }
+  };
+
+  // Update the handleSendMessage function to use the new API
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+
+    // Add user message to chat
+    const userMessage = {
+      id: messages.length + 1,
+      type: 'user',
+      content: inputValue
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      // Direct API call as a fallback if imported function has issues
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated");
+
+      const response = await api.post(
+        "lesson-assistant/",
+        {
+          lessonId,
+          currentStep: Number(currentStep) || 1,
+          userCode: userCode || "",
+          expectedOutput: expectedOutput || "",
+          question: userMessage.content
+        },
+        { 
+          headers: { Authorization: `Token ${token}` },
+          timeout: 8000
+        }
+      );
+
+      // Process response
+      if (response.data && response.data.response) {
+        setMessages(prev => [
+          ...prev, 
+          { 
+            id: prev.length + 1, 
+            type: 'assistant', 
+            content: response.data.response
+          }
+        ]);
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error) {
+      console.error('AI Assistant Error:', error);
+      
+      // Use fallback response
+      setMessages(prev => [
+        ...prev, 
+        { 
+          id: prev.length + 1, 
+          type: 'assistant', 
+          content: getFallbackResponse(userMessage.content, currentStep)
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
