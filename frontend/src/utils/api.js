@@ -156,22 +156,32 @@ export const getAIAssistantResponse = async (assistantData) => {
       },
       {
         headers: { Authorization: `Token ${token}` },
-        timeout: 15000 // 15-second timeout for this specific request
+        timeout: 8000 // 8-second timeout for this specific request
       }
     );
 
-    return {
-      success: true,
-      response: response.data.response
-    };
+    // Validate response
+    if (response.data && typeof response.data.response === 'string') {
+      return {
+        success: true,
+        response: response.data.response
+      };
+    } else {
+      // If server response is not in expected format
+      return {
+        success: false,
+        error: "Invalid response format from server",
+        fallbackResponse: getFallbackResponse(assistantData.question, assistantData.currentStep)
+      };
+    }
   } catch (error) {
     console.error("AI Assistant API Error:", error);
     
-    // Provide more detailed error information
+    // Provide more detailed error information and a fallback response
     let errorMessage = "Failed to get AI assistant response.";
     
     if (error.code === 'ECONNABORTED') {
-      errorMessage = "Request timed out. The AI assistant is taking too long to respond.";
+      errorMessage = "Request timed out. The assistant is taking too long to respond.";
     } else if (error.response) {
       errorMessage = error.response.data?.error || 
                     `Server error (${error.response.status}): ${error.response.statusText}`;
@@ -181,8 +191,45 @@ export const getAIAssistantResponse = async (assistantData) => {
     
     return { 
       success: false, 
-      error: errorMessage
+      error: errorMessage,
+      fallbackResponse: getFallbackResponse(assistantData.question, assistantData.currentStep)
     };
+  }
+};
+
+/**
+ * Generate a fallback response when the API call fails
+ * @param {string} question - The user's question
+ * @param {number} step - The current lesson step
+ * @returns {string} - A helpful fallback response
+ */
+const getFallbackResponse = (question, step) => {
+  const questionLower = question.toLowerCase();
+  
+  // Check for common patterns
+  if (questionLower.includes("explain") || questionLower.includes("what is")) {
+    return "This concept is a fundamental part of programming that helps you solve problems by breaking them down into manageable steps. If you'd like more specific help, try asking about a particular part you're struggling with.";
+  }
+  
+  if (questionLower.includes("error") || questionLower.includes("not working")) {
+    return "When debugging code, check for these common issues: syntax errors (like missing colons or parentheses), variable naming inconsistencies, and logic errors in your conditions. Reading the error message carefully often gives you clues about what's wrong.";
+  }
+  
+  if (questionLower.includes("hint") || questionLower.includes("stuck")) {
+    return "Try breaking down the problem into smaller steps. First, understand what inputs you're working with. Then, think about what transformations you need to apply. Finally, format your output according to what's expected.";
+  }
+  
+  // Step-specific fallbacks
+  const stepNum = Number(step) || 1;
+  switch(stepNum) {
+    case 1:
+      return "The introduction is meant to give you a foundation for the concepts in this lesson. Take your time to understand each part, and don't worry if it doesn't all click immediately. Learning programming is a step-by-step process.";
+    case 2:
+      return "In the guided example, try to understand each line of code. What is its purpose? How does it contribute to the overall solution? Experimenting by changing small parts of the code can help you see how it works.";
+    case 3:
+      return "For challenges, start by making sure you understand what the problem is asking. Then sketch a plan before coding. Break down your solution into steps, and implement one step at a time.";
+    default:
+      return "I'm here to help with this lesson. Could you tell me more specifically what you're struggling with?";
   }
 };
 

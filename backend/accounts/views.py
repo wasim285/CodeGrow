@@ -21,6 +21,11 @@ from django.conf import settings
 import os
 import requests
 from dotenv import load_dotenv
+import json
+import re
+import time
+import random
+import logging
 
 load_dotenv()  # Load environment variables
 
@@ -502,6 +507,7 @@ class LessonAssistantView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        # Extract data from the request
         lesson_id = request.data.get("lessonId")
         current_step = request.data.get("currentStep")
         user_code = request.data.get("userCode", "")
@@ -522,131 +528,162 @@ class LessonAssistantView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Prepare a simplified response based on the question type
-        # This avoids API timeouts by using predefined responses for common questions
-        simplified_response = self.get_simplified_response(question, lesson, current_step, user_code, expected_output)
-        if simplified_response:
-            return Response({"response": simplified_response}, status=status.HTTP_200_OK)
-            
+        # Instead of relying on external API, generate responses locally
+        # This eliminates the timeout issues completely
+        response_text = self.generate_local_response(question, lesson, current_step, user_code, expected_output)
+        
+        # Log the interaction for analytics (optional)
         try:
-            # If no simplified response is available, use a simpler prompt for the API
-            # that is less likely to cause timeouts
-            prompt = self.create_simplified_prompt(question, lesson, current_step, user_code, expected_output)
-            
-            HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-            API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-
-            headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
-            payload = {"inputs": prompt, "wait_for_model": False}  # Don't wait for model to load
-
-            # Set a shorter timeout to avoid worker timeouts
-            response = requests.post(API_URL, headers=headers, json=payload, timeout=5)
-            
-            if response.status_code != 200:
-                # Fallback to simplified response if API fails
-                return Response({
-                    "response": "I'm having trouble connecting to my knowledge base right now. Let me provide a simpler answer:\n\n" + 
-                                self.generate_fallback_response(question, lesson, current_step)
-                }, status=status.HTTP_200_OK)
-                
-            feedback_data = response.json()
-            
-            # Extract the generated text
-            if isinstance(feedback_data, list) and len(feedback_data) > 0:
-                response_text = feedback_data[0].get("generated_text", "")
-            else:
-                response_text = feedback_data.get("generated_text", "")
-            
-            # Clean up the response
-            response_text = self.clean_response_text(response_text, prompt)
-            
-            return Response({"response": response_text}, status=status.HTTP_200_OK)
-
-        except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as e:
-            import traceback
-            print(f"AI Assistant Error: {str(e)}")
-            print(traceback.format_exc())
-            
-            # Return a fallback response instead of an error
-            return Response({
-                "response": "I'm having trouble processing your question right now. Let me provide a simpler answer:\n\n" + 
-                            self.generate_fallback_response(question, lesson, current_step)
-            }, status=status.HTTP_200_OK)
-    
-    def create_simplified_prompt(self, question, lesson, current_step, user_code, expected_output):
-        """Create a much simpler prompt that's less likely to cause timeouts"""
-        prompt = f"Help a student with: {question}\n\nLesson: {lesson.title}\n"
+            AIInteraction.objects.create(
+                user=request.user,
+                lesson=lesson,
+                question=question,
+                response=response_text[:500],  # Store first 500 chars to avoid DB issues
+                step=current_step
+            )
+        except Exception as e:
+            # Don't fail if logging fails
+            print(f"Error logging AI interaction: {str(e)}")
         
-        if current_step == 3 and user_code:
-            prompt += f"Their code: {user_code[:300]}...\n"  # Limit code size
-            
-        prompt += "Keep your response short, simple, and encouraging."
-        return prompt
+        return Response({"response": response_text}, status=status.HTTP_200_OK)
     
-    def clean_response_text(self, text, prompt):
-        """Clean the response text to remove HTML, docstrings, etc."""
-        if not text:
-            return "I'm sorry, I couldn't generate a response. Please try a different question."
-            
-        # Remove the prompt if it's repeated in the response
-        if text.startswith(prompt):
-            text = text[len(prompt):].strip()
-            
-        # Remove HTML and docstrings
-        text = re.sub(r'<!DOCTYPE.*?>', '', text, flags=re.DOTALL)
-        text = re.sub(r'<html>.*?</html>', '', text, flags=re.DOTALL)
-        text = re.sub(r'""".*?"""', '', text, flags=re.DOTALL)
-        text = re.sub(r"'''.*?'''", '', text, flags=re.DOTALL)
-        
-        # If after cleaning we have little text left, provide a fallback
-        if len(text.strip()) < 20:
-            return "I understand your question. Could you try rephrasing it so I can help you better?"
-            
-        return text.strip()
-    
-    def get_simplified_response(self, question, lesson, current_step, user_code, expected_output):
-        """Check if the question matches common patterns and return a pre-defined response"""
+    def generate_local_response(self, question, lesson, current_step, user_code, expected_output):
+        """
+        Generate AI assistant responses locally without external API calls
+        This eliminates timeouts and ensures consistent performance
+        """
         question_lower = question.lower()
         
-        # Check for common question patterns
-        if any(keyword in question_lower for keyword in ["hello", "hi ", "hey", "greetings"]):
-            return f"Hello! I'm here to help you with your '{lesson.title}' lesson. What would you like to know?"
-            
-        if any(keyword in question_lower for keyword in ["what will i learn", "what is this lesson about"]):
-            return f"In this lesson on '{lesson.title}', you'll learn about {lesson.description}"
-            
-        if "explain" in question_lower and "concept" in question_lower:
-            if current_step == 1:
-                return f"Let me explain this concept in simpler terms: {lesson.step1_content[:300]}..."
-            elif current_step == 2:
-                return f"This concept involves: {lesson.step2_content[:300]}..."
-                
-        if "stuck" in question_lower and current_step == 3:
-            return f"Let's break down the challenge step by step. The goal is to {lesson.step3_challenge[:150]}... Try starting by understanding what inputs you need and what output is expected."
-            
-        if "hint" in question_lower and current_step == 3:
-            return f"Here's a hint: Make sure you're handling the input correctly and check that your output format matches what's expected ({expected_output})."
-            
-        # No simplified response available
-        return None
+        # Add a small delay to simulate thinking (optional)
+        time.sleep(0.5)
         
-    def generate_fallback_response(self, question, lesson, current_step):
-        """Generate a fallback response based on the question and context"""
-        if "explain" in question.lower():
-            return f"This is a concept in {lesson.title} that involves understanding how to process data and perform operations in Python. Would you like me to break it down into smaller steps?"
+        # Handle common greeting patterns
+        if any(word in question_lower for word in ["hello", "hi", "hey", "greetings"]):
+            return f"Hello! I'm your AI assistant for this '{lesson.title}' lesson. How can I help you today?"
+        
+        # Handle lesson content questions
+        if "what" in question_lower and any(phrase in question_lower for phrase in ["lesson", "learn", "about", "topic"]):
+            return f"This lesson on '{lesson.title}' is about {lesson.description}. You'll learn key programming concepts and practical skills through guided examples and hands-on challenges."
+        
+        # Handle concept explanation requests
+        if "explain" in question_lower or "understand" in question_lower:
+            if current_step == 1:
+                content = self.extract_clean_content(lesson.step1_content)
+                return f"Let me explain the concept in simpler terms. {content} Does that help clarify things?"
+            elif current_step == 2:
+                content = self.extract_clean_content(lesson.step2_content)
+                return f"In the guided example, we're learning about {content} Pay attention to how the code is structured and the logic flow."
+        
+        # Handle code-specific questions in step 2 or 3
+        if (current_step == 2 or current_step == 3) and any(word in question_lower for word in ["code", "function", "error", "bug", "fix"]):
+            if not user_code:
+                return "I don't see any code to analyze. Please write some code in the editor first, then I can help you review it."
             
-        if "error" in question.lower() or "not working" in question.lower():
-            return "When debugging code, focus on checking your syntax, making sure variable names match throughout your code, and verifying that your logic handles all possible inputs."
+            code_snippet = user_code[:200] + "..." if len(user_code) > 200 else user_code
             
-        if "how to" in question.lower():
-            return "To approach this problem, break it into smaller steps: 1) Understand what inputs you need, 2) Process the data step by step, 3) Format your output correctly."
+            # Generic code analysis
+            if "what does" in question_lower or "explain" in question_lower:
+                return f"Let me explain what your code does:\n\nYour code takes input, processes it using variables and operations, and produces an output. The key part is how you're handling the computation logic. Make sure your variables are properly initialized and your operations are performing the intended calculations."
             
-        # Generic fallback based on current step
-        if current_step == 1:
-            return "This introductory section helps build your foundation. Try re-reading the explanation and think about how these concepts connect to what you already know."
-        elif current_step == 2:
-            return "In the guided example, focus on understanding each line of code. Try changing small parts to see how it affects the output."
-        elif current_step == 3:
-            return "For this challenge, start by planning your approach on paper before coding. Think about what inputs you have and what steps you need to take to get the expected output."
-        else:
-            return "I'm here to help with this lesson. Could you tell me more specifically what you're struggling with?"
+            if "error" in question_lower or "bug" in question_lower or "fix" in question_lower:
+                # Check for common programming errors
+                common_issues = self.identify_common_issues(user_code)
+                if common_issues:
+                    return f"I spotted a few potential issues in your code:\n\n{common_issues}\n\nTry fixing these and see if it helps!"
+                else:
+                    return "Your code looks syntactically correct, but you might have a logical error. Check that your algorithm correctly implements the requirements. Make sure you're handling all possible input cases correctly."
+        
+        # Handle challenge-specific help in step 3
+        if current_step == 3:
+            if "stuck" in question_lower or "hint" in question_lower or "help" in question_lower:
+                challenge = self.extract_clean_content(lesson.step3_challenge)
+                return f"Let's break down the challenge: {challenge}\n\nHere's a hint: start by understanding the expected input and output format. Then, write pseudocode to outline your approach before coding. Focus on one requirement at a time."
+            
+            if "output" in question_lower or "expected" in question_lower:
+                return f"The expected output should be: {expected_output}\n\nMake sure your code produces output in exactly this format, including any spacing, punctuation, or formatting details."
+        
+        # Handle general programming questions
+        programming_concepts = {
+            "loop": "Loops allow you to repeat a block of code multiple times. Common types are 'for' loops (for a specific number of iterations) and 'while' loops (until a condition is met).",
+            "variable": "Variables store data values that can be used and modified throughout your program. In Python, you don't need to declare the type - it's dynamically typed.",
+            "function": "Functions are reusable blocks of code that perform specific tasks. They help organize your code and follow the DRY (Don't Repeat Yourself) principle.",
+            "if": "Conditional statements (if/elif/else) allow your program to make decisions based on certain conditions, executing different code blocks accordingly.",
+            "list": "Lists are ordered, changeable collections that can store multiple items, even of different types. They use square brackets [].",
+            "dictionary": "Dictionaries store data in key-value pairs, allowing fast lookups by key. They use curly braces {} with key:value syntax.",
+            "error": "Errors happen when your code can't execute properly. Common types include SyntaxError (incorrect syntax), TypeError (operation on incorrect data type), and IndexError (accessing non-existent index)."
+        }
+        
+        for concept, explanation in programming_concepts.items():
+            if concept in question_lower:
+                return explanation
+        
+        # Default responses based on current step
+        step_responses = {
+            1: [
+                f"The introduction to {lesson.title} provides the foundation you need. Take your time to understand these concepts as they'll be essential for the next steps.",
+                "It might help to relate these new concepts to something you already know. Can you think of a real-world analogy for this programming concept?",
+                "Don't worry if everything doesn't click immediately. Programming is a skill that develops with practice and experience."
+            ],
+            2: [
+                "Try to understand the guided example line by line. What does each statement do? How do they work together?",
+                "The best way to learn is by experimenting! Try modifying the code example slightly and see how it changes the output.",
+                "This example demonstrates fundamental programming patterns that you'll use frequently. Pay attention to the structure and problem-solving approach."
+            ],
+            3: [
+                "For this challenge, break down the problem into smaller steps. What inputs do you need? What operations should you perform? What's the expected output format?",
+                "Think about edge cases in your solution. What happens with unexpected inputs? Have you handled all possible scenarios?",
+                "If you're stuck, try writing pseudocode first - outline your solution in plain English steps before converting to Python code."
+            ]
+        }
+        
+        # Return a random appropriate response for the current step
+        step_num = int(current_step) if str(current_step).isdigit() else 1
+        return random.choice(step_responses.get(step_num, step_responses[1]))
+    
+    def extract_clean_content(self, html_content):
+        """Extract readable text from HTML content"""
+        if not html_content:
+            return "the key programming concepts covered in this lesson."
+            
+        # Simple regex to remove HTML tags
+        text = re.sub(r'<[^>]+>', ' ', html_content)
+        # Clean up extra whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+        
+        # Limit length
+        if len(text) > 200:
+            text = text[:200] + "..."
+            
+        return text
+    
+    def identify_common_issues(self, code):
+        """Identify common programming issues in code"""
+        issues = []
+        
+        # Check for indentation issues (simplified check)
+        if "    " in code and "\t" in code:
+            issues.append("- You're mixing tabs and spaces for indentation, which can cause issues in Python")
+            
+        # Check for unclosed brackets/parentheses
+        if code.count('(') != code.count(')'):
+            issues.append("- You have mismatched parentheses () in your code")
+        if code.count('[') != code.count(']'):
+            issues.append("- You have mismatched square brackets [] in your code")
+        if code.count('{') != code.count('}'):
+            issues.append("- You have mismatched curly braces {} in your code")
+            
+        # Check for common syntax issues
+        if "print" in code and "print " not in code and "print(" not in code:
+            issues.append("- Check your print statements. In Python 3, print requires parentheses: print()")
+            
+        if ";" in code:
+            issues.append("- Python doesn't require semicolons (;) at the end of lines. They're optional but rarely used.")
+            
+        # Check for logical errors
+        if "==" not in code and "if" in code:
+            issues.append("- For comparisons in if statements, use == (double equals) not = (single equals)")
+            
+        # Return formatted issues or None
+        if issues:
+            return "\n".join(issues)
+        return None

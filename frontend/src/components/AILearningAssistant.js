@@ -45,7 +45,7 @@ const AILearningAssistant = ({
     setInputValue(e.target.value);
   };
 
-  // Update the response handling to be more robust
+  // Update the handleSendMessage function to use the new API
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -60,76 +60,49 @@ const AILearningAssistant = ({
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error('Not authenticated');
-
-      // Get context information to send to the AI
-      const contextInfo = {
+      // Use the imported API function
+      const result = await getAIAssistantResponse({
         lessonId,
         currentStep: Number(currentStep) || 1,
         userCode: userCode || '',
         expectedOutput: expectedOutput || '',
         question: userMessage.content
-      };
+      });
 
-      // Make API call to get AI response
-      const response = await api.post(
-        'lesson-assistant/',
-        contextInfo,
-        { 
-          headers: { Authorization: `Token ${token}` },
-          timeout: 10000 // 10 second timeout
-        }
-      );
-
-      // Process the response data safely
-      let aiResponseText = "I'm here to help! What specifically would you like to know about this lesson?";
-      
-      try {
-        if (response.data && typeof response.data === 'object') {
-          if (response.data.response && typeof response.data.response === 'string') {
-            aiResponseText = response.data.response.trim();
-            
-            // Basic cleaning of problematic text patterns
-            if (aiResponseText.includes("<!DOCTYPE") || 
-                aiResponseText.includes("dialog_finished_docstring") ||
-                aiResponseText.includes("<html>")) {
-              throw new Error("Invalid response format");
-            }
+      if (result.success) {
+        // Add AI response to chat
+        setMessages(prev => [
+          ...prev, 
+          { 
+            id: prev.length + 1, 
+            type: 'assistant', 
+            content: result.response
           }
-        }
-      } catch (parseError) {
-        console.warn("Response parsing error:", parseError);
-        // Use fallback response based on the user's question
-        aiResponseText = getFallbackResponse(userMessage.content, currentStep);
+        ]);
+      } else {
+        // Use fallback response if provided, otherwise use error message
+        const responseText = result.fallbackResponse || 
+                            `I'm having trouble right now. ${result.error}`;
+        
+        setMessages(prev => [
+          ...prev, 
+          { 
+            id: prev.length + 1, 
+            type: 'assistant', 
+            content: responseText
+          }
+        ]);
       }
-
-      // Add AI response to chat
-      setMessages(prev => [
-        ...prev, 
-        { 
-          id: prev.length + 1, 
-          type: 'assistant', 
-          content: aiResponseText
-        }
-      ]);
     } catch (error) {
       console.error('AI Assistant Error:', error);
       
-      // Add helpful error message based on the error type
-      let errorMessage = "I'm having trouble connecting right now. Please try again later.";
-      
-      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-        errorMessage = "It's taking me longer than expected to think of a response. Let me offer a simpler answer: " + 
-                       getFallbackResponse(userMessage.content, currentStep);
-      }
-      
+      // Add helpful error message
       setMessages(prev => [
         ...prev, 
         { 
           id: prev.length + 1, 
           type: 'assistant', 
-          content: errorMessage
+          content: "Something went wrong with my thinking process. Let me try a simpler approach: What specific part of the lesson can I help you understand better?"
         }
       ]);
     } finally {
