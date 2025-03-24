@@ -7,7 +7,6 @@ import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import api from "../utils/api";
-import { getLessonFeedback } from "../services/feedbackService";
 import AILearningAssistant from "../components/AILearningAssistant";
 
 const API_BASE_URL =
@@ -29,11 +28,10 @@ const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [step, setStep] = useState(1);
 
-  // Feedback states
-  const [aiFeedback, setAiFeedback] = useState("");
-  const [loadingFeedback, setLoadingFeedback] = useState(false);
+  // States for auto-checking code output
   const [expectedOutput, setExpectedOutput] = useState("");
-  const [checkingAnswer, setCheckingAnswer] = useState(false);
+  const [checkResult, setCheckResult] = useState(null);
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -101,7 +99,7 @@ const LessonPage = () => {
     if (running) return;
     setRunning(true);
     setOutput("Running...");
-    setAiFeedback(""); // Clear previous feedback
+    setCheckResult(null); // Clear previous check result
 
     try {
       const token = localStorage.getItem("token");
@@ -114,54 +112,45 @@ const LessonPage = () => {
       );
 
       setOutput(response.data.output || "No output.");
-      return response.data.output || ""; // Return output for checkAnswer function
+      return response.data.output || ""; // Return output for checkAnswer
     } catch (error) {
       console.error("Run Code API Error:", error.response?.data || error.message);
       setOutput("Error executing code.");
-      return "Error"; // Return error for checkAnswer function
+      return "Error"; // Return error for checkAnswer
     } finally {
       setRunning(false);
     }
   };
 
-  // Check answer against expected output
+  // Simple check answer without AI feedback
   const checkAnswer = async () => {
-    if (checkingAnswer || running) return;
-    setCheckingAnswer(true);
-    setLoadingFeedback(true);
+    if (checking || running) return;
+    setChecking(true);
     
     try {
-      // Run code and get output
-      const userOutput = await runCode();
+      const userOutput = await runCode(); // Run the code to get output
       
-      // Compare with expected output
+      // Simple output comparison
       if (userOutput.trim() === expectedOutput.trim()) {
-        // Correct answer
-        setAiFeedback("✅ Great job! Your solution is correct!");
-        markAsCompleted();
-      } else {
-        // Wrong answer - get AI feedback
-        setAiFeedback("Analyzing your code...");
-        
-        const result = await getLessonFeedback({
-          code: userCode.trim(),
-          expected_output: expectedOutput,
-          user_output: userOutput,
-          question: lesson.step3_challenge
+        setCheckResult({
+          correct: true,
+          message: "✅ Correct! Your solution matches the expected output.",
         });
-        
-        if (result.success) {
-          setAiFeedback(result.feedback);
-        } else {
-          setAiFeedback("Your solution doesn't match the expected output. Try again!");
-        }
+        markAsCompleted(); // Mark lesson as completed
+      } else {
+        setCheckResult({
+          correct: false,
+          message: "❌ Incorrect. Your solution doesn't match the expected output. Try asking the AI Assistant for help.",
+        });
       }
     } catch (error) {
       console.error("Check Answer Error:", error);
-      setAiFeedback("Error analyzing your code. Please try again.");
+      setCheckResult({
+        correct: false,
+        message: "Error checking your answer. Please try again.",
+      });
     } finally {
-      setCheckingAnswer(false);
-      setLoadingFeedback(false);
+      setChecking(false);
     }
   };
 
@@ -238,15 +227,19 @@ const LessonPage = () => {
                       
                       {/* Button Group */}
                       <div className="button-group">
-                        <button className="run-btn" onClick={runCode} disabled={running || checkingAnswer}>
+                        <button 
+                          className="run-btn" 
+                          onClick={runCode} 
+                          disabled={running || checking}
+                        >
                           {running ? "Running..." : "Run Code"}
                         </button>
                         <button
                           className="check-btn"
                           onClick={checkAnswer}
-                          disabled={running || checkingAnswer || loadingFeedback}
+                          disabled={running || checking}
                         >
-                          {checkingAnswer ? "Checking..." : "Check Answer"}
+                          {checking ? "Checking..." : "Check Answer"}
                         </button>
                       </div>
                       
@@ -255,20 +248,10 @@ const LessonPage = () => {
                         <pre>{output}</pre>
                       </div>
                       
-                      {/* AI Feedback Section (will be shown inline for immediate feedback) */}
-                      {loadingFeedback && !aiFeedback && (
-                        <div className="feedback-loading">
-                          <div className="spinner"></div>
-                          <p>Getting AI feedback...</p>
-                        </div>
-                      )}
-                      
-                      {aiFeedback && (
-                        <div className="feedback-container">
-                          <h3>AI Feedback</h3>
-                          <div className="feedback-content">
-                            {aiFeedback}
-                          </div>
+                      {/* Simple Check Result */}
+                      {checkResult && (
+                        <div className={`check-result ${checkResult.correct ? 'success' : 'error'}`}>
+                          <p>{checkResult.message}</p>
                         </div>
                       )}
                     </>
@@ -303,7 +286,7 @@ const LessonPage = () => {
           )}
         </div>
         
-        {/* AI Learning Assistant (always available) */}
+        {/* AI Learning Assistant */}
         {lesson && (
           <AILearningAssistant 
             lessonId={lessonId}
