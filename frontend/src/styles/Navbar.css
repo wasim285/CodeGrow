@@ -99,18 +99,18 @@
     background: linear-gradient(to right, #4caf50, #8bc34a);
 }
 
-/* Update the profile-container styling */
+/* Update the profile-container positioning */
 
 .profile-container {
     display: flex;
     align-items: center;
-    position: relative; /* Change from absolute to relative */
+    position: relative;
     cursor: pointer;
     padding: 5px;
     border-radius: 50px;
     transition: all 0.3s ease;
-    margin-left: auto; /* Push to the right side, but within the navbar */
-    margin-right: 20px; /* Add right margin to keep it away from the edge */
+    margin-left: auto;
+    margin-right: 60px; /* Increased to move it further away from the edge and scrollbar */
 }
 
 .profile-container:hover {
@@ -133,7 +133,7 @@
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
 }
 
-/* Also update the dropdown menu positioning */
+/* Update the dropdown menu positioning */
 .dropdown-menu {
     position: absolute;
     top: 60px;
