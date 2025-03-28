@@ -32,19 +32,11 @@ const LessonPage = () => {
   const [expectedOutput, setExpectedOutput] = useState("");
   const [checkResult, setCheckResult] = useState(null);
   const [checking, setChecking] = useState(false);
-  
-  // Add state to track the learning pathway
-  const [learningPathway, setLearningPathway] = useState("");
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
-    }
-    
-    // Set learning pathway from user context
-    if (user.learning_goal) {
-      setLearningPathway(user.learning_goal);
     }
 
     const fetchLesson = async () => {
@@ -59,33 +51,22 @@ const LessonPage = () => {
           headers: { Authorization: `Token ${token}` },
         });
 
-        const lessonData = response.data;
-        setLesson(lessonData);
-        setExpectedOutput(lessonData.expected_output || "");
+        setLesson(response.data);
+        setExpectedOutput(response.data.expected_output || "");
 
-        console.log("Fetched lesson data:", lessonData);
-        console.log("Current learning pathway:", user.learning_goal);
-
-        // Handle code snippets based on step and learning pathway
+        // Handle code snippets based on step
         if (step === 2) {
           // For guided example, use code snippet if available
-          if (lessonData.code_snippet && userCode.trim() === "") {
-            console.log("Setting code from lesson snippet:", lessonData.code_snippet);
-            setUserCode(lessonData.code_snippet);
+          if (response.data.code_snippet && userCode.trim() === "") {
+            setUserCode(response.data.code_snippet);
           } 
           // If no snippet is available but we need some starter code
-          else if (!lessonData.code_snippet && userCode.trim() === "") {
+          else if (!response.data.code_snippet && userCode.trim() === "") {
             setUserCode("# Try your code here\n\n");
           }
         } else if (step === 3) {
-          // For mini challenge, determine if we should provide starter code based on pathway
-          if (user.learning_goal === "School" && step === 3) {
-            // For school pathway, students might need a bit more guidance in challenges
-            setUserCode("# Write your solution here\n\n");
-          } else {
-            // For other pathways, start with empty editor for challenges
-            setUserCode("");
-          }
+          // For mini challenge, always start with empty editor
+          setUserCode("");
         }
 
         // Check if lesson is already completed
@@ -152,7 +133,7 @@ const LessonPage = () => {
     }
   };
 
-  // Improved check answer with pathway-specific feedback
+  // Simple check answer without AI feedback
   const checkAnswer = async () => {
     if (checking || running) return;
     setChecking(true);
@@ -160,43 +141,19 @@ const LessonPage = () => {
     try {
       const userOutput = await runCode(); // Run the code to get output
       
-      // Compare with expected output
-      const isCorrect = userOutput.trim() === expectedOutput.trim();
-      
-      // Create pathway-specific feedback messages
-      let feedbackMessage = "";
-      
-      if (isCorrect) {
-        // Customized success messages by pathway
-        if (learningPathway === "School") {
-          feedbackMessage = "✅ Correct! You've successfully completed this exercise. Great job!";
-        } else if (learningPathway === "Portfolio") {
-          feedbackMessage = "✅ Excellent! Your solution works perfectly. This would be a great addition to your portfolio.";
-        } else if (learningPathway === "Career Growth") {
-          feedbackMessage = "✅ Correct implementation. Your solution demonstrates professional-quality code.";
-        } else {
-          feedbackMessage = "✅ Correct! Your solution matches the expected output.";
-        }
-        
+      // Simple output comparison
+      if (userOutput.trim() === expectedOutput.trim()) {
+        setCheckResult({
+          correct: true,
+          message: "✅ Correct! Your solution matches the expected output.",
+        });
         markAsCompleted(); // Mark lesson as completed
       } else {
-        // Customized error messages by pathway
-        if (learningPathway === "School") {
-          feedbackMessage = "❌ Not quite right. Try reviewing what you've learned so far, or ask the AI Assistant for help.";
-        } else if (learningPathway === "Portfolio") {
-          feedbackMessage = "❌ Your solution doesn't match the expected output. Remember that attention to detail is important in portfolio projects.";
-        } else if (learningPathway === "Career Growth") {
-          feedbackMessage = "❌ Your implementation needs revision. Consider edge cases and validate your approach.";
-        } else {
-          feedbackMessage = "❌ Incorrect. Your solution doesn't match the expected output.";
-        }
+        setCheckResult({
+          correct: false,
+          message: "❌ Incorrect. Your solution doesn't match the expected output. Try asking the AI Assistant for help.",
+        });
       }
-      
-      setCheckResult({
-        correct: isCorrect,
-        message: feedbackMessage
-      });
-      
     } catch (error) {
       console.error("Check Answer Error:", error);
       setCheckResult({
@@ -230,18 +187,6 @@ const LessonPage = () => {
     setCheckResult(null);  // Clear check results
   };
 
-  // Display pathway-specific learning path indicator
-  const renderPathwayBadge = () => {
-    if (!learningPathway) return null;
-    
-    let badgeClass = "pathway-badge";
-    if (learningPathway === "School") badgeClass += " school";
-    if (learningPathway === "Portfolio") badgeClass += " portfolio";
-    if (learningPathway === "Career Growth") badgeClass += " career";
-    
-    return <span className={badgeClass}>{learningPathway}</span>;
-  };
-
   if (loading) return <TreeLoader />;
   if (error) return <p className="error-message">{error}</p>;
 
@@ -252,10 +197,7 @@ const LessonPage = () => {
         <div className="lesson-content">
           {lesson && (
             <>
-              <div className="lesson-header">
-                <h1>{lesson.title}</h1>
-                {renderPathwayBadge()}
-              </div>
+              <h1>{lesson.title}</h1>
               <p className="lesson-description">{lesson.description}</p>
 
               {step === 1 && (
@@ -313,7 +255,7 @@ const LessonPage = () => {
                           extensions={[python()]}
                           theme="dark"
                           onChange={(value) => setUserCode(value)}
-                          placeholder={`Write your solution here for ${learningPathway}...`}
+                          placeholder="Write your solution here..."
                         />
                       </div>
                       
@@ -340,7 +282,7 @@ const LessonPage = () => {
                         <pre>{output}</pre>
                       </div>
                       
-                      {/* Pathway-Specific Check Result */}
+                      {/* Simple Check Result */}
                       {checkResult && (
                         <div className={`check-result ${checkResult.correct ? 'success' : 'error'}`}>
                           <p>{checkResult.message}</p>
@@ -380,7 +322,7 @@ const LessonPage = () => {
         </div>
       </div>
       
-      {/* AI Learning Assistant */}
+      {/* AI Learning Assistant - Now positioned absolutely by CSS */}
       {lesson && (
         <AILearningAssistant 
           lessonId={lessonId}
@@ -388,7 +330,6 @@ const LessonPage = () => {
           currentStep={step}
           userCode={userCode}
           expectedOutput={expectedOutput}
-          learningPathway={learningPathway} // Pass learning pathway to AI assistant
         />
       )}
     </div>

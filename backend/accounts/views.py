@@ -196,6 +196,41 @@ class LessonListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+
+        if not user.learning_goal or not user.difficulty_level:
+            return Lesson.objects.none()
+
+        lessons = Lesson.objects.filter(
+            learning_goal=user.learning_goal.strip(),
+            difficulty_level=user.difficulty_level.strip()
+        ).order_by("order")
+
+        return lessons
+
+
+class LessonDetailView(generics.RetrieveAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        lesson = self.get_object()
+        return Response({
+            "title": lesson.title,
+            "description": lesson.description,
+            "step1_content": lesson.step1_content,
+            "step2_content": lesson.step2_content,
+            "step3_challenge": lesson.step3_challenge,
+            "code_snippet": lesson.code_snippet,
+        }, status=status.HTTP_200_OK)
+
+
+class LessonListView(generics.ListAPIView):
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
         if not user.learning_goal or not user.difficulty_level:
             return Lesson.objects.none()
 
@@ -203,37 +238,21 @@ class LessonListView(generics.ListAPIView):
             learning_goal=user.learning_goal.strip(),
             difficulty_level=user.difficulty_level.strip()
         ).order_by("order")
-        
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        # Add the request to context so the serializer can access the user
-        context['request'] = self.request
-        return context
 
-
-class LessonDetailView(generics.RetrieveAPIView):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        # Add the request to context so the serializer can access the user
-        context['request'] = self.request
-        return context
-
-    def get(self, request, *args, **kwargs):
-        lesson = self.get_object()
-        serializer = self.get_serializer(lesson)
-        
-        # Get the serialized data which already includes pathway-specific content
-        lesson_data = serializer.data
-        
-        # Add expected output if available
-        if hasattr(lesson, 'expected_output') and lesson.expected_output:
-            lesson_data['expected_output'] = lesson.expected_output
-            
-        return Response(lesson_data, status=status.HTTP_200_OK)
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        lessons_data = [
+            {
+                "title": lesson.title,
+                "description": lesson.description,
+                "step1_content": lesson.step1_content,
+                "step2_content": lesson.step2_content,
+                "step3_challenge": lesson.step3_challenge,
+                "code_snippet": lesson.code_snippet,
+            }
+            for lesson in queryset
+        ]
+        return Response(lessons_data, status=status.HTTP_200_OK)
 
 
 class AllLessonsView(generics.ListAPIView):
@@ -242,12 +261,21 @@ class AllLessonsView(generics.ListAPIView):
 
     def get_queryset(self):
         return Lesson.objects.all().order_by("order")
-        
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        # Add the request to context so the serializer can access the user
-        context['request'] = self.request
-        return context
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        lessons_data = [
+            {
+                "title": lesson.title,
+                "description": lesson.description,
+                "step1_content": lesson.step1_content,
+                "step2_content": lesson.step2_content,
+                "step3_challenge": lesson.step3_challenge,
+                "code_snippet": lesson.code_snippet,
+            }
+            for lesson in queryset
+        ]
+        return Response(lessons_data, status=status.HTTP_200_OK)
 
 
 class DashboardView(APIView):
