@@ -81,7 +81,37 @@ class ProfileSerializer(serializers.ModelSerializer):
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "step1_content", "step2_content", "step3_challenge", "code_snippet"]
+        fields = [
+            "id", "title", "description", 
+            "step1_content", "step2_content", "step3_challenge", 
+            "code_snippet", "expected_output", "pathway_content"
+        ]
+    
+    def to_representation(self, instance):
+        """
+        Override to customize output based on user's learning goal
+        """
+        # Get the base representation with all fields
+        data = super().to_representation(instance)
+        
+        # Get the requesting user's learning goal
+        request = self.context.get('request')
+        learning_goal = None
+        
+        if request and request.user.is_authenticated:
+            learning_goal = request.user.learning_goal
+        
+        # If we have a learning goal and pathway-specific content exists,
+        # override the default content with pathway-specific content
+        if learning_goal and instance.pathway_content and learning_goal in instance.pathway_content:
+            pathway_content = instance.pathway_content[learning_goal]
+            
+            # Override fields if they exist in pathway_content
+            for field in ['step1_content', 'step2_content', 'step3_challenge', 'code_snippet']:
+                if field in pathway_content and pathway_content[field]:
+                    data[field] = pathway_content[field]
+        
+        return data
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
