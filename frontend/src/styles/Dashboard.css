@@ -75,7 +75,7 @@
     font-family: "Inter", sans-serif;
 }
 
-/* Dashboard layout grid */
+/* Dashboard layout grid - fix positioning */
 .dashboard-grid {
     display: flex;
     justify-content: space-between;
@@ -87,37 +87,36 @@
     padding: 0 20px;
 }
 
-/* Left section alignment - reduced gap */
+/* Left section - adjusted to balance with the moved progress section */
 .left-section {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Small gap between elements */
-    width: 65%;
+    gap: 30px;
+    width: 63%; /* Slightly reduced from 65% to balance with increased margin */
     padding-left: 30px;
 }
 
-/* Lesson box and Study sessions box with identical dimensions */
+/* Lesson box and Study sessions box with improved layout */
 .lesson-box,
 .study-sessions-box {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
-    padding: 20px; /* Reduced padding */
-    width: 80%; /* Reduced width as requested */
-    margin: 0 auto;
+    padding: 20px;
+    width: 100%; /* Full width within left section */
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    height: 200px; /* Reduced height for both */
-    min-height: 200px; /* Ensure minimum height is consistent */
+    min-height: 200px;
+    margin: 0; /* Remove margin to align with grid */
 }
 
 /* Specific styling for study sessions only */
 .study-sessions-box {
     background: linear-gradient(145deg, #222232, #1e1e2e);
-    margin-top: 15px; /* Space below lesson box */
     overflow: hidden;
+    margin-top: 0; /* Remove specific margin, use gap from parent */
 }
 
 /* Study sessions content wrapper */
@@ -126,6 +125,7 @@
     overflow-y: auto;
     padding-right: 5px;
     margin-top: 10px;
+    max-height: 180px; /* Limit height to prevent overflow */
 }
 
 /* Lesson box title */
@@ -240,142 +240,95 @@
     font-family: "Inter", sans-serif;
 }
 
-/* Right section (Progress tracker) */
+/* Right section (Progress tracker) - increased height and width, moved more to the right */
 .progress-section {
-    width: 34%; /* Further increased from 32% */
+    width: 32%; /* Increased width from 30% */
     background: linear-gradient(145deg, #2a2a3d, #262636);
     border-radius: 14px;
-    padding: 35px;
+    padding: 40px; /* Increased padding */
     text-align: center;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-    margin-left: 25px; /* Further increased margin to move it more to the right */
+    box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.35);
+    margin-left: 30px; /* Increased margin from 20px to move it more to the right */
     height: fit-content;
-    min-height: 520px; /* Further increased minimum height */
+    min-height: 580px; /* Increased minimum height */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 100px; /* Sticky position for scrolling */
 }
 
-.progress-section h3 {
-    font-size: 24px;
-    margin-top: 0;
-    margin-bottom: 30px;
-    color: #fff;
-    font-family: "Outfit", sans-serif;
-    letter-spacing: -0.3px;
-    font-weight: 600;
-}
-
-/* Fix for streak display */
-.progress-section p {
-    margin: 15px 0;
-    font-size: 16px;
-    white-space: normal; /* Allow text to wrap */
-    max-width: 100%; /* Full width */
-}
-
-p.streak-display {
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    flex-wrap: wrap; /* Allow wrapping if needed */
-}
-
-p.streak-display strong {
-    display: inline-block;
-    max-width: none; /* Remove the max-width limitation that's causing truncation */
-    overflow: visible; /* Don't hide overflow */
-    text-overflow: clip; /* Don't use ellipsis */
-}
-
-/* Progress circle container */
+/* Progress circle container with better positioning */
 .progress-circle {
-    width: 200px;
-    height: 200px;
-    margin: 0 auto 40px;
+    width: 230px; /* Increased size */
+    height: 230px; /* Increased size */
+    margin: 0 auto 50px; /* Increased bottom margin */
     position: relative;
 }
 
-/* Progress wrapper to allow text overlay */
-.progress-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-/* SVG styling */
+/* SVG styling - adjusted for larger circle */
 .progress-circle svg {
     width: 100%;
     height: 100%;
     transform: rotate(-90deg);
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.4)); /* Enhanced shadow */
     z-index: 1;
 }
 
-/* Background circle */
+/* Background circle - adjusted for larger circle */
 .progress-bg {
     fill: none;
     stroke: #3a3a4a;
-    stroke-width: 10;
-    stroke-dasharray: 251.2; /* 2 * PI * 40 (your circle radius) */
+    stroke-width: 12; /* Increased from 10 */
+    stroke-dasharray: 289; /* Adjusted for larger circle (2 * PI * 46) */
     stroke-dashoffset: 0;
 }
 
-/* Progress fill */
+/* Progress fill - adjusted for larger circle */
 .progress-fill {
     fill: none;
     stroke: url(#progressGradient);
-    stroke-width: 10;
+    stroke-width: 12; /* Increased from 10 */
     stroke-linecap: round;
-    stroke-dasharray: 251.2; /* 2 * PI * 40 */
+    stroke-dasharray: 289; /* Adjusted for larger circle */
     transition: stroke-dashoffset 1.5s ease;
 }
 
-/* Percentage display */
+/* Percentage display - centered inside the circle */
 .percentage-display {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 2;
+    text-align: center;
+    width: 100%;
 }
 
 .percentage-display span {
-    font-size: 28px;
+    font-size: 36px; /* Increased font size */
     font-weight: bold;
     color: white;
     font-family: "Outfit", sans-serif;
+    display: block; /* Ensure it takes up full width */
 }
 
-/* Progress text adjustment */
-.progress-text {
-    fill: white;
-    font-size: 28px;
-    font-weight: bold;
-    text-anchor: middle;
-    dominant-baseline: middle;
-    font-family: "Outfit", sans-serif;
-    transform-origin: center;
-}
-
+/* Progress stats - adjusted for better spacing */
 .progress-section p {
-    font-size: 16px;
-    margin: 15px 0;
+    font-size: 17px; /* Increased from 16px */
+    margin: 20px 0; /* Increased margins */
     color: #b8b8d0;
     font-family: "Inter", sans-serif;
 }
 
 .progress-section p strong {
     color: white;
-    font-size: 18px;
+    font-size: 19px; /* Increased from 18px */
     font-weight: 600;
+    padding: 3px 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
 }
 
 /* Recommended lessons styling */
@@ -383,10 +336,10 @@ p.streak-display strong {
     background: linear-gradient(145deg, #23233f, #1d1d36);
     border-radius: 14px;
     padding: 30px;
-    width: 100%; 
-    margin: 15px auto 0;
+    width: 100%; /* Full width within left section */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
+    margin: 0; /* Remove margin to use parent's gap property */
 }
 
 .recommendations-box h3 {
@@ -405,7 +358,7 @@ p.streak-display strong {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-height: 500px;
+    max-height: 400px; /* Limit height to prevent overflow */
     overflow-y: auto;
     padding-right: 8px;
 }
@@ -499,7 +452,51 @@ p.streak-display strong {
     font-family: "Inter", sans-serif;
 }
 
-/* Responsive adjustments for mobile */
+/* Responsive layout fixes */
+@media (max-width: 1200px) {
+    .progress-section {
+        margin-left: 25px; /* Slightly reduced margin for medium screens */
+    }
+}
+
+@media (max-width: 990px) {
+    .dashboard-grid {
+        flex-direction: column;
+        gap: 35px;
+    }
+    
+    .left-section, 
+    .progress-section {
+        width: 100%;
+        margin-left: 0;
+        padding-left: 0;
+    }
+    
+    .progress-section {
+        margin-left: 0; /* Remove margin on mobile */
+        margin-top: 30px;
+        width: 100%;
+        min-height: 500px;
+        margin: 20px 0;
+        padding: 35px;
+    }
+    
+    .progress-circle {
+        width: 220px;
+        height: 220px;
+    }
+    
+    .recommendations-box {
+        margin-bottom: 20px;
+    }
+    
+    /* Ensure percentage remains centered on mobile */
+    .percentage-display {
+        top: 50%;
+        left: 50%;
+    }
+}
+
 @media (max-width: 768px) {
     .dashboard-grid {
         flex-direction: column;
@@ -545,6 +542,26 @@ p.streak-display strong {
     
     .study-sessions-box {
         margin-top: 10px;
+    }
+    
+    .progress-section {
+        min-height: 480px;
+        padding: 30px;
+    }
+    
+    .progress-circle {
+        width: 200px;
+        height: 200px;
+        margin-bottom: 40px;
+    }
+    
+    .progress-section h3 {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+    
+    .percentage-display span {
+        font-size: 32px;
     }
 }
 

@@ -191,7 +191,7 @@ const Dashboard = () => {
 
                 {/* Welcome Banner */}
                 <div className="welcome-box">
-                    <h2>Welcome to CodeGrow, {localStorage.getItem('username') || 'Coder'}! 👋</h2>
+                    <h2>Welcome to CodeGrow, {localStorage.getItem('username') || 'Coder'}! </h2>
                     <p>Ready to level up your coding skills today?</p>
                 </div>
 
