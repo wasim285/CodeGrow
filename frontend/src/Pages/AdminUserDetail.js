@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../context/Authcontext';
-import AdminSidebar from '../components/AdminSidebar';
-import { getAdminUser, activateAdminUser } from '../utils/api';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getAdminUser, toggleUserStatus, deleteAdminUser } from '../utils/api';
 
 const AdminUserDetail = () => {
   const { id } = useParams();
-  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +13,7 @@ const AdminUserDetail = () => {
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
-        const response = await getAdminUser(token, id);
+        const response = await getAdminUser(id);
         setUser(response.data);
         setLoading(false);
       } catch (err) {
@@ -27,178 +24,159 @@ const AdminUserDetail = () => {
     };
 
     fetchUserDetails();
-  }, [id, token]);
+  }, [id]);
 
-  const handleToggleActive = async () => {
-    if (!user) return;
+  const handleToggleStatus = async () => {
+    try {
+      const updatedStatus = !user.is_active;
+      await toggleUserStatus(id, updatedStatus);
+      setUser({ ...user, is_active: updatedStatus });
+    } catch (err) {
+      console.error('Error updating user status:', err);
+      setError('Failed to update user status. Please try again.');
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!window.confirm(`Are you sure you want to delete the user ${user.username}? This action cannot be undone.`)) {
+      return;
+    }
     
     try {
-      await activateAdminUser(token, user.id, !user.is_active);
-      setUser({
-        ...user,
-        is_active: !user.is_active
-      });
+      await deleteAdminUser(id);
+      navigate('/admin/users');
     } catch (err) {
-      console.error('Error toggling user status:', err);
-      setError('Failed to update user status. Please try again.');
+      console.error('Error deleting user:', err);
+      setError('Failed to delete user. Please try again.');
     }
   };
 
   if (loading) {
     return (
-      <div className="admin-dashboard-container">
-        <AdminSidebar />
-        <div className="admin-content">
-          <div className="admin-loading">Loading user details...</div>
-        </div>
+      <div className="admin-loading">
+        <div className="spinner"></div>
+        <p>Loading user details...</p>
       </div>
     );
   }
 
-  if (error || !user) {
+  if (!user) {
     return (
-      <div className="admin-dashboard-container">
-        <AdminSidebar />
-        <div className="admin-content">
-          <div className="admin-error">{error || 'User not found'}</div>
-        </div>
+      <div className="admin-error-message">
+        <p>User not found or you don't have permission to view this user.</p>
+        <Link to="/admin/users" className="admin-button admin-button-secondary">
+          Back to Users
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="admin-dashboard-container">
-      <AdminSidebar />
-      <div className="admin-content">
-        <div className="admin-header">
-          <div className="admin-header-title">
-            <Link to="/admin/users" className="admin-back-button">
-              &larr; Back to Users
-            </Link>
-            <h1 className="admin-page-title">User Details</h1>
-          </div>
-          <div className="admin-header-actions">
-            <Link to={`/admin/users/${id}/edit`} className="admin-button admin-button-secondary">
-              Edit User
-            </Link>
-            <button
-              onClick={handleToggleActive}
-              className={`admin-button ${user.is_active ? 'admin-button-danger' : 'admin-button-primary'}`}
-            >
-              {user.is_active ? 'Deactivate User' : 'Activate User'}
-            </button>
-          </div>
+    <>
+      <div className="admin-header">
+        <div className="admin-header-left">
+          <Link to="/admin/users" className="admin-back-button">
+            &larr;
+          </Link>
+          <h1>User: {user.username}</h1>
         </div>
+        <div className="admin-header-actions">
+          <button
+            onClick={handleToggleStatus}
+            className={`admin-button ${user.is_active ? 'admin-button-danger' : 'admin-button-primary'}`}
+          >
+            {user.is_active ? 'Deactivate' : 'Activate'}
+          </button>
+          <Link to={`/admin/users/${id}/edit`} className="admin-button admin-button-secondary">
+            Edit
+          </Link>
+          <button onClick={handleDeleteUser} className="admin-button admin-button-danger">
+            Delete
+          </button>
+        </div>
+      </div>
 
-        <div className="admin-user-detail-container">
-          <div className="admin-user-profile">
-            <div className="admin-user-avatar">
-              {user.profile_picture ? (
-                <img src={user.profile_picture} alt={user.username} />
-              ) : (
-                <div className="admin-avatar-placeholder">
-                  {user.username.charAt(0).toUpperCase()}
-                </div>
-              )}
+      {error && (
+        <div className="admin-alert admin-alert-danger">
+          {error}
+        </div>
+      )}
+
+      <div className="admin-detail-container">
+        <div className="admin-detail-card">
+          <h2 className="admin-detail-title">User Information</h2>
+          
+          <div className="admin-detail-info">
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Username:</span>
+              <span>{user.username}</span>
             </div>
-            <div className="admin-user-header">
-              <h2 className="admin-user-name">{user.username}</h2>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Email:</span>
+              <span>{user.email}</span>
+            </div>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Full Name:</span>
+              <span>
+                {user.first_name && user.last_name 
+                  ? `${user.first_name} ${user.last_name}` 
+                  : 'Not provided'}
+              </span>
+            </div>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Role:</span>
+              <span>{user.role || 'student'}</span>
+            </div>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Status:</span>
               <span className={`admin-status ${user.is_active ? 'active' : 'inactive'}`}>
                 {user.is_active ? 'Active' : 'Inactive'}
               </span>
-              <span className={`admin-role-badge ${user.role}`}>{user.role}</span>
+            </div>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Joined:</span>
+              <span>{new Date(user.date_joined).toLocaleString()}</span>
+            </div>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Last Login:</span>
+              <span>{user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}</span>
             </div>
           </div>
+        </div>
 
-          <div className="admin-detail-section">
-            <h3>Basic Information</h3>
-            <div className="admin-detail-grid">
-              <div className="admin-detail-item">
-                <span className="admin-detail-label">Email</span>
-                <span className="admin-detail-value">{user.email}</span>
-              </div>
-              <div className="admin-detail-item">
-                <span className="admin-detail-label">Learning Goal</span>
-                <span className="admin-detail-value">{user.learning_goal || 'Not set'}</span>
-              </div>
-              <div className="admin-detail-item">
-                <span className="admin-detail-label">Difficulty Level</span>
-                <span className="admin-detail-value">{user.difficulty_level || 'Not set'}</span>
-              </div>
-              <div className="admin-detail-item">
-                <span className="admin-detail-label">Joined Date</span>
-                <span className="admin-detail-value">
-                  {new Date(user.date_joined).toLocaleDateString()}
-                </span>
-              </div>
-              <div className="admin-detail-item">
-                <span className="admin-detail-label">Last Login</span>
-                <span className="admin-detail-value">
-                  {user.last_login 
-                    ? new Date(user.last_login).toLocaleString() 
-                    : 'Never'
-                  }
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {user.bio && (
-            <div className="admin-detail-section">
-              <h3>Bio</h3>
-              <div className="admin-user-bio">
-                {user.bio}
-              </div>
-            </div>
-          )}
+        <div className="admin-detail-card">
+          <h2 className="admin-detail-title">Learning Information</h2>
           
-          <div className="admin-detail-section">
-            <h3>Learning Progress</h3>
-            <div className="admin-stats-grid">
-              <div className="admin-stat-card">
-                <div className="admin-stat-title">Completed Pathways</div>
-                <div className="admin-stat-value">{user.stats?.completed_pathways || 0}</div>
-              </div>
-              <div className="admin-stat-card">
-                <div className="admin-stat-title">Completed Lessons</div>
-                <div className="admin-stat-value">{user.stats?.completed_lessons || 0}</div>
-              </div>
-              <div className="admin-stat-card">
-                <div className="admin-stat-title">Completed Exercises</div>
-                <div className="admin-stat-value">{user.stats?.completed_exercises || 0}</div>
-              </div>
-              <div className="admin-stat-card">
-                <div className="admin-stat-title">Success Rate</div>
-                <div className="admin-stat-value">{user.stats?.success_rate || 0}%</div>
-              </div>
+          <div className="admin-detail-info">
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Learning Goal:</span>
+              <span>{user.learning_goal || 'Not set'}</span>
             </div>
-          </div>
-          
-          <div className="admin-detail-section">
-            <h3>Recent Activity</h3>
-            {user.recent_activity && user.recent_activity.length > 0 ? (
-              <div className="admin-activity-list">
-                {user.recent_activity.map((activity, index) => (
-                  <div key={index} className="admin-activity-item">
-                    <div className="admin-activity-time">
-                      {new Date(activity.timestamp).toLocaleString()}
-                    </div>
-                    <div className="admin-activity-content">
-                      {activity.description}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="admin-no-data">No recent activity found.</div>
-            )}
-            <div className="admin-view-all">
-              <Link to={`/admin/activity?user_id=${id}`}>View All Activity</Link>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Difficulty Level:</span>
+              <span>{user.difficulty_level || 'Not set'}</span>
+            </div>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Completed Lessons:</span>
+              <span>{user.completed_lessons_count || 0}</span>
+            </div>
+            
+            <div className="admin-detail-row">
+              <span className="admin-detail-label">Study Hours:</span>
+              <span>{user.total_study_hours || 0} hours</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
