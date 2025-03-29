@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
-import logo from '../assets/logo.png'; // Adjust path to your logo
 import '../styles/AdminDashboard.css';
 
 const AdminSidebar = () => {
@@ -39,7 +38,7 @@ const AdminSidebar = () => {
   return (
     <div className="admin-sidebar-container">
       <div className="admin-sidebar-header">
-        <img src={logo} alt="CodeGrow Admin" className="admin-logo" />
+        <div className="admin-logo-text">CG</div>
         <h2 className="admin-title">CodeGrow</h2>
       </div>
 
