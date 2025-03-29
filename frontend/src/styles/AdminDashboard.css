@@ -141,11 +141,40 @@
   transition: all 0.3s ease;
 }
 
+/* Header with action buttons */
 .admin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.admin-back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #334155;
+  text-decoration: none;
+  margin-right: 0.75rem;
+  transition: background-color 0.2s;
+}
+
+.admin-back-button:hover {
+  background-color: #e2e8f0;
+}
+
+.admin-header-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .admin-page-title {
@@ -299,6 +328,85 @@
   .admin-dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Detail sections */
+.admin-detail-container {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .admin-detail-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.admin-detail-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.admin-detail-title {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.admin-detail-info {
+  padding: 1.5rem;
+}
+
+.admin-detail-row {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.admin-detail-row.full {
+  display: block;
+}
+
+.admin-detail-label {
+  min-width: 120px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.admin-detail-text {
+  margin-top: 0.5rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.admin-empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+}
+
+.admin-detail-actions {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.admin-alert-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
 /* Data Tables */

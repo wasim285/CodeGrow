@@ -996,3 +996,25 @@ def redirect_based_on_role(request):
         return redirect('/admin/')
     else:
         return redirect('/dashboard/')  # Or wherever regular users should go
+
+
+class TokenRefreshView(APIView):
+    """
+    API endpoint to refresh auth token without requiring re-login
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        # Delete the old token
+        request.auth.delete()
+        
+        # Create a new token
+        token, created = Token.objects.get_or_create(user=request.user)
+        
+        return Response({
+            'token': token.key,
+            'username': request.user.username,
+            'is_staff': request.user.is_staff,
+            'is_superuser': request.user.is_superuser,
+            'role': request.user.role
+        }, status=status.HTTP_200_OK)
