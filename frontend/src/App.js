@@ -12,7 +12,6 @@ import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/ProfilePage'; // Changed to match your file structure
 import Pathways from './Pages/PathwaysPage'; // Changed to match your file structure
 import Lesson from './Pages/LessonPage'; // Changed to match your file structure
-import NotFound from './Pages/NotFound'; // This might not exist - you might need to create it
 
 // Admin pages
 import AdminDashboard from './Pages/AdminDashboard';
