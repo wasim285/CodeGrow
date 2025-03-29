@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminLessons, deleteAdminLesson } from '../utils/api';
-import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import '../styles/AdminDashboard.css';
 
 const AdminLessons = () => {
@@ -87,7 +86,7 @@ const AdminLessons = () => {
         <div className="admin-header">
           <h1 className="admin-page-title">Lessons</h1>
           <Link to="/admin/lessons/new" className="admin-button admin-button-primary">
-            <FaPlus style={{ marginRight: '0.5rem' }} /> Create Lesson
+            + Create Lesson
           </Link>
         </div>
 
@@ -159,16 +158,16 @@ const AdminLessons = () => {
                   </td>
                   <td className="admin-actions">
                     <Link to={`/admin/lessons/${lesson.id}`} className="admin-action-button view">
-                      <FaEye />
+                      View
                     </Link>
                     <Link to={`/admin/lessons/${lesson.id}/edit`} className="admin-action-button edit">
-                      <FaEdit />
+                      Edit
                     </Link>
                     <button 
                       onClick={() => handleDeleteLesson(lesson.id)} 
                       className="admin-action-button delete"
                     >
-                      <FaTrash />
+                      Delete
                     </button>
                   </td>
                 </tr>

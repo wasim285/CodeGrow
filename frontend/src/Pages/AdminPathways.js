@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminPathways, deleteAdminPathway } from '../utils/api';
-import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 import '../styles/AdminDashboard.css';
 
 const AdminPathways = () => {
@@ -72,7 +71,7 @@ const AdminPathways = () => {
         <div className="admin-header">
           <h1 className="admin-page-title">Learning Pathways</h1>
           <Link to="/admin/pathways/new" className="admin-button admin-button-primary">
-            <FaPlus style={{ marginRight: '0.5rem' }} /> Add Pathway
+            + Add Pathway
           </Link>
         </div>
 
@@ -117,16 +116,16 @@ const AdminPathways = () => {
                   </td>
                   <td className="admin-actions">
                     <Link to={`/admin/pathways/${pathway.id}`} className="admin-action-button view">
-                      <FaEye />
+                      View
                     </Link>
                     <Link to={`/admin/pathways/${pathway.id}/edit`} className="admin-action-button edit">
-                      <FaEdit />
+                      Edit
                     </Link>
                     <button 
                       onClick={() => handleDeletePathway(pathway.id)} 
                       className="admin-action-button delete"
                     >
-                      <FaTrash />
+                      Delete
                     </button>
                   </td>
                 </tr>

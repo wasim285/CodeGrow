@@ -4,12 +4,6 @@ import { AuthContext } from '../context/Authcontext';
 import logo from '../assets/logo.png'; // Adjust path to your logo
 import '../styles/AdminDashboard.css';
 
-// Import icons
-import { 
-  FaTachometerAlt, FaUsers, FaBookOpen, FaRoad,
-  FaHistory, FaSignOutAlt, FaUserCircle
-} from 'react-icons/fa';
-
 const AdminSidebar = () => {
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
@@ -18,27 +12,27 @@ const AdminSidebar = () => {
     {
       title: 'Dashboard',
       path: '/admin/dashboard',
-      icon: <FaTachometerAlt className="sidebar-icon" />
+      icon: '📊' // Dashboard icon
     },
     {
       title: 'Users',
       path: '/admin/users',
-      icon: <FaUsers className="sidebar-icon" />
+      icon: '👥' // Users icon
     },
     {
       title: 'Learning Pathways',
       path: '/admin/pathways',
-      icon: <FaRoad className="sidebar-icon" />
+      icon: '🛣️' // Road/pathway icon
     },
     {
       title: 'Lessons',
       path: '/admin/lessons',
-      icon: <FaBookOpen className="sidebar-icon" />
+      icon: '📚' // Book icon
     },
     {
       title: 'Activity Log',
       path: '/admin/activity',
-      icon: <FaHistory className="sidebar-icon" />
+      icon: '📝' // History/log icon
     }
   ];
 
@@ -51,7 +45,9 @@ const AdminSidebar = () => {
 
       <div className="admin-profile-section">
         <div className="admin-avatar">
-          <FaUserCircle size={40} />
+          <div className="admin-avatar-placeholder">
+            {user?.username ? user.username.charAt(0).toUpperCase() : 'A'}
+          </div>
         </div>
         <div className="admin-info">
           <div className="admin-name">{user?.username || 'Admin'}</div>
@@ -66,7 +62,7 @@ const AdminSidebar = () => {
             to={item.path} 
             className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
           >
-            {item.icon}
+            <span className="admin-nav-icon">{item.icon}</span>
             <span className="admin-nav-text">{item.title}</span>
           </Link>
         ))}
@@ -74,7 +70,7 @@ const AdminSidebar = () => {
       
       <div className="admin-sidebar-footer">
         <button onClick={logout} className="admin-logout-btn">
-          <FaSignOutAlt className="sidebar-icon" />
+          <span className="admin-nav-icon">🚪</span>
           <span>Logout</span>
         </button>
       </div>

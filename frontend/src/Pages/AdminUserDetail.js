@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminUser, activateAdminUser } from '../utils/api';
-import { FaUser, FaEdit, FaUserSlash, FaUserCheck, FaArrowLeft } from 'react-icons/fa';
 
 const AdminUserDetail = () => {
   const { id } = useParams();
@@ -74,27 +73,19 @@ const AdminUserDetail = () => {
         <div className="admin-header">
           <div className="admin-header-title">
             <Link to="/admin/users" className="admin-back-button">
-              <FaArrowLeft /> Back to Users
+              &larr; Back to Users
             </Link>
             <h1 className="admin-page-title">User Details</h1>
           </div>
           <div className="admin-header-actions">
             <Link to={`/admin/users/${id}/edit`} className="admin-button admin-button-secondary">
-              <FaEdit style={{ marginRight: '0.5rem' }} /> Edit User
+              Edit User
             </Link>
             <button
               onClick={handleToggleActive}
               className={`admin-button ${user.is_active ? 'admin-button-danger' : 'admin-button-primary'}`}
             >
-              {user.is_active ? (
-                <>
-                  <FaUserSlash style={{ marginRight: '0.5rem' }} /> Deactivate User
-                </>
-              ) : (
-                <>
-                  <FaUserCheck style={{ marginRight: '0.5rem' }} /> Activate User
-                </>
-              )}
+              {user.is_active ? 'Deactivate User' : 'Activate User'}
             </button>
           </div>
         </div>
@@ -105,7 +96,9 @@ const AdminUserDetail = () => {
               {user.profile_picture ? (
                 <img src={user.profile_picture} alt={user.username} />
               ) : (
-                <FaUser size={60} />
+                <div className="admin-avatar-placeholder">
+                  {user.username.charAt(0).toUpperCase()}
+                </div>
               )}
             </div>
             <div className="admin-user-header">
@@ -159,7 +152,50 @@ const AdminUserDetail = () => {
             </div>
           )}
           
-          {/* Additional sections like progress stats could go here */}
+          <div className="admin-detail-section">
+            <h3>Learning Progress</h3>
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card">
+                <div className="admin-stat-title">Completed Pathways</div>
+                <div className="admin-stat-value">{user.stats?.completed_pathways || 0}</div>
+              </div>
+              <div className="admin-stat-card">
+                <div className="admin-stat-title">Completed Lessons</div>
+                <div className="admin-stat-value">{user.stats?.completed_lessons || 0}</div>
+              </div>
+              <div className="admin-stat-card">
+                <div className="admin-stat-title">Completed Exercises</div>
+                <div className="admin-stat-value">{user.stats?.completed_exercises || 0}</div>
+              </div>
+              <div className="admin-stat-card">
+                <div className="admin-stat-title">Success Rate</div>
+                <div className="admin-stat-value">{user.stats?.success_rate || 0}%</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="admin-detail-section">
+            <h3>Recent Activity</h3>
+            {user.recent_activity && user.recent_activity.length > 0 ? (
+              <div className="admin-activity-list">
+                {user.recent_activity.map((activity, index) => (
+                  <div key={index} className="admin-activity-item">
+                    <div className="admin-activity-time">
+                      {new Date(activity.timestamp).toLocaleString()}
+                    </div>
+                    <div className="admin-activity-content">
+                      {activity.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="admin-no-data">No recent activity found.</div>
+            )}
+            <div className="admin-view-all">
+              <Link to={`/admin/activity?user_id=${id}`}>View All Activity</Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

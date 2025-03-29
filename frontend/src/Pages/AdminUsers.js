@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import AdminSidebar from '../components/AdminSidebar';
-import { getAdminUsers, activateAdminUser } from '../utils/api';
+import { getAdminUsers, deleteAdminUser, activateAdminUser } from '../utils/api';
+import '../styles/AdminDashboard.css';
 import { FaUserPlus, FaSearch, FaUserCheck, FaUserSlash, FaEye } from 'react-icons/fa';
 
 const AdminUsers = () => {
@@ -13,9 +14,9 @@ const AdminUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState({
-    search: '',
     role: '',
-    is_active: ''
+    is_active: '',
+    search: ''
   });
 
   useEffect(() => {
@@ -23,8 +24,8 @@ const AdminUsers = () => {
       try {
         setLoading(true);
         const response = await getAdminUsers(token, currentPage, filters);
-        setUsers(response.data.results);
-        setTotalPages(Math.ceil(response.data.count / 10));
+        setUsers(response.data.results || []);
+        setTotalPages(Math.ceil(response.data.count / 10)); // Assuming 10 items per page
         setLoading(false);
       } catch (err) {
         console.error('Error fetching users:', err);
@@ -49,9 +50,19 @@ const AdminUsers = () => {
     setCurrentPage(1); // Reset to first page on filter change
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    // The search is handled by the filter change already
+  const handleDeleteUser = async (id, username) => {
+    if (!window.confirm(`Are you sure you want to delete user "${username}"? This cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await deleteAdminUser(token, id);
+      // Refresh the list
+      setUsers(users.filter(user => user.id !== id));
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      setError('Failed to delete user. Please try again.');
+    }
   };
 
   const handleToggleActive = async (userId, currentStatus) => {
@@ -66,7 +77,7 @@ const AdminUsers = () => {
     }
   };
 
-  if (loading) {
+  if (loading && users.length === 0) {
     return (
       <div className="admin-dashboard-container">
         <AdminSidebar />
@@ -89,7 +100,7 @@ const AdminUsers = () => {
         </div>
 
         <div className="admin-filters-container">
-          <form onSubmit={handleSearch} className="admin-search-form">
+          <form onSubmit={(e) => e.preventDefault()} className="admin-search-form">
             <div className="admin-search-input">
               <input
                 type="text"
@@ -143,36 +154,62 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
-                <tr key={user.id}>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td>{user.role}</td>
-                  <td>{new Date(user.date_joined).toLocaleDateString()}</td>
-                  <td>
-                    <span className={`admin-status ${user.is_active ? 'active' : 'inactive'}`}>
-                      {user.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="admin-actions">
-                    <Link to={`/admin/users/${user.id}`} className="admin-action-button view">
-                      <FaEye />
-                    </Link>
-                    <button 
-                      onClick={() => handleToggleActive(user.id, user.is_active)} 
-                      className={`admin-action-button ${user.is_active ? 'deactivate' : 'activate'}`}
-                    >
-                      {user.is_active ? <FaUserSlash /> : <FaUserCheck />}
-                    </button>
+              {users.length > 0 ? (
+                users.map((user) => (
+                  <tr key={user.id}>
+                    <td>
+                      <Link to={`/admin/users/${user.id}`} className="admin-table-link">
+                        {user.username}
+                      </Link>
+                    </td>
+                    <td>{user.email}</td>
+                    <td>{user.role || 'student'}</td>
+                    <td>{new Date(user.date_joined).toLocaleDateString()}</td>
+                    <td>
+                      <span className={`admin-status ${user.is_active ? 'active' : 'inactive'}`}>
+                        {user.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="admin-actions">
+                      <Link 
+                        to={`/admin/users/${user.id}`} 
+                        className="admin-button admin-button-sm"
+                        title="View User"
+                      >
+                        <FaEye />
+                      </Link>
+                      <Link 
+                        to={`/admin/users/${user.id}/edit`} 
+                        className="admin-button admin-button-sm admin-button-secondary"
+                        title="Edit User"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteUser(user.id, user.username)}
+                        className="admin-button admin-button-sm admin-button-danger"
+                        title="Delete User"
+                      >
+                        Delete
+                      </button>
+                      <button 
+                        onClick={() => handleToggleActive(user.id, user.is_active)} 
+                        className={`admin-action-button ${user.is_active ? 'deactivate' : 'activate'}`}
+                      >
+                        {user.is_active ? <FaUserSlash /> : <FaUserCheck />}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="admin-no-data">
+                    No users found. Try adjusting your filters or create a new user.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
-          
-          {users.length === 0 && (
-            <div className="admin-no-data">No users found matching your filters.</div>
-          )}
         </div>
 
         {totalPages > 1 && (

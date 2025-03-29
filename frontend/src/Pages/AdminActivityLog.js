@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/Authcontext';
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminActivityLog } from '../utils/api';
-import { FaFilter, FaCalendarAlt, FaUser, FaCode } from 'react-icons/fa';
 import '../styles/AdminDashboard.css';
 
 const AdminActivityLog = () => {
@@ -58,13 +57,19 @@ const AdminActivityLog = () => {
   const getActivityIcon = (type) => {
     switch (type) {
       case 'login':
-        return <FaUser />;
+        return '👤';
       case 'lesson_view':
-        return <FaCode />;
+        return '📖';
       case 'exercise_submission':
-        return <FaCode />;
+        return '📝';
+      case 'exercise_complete':
+        return '✅';
+      case 'pathway_start':
+        return '🚀';
+      case 'pathway_complete':
+        return '🏆';
       default:
-        return <FaCalendarAlt />;
+        return '📅';
     }
   };
 
@@ -113,7 +118,7 @@ const AdminActivityLog = () => {
         <div className="admin-filters-container">
           <form onSubmit={handleFilterSubmit} className="admin-filters-form">
             <div className="admin-filters-header">
-              <FaFilter /> <span>Filter Activities</span>
+              🔍 <span>Filter Activities</span>
             </div>
             
             <div className="admin-filters-grid">

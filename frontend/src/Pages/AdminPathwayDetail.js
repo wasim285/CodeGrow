@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext'; // Lowercase c is correct
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminPathway, deleteAdminPathway } from '../utils/api';
-import { FaEdit, FaTrash, FaArrowLeft } from 'react-icons/fa';
 
 const AdminPathwayDetail = () => {
   const { id } = useParams();
@@ -62,7 +61,7 @@ const AdminPathwayDetail = () => {
         <div className="admin-content">
           <div className="admin-error-message">Pathway not found or you don't have permission to view it.</div>
           <Link to="/admin/pathways" className="admin-back-link">
-            <FaArrowLeft /> Back to Pathways
+            &larr; Back to Pathways
           </Link>
         </div>
       </div>
@@ -76,19 +75,19 @@ const AdminPathwayDetail = () => {
         <div className="admin-header">
           <div className="admin-header-left">
             <Link to="/admin/pathways" className="admin-back-button">
-              <FaArrowLeft />
+              &larr;
             </Link>
-            <h1 className="admin-page-title">{pathway.name}</h1>
+            <h1 className="admin-page-title">{pathway.title || pathway.name}</h1>
           </div>
           <div className="admin-header-actions">
             <Link to={`/admin/pathways/${id}/edit`} className="admin-button admin-button-secondary">
-              <FaEdit style={{ marginRight: '0.5rem' }} /> Edit
+              Edit
             </Link>
             <button 
               onClick={handleDeletePathway} 
               className="admin-button admin-button-danger"
             >
-              <FaTrash style={{ marginRight: '0.5rem' }} /> Delete
+              Delete
             </button>
           </div>
         </div>

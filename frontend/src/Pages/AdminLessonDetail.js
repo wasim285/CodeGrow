@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminLesson, deleteAdminLesson } from '../utils/api';
-import { FaEdit, FaTrash, FaArrowLeft } from 'react-icons/fa';
 
 const AdminLessonDetail = () => {
   const { id } = useParams();
@@ -62,7 +61,7 @@ const AdminLessonDetail = () => {
         <div className="admin-content">
           <div className="admin-error-message">Lesson not found or you don't have permission to view it.</div>
           <Link to="/admin/lessons" className="admin-back-link">
-            <FaArrowLeft /> Back to Lessons
+            &larr; Back to Lessons
           </Link>
         </div>
       </div>
@@ -76,19 +75,19 @@ const AdminLessonDetail = () => {
         <div className="admin-header">
           <div className="admin-header-left">
             <Link to="/admin/lessons" className="admin-back-button">
-              <FaArrowLeft />
+              &larr;
             </Link>
             <h1 className="admin-page-title">{lesson.title}</h1>
           </div>
           <div className="admin-header-actions">
             <Link to={`/admin/lessons/${id}/edit`} className="admin-button admin-button-secondary">
-              <FaEdit style={{ marginRight: '0.5rem' }} /> Edit
+              Edit
             </Link>
             <button 
               onClick={handleDeleteLesson} 
               className="admin-button admin-button-danger"
             >
-              <FaTrash style={{ marginRight: '0.5rem' }} /> Delete
+              Delete
             </button>
           </div>
         </div>

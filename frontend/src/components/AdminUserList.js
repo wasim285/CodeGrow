@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Table, Button, Form, InputGroup, Badge, Modal, Pagination } from 'react-bootstrap';
-import { FaSearch, FaUserPlus, FaEdit, FaUserSlash, FaUserCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
 import api from '../utils/api';
@@ -323,14 +322,14 @@ const AdminUserList = () => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <Button variant="primary" type="submit">
-                      <FaSearch /> Search
+                      Search
                     </Button>
                   </InputGroup>
                 </Form>
               </Col>
               <Col md={6} className="text-end">
                 <Button variant="success" onClick={handleCreateUser}>
-                  <FaUserPlus /> Add User
+                  + Add User
                 </Button>
               </Col>
             </Row>
@@ -438,18 +437,14 @@ const AdminUserList = () => {
                         className="me-2"
                         onClick={() => handleEditUser(user)}
                       >
-                        <FaEdit /> Edit
+                        Edit
                       </Button>
                       <Button
                         variant={user.is_active ? "outline-danger" : "outline-success"}
                         size="sm"
                         onClick={() => handleToggleActive(user.id, user.is_active)}
                       >
-                        {user.is_active ? (
-                          <><FaUserSlash /> Deactivate</>
-                        ) : (
-                          <><FaUserCheck /> Activate</>
-                        )}
+                        {user.is_active ? "Deactivate" : "Activate"}
                       </Button>
                     </td>
                   </tr>
