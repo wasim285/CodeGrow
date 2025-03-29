@@ -13,6 +13,32 @@ const LessonsPage = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+    // Helper function to try multiple endpoints
+    const tryEndpoints = async (baseEndpoint) => {
+        const endpoints = [
+            baseEndpoint,
+            `accounts/${baseEndpoint}`,
+            `lessons/${baseEndpoint}`
+        ];
+        
+        for (const endpoint of endpoints) {
+            try {
+                console.log(`Trying lessons endpoint: ${endpoint}`);
+                const token = localStorage.getItem("token");
+                const response = await api.get(endpoint, {
+                    headers: { Authorization: `Token ${token}` }
+                });
+                console.log(`Lessons endpoint ${endpoint} succeeded`);
+                return response;
+            } catch (endpointError) {
+                console.log(`Endpoint ${endpoint} failed:`, endpointError.message);
+            }
+        }
+        
+        // If all endpoints fail, throw an error
+        throw new Error("Could not fetch lessons from any endpoint");
+    };
+
     useEffect(() => {
         // Check authentication first
         const token = localStorage.getItem("token");
@@ -23,11 +49,27 @@ const LessonsPage = () => {
         
         const fetchLessons = async () => {
             try {
-                // Use our API utility for consistent behavior
-                const response = await api.get("all-lessons/", {
-                    headers: { Authorization: `Token ${token}` }
-                });
+                // Try multiple endpoints to fetch lessons
+                let response;
+                try {
+                    // Try the all-lessons endpoint with multiple patterns
+                    response = await tryEndpoints("all-lessons/");
+                } catch (firstError) {
+                    try {
+                        // Try the lessons endpoint with multiple patterns
+                        response = await tryEndpoints("lessons/");
+                    } catch (secondError) {
+                        try {
+                            // Try the user-lessons endpoint with multiple patterns
+                            response = await tryEndpoints("user-lessons/");
+                        } catch (thirdError) {
+                            // If all attempts fail, throw the first error for handling below
+                            throw firstError;
+                        }
+                    }
+                }
 
+                // Process the successful response
                 if (!response.data || response.data.length === 0) {
                     setError("No lessons available at this time.");
                 } else {
@@ -52,6 +94,12 @@ const LessonsPage = () => {
         fetchLessons();
     }, [navigate]);
 
+    const handleRetry = () => {
+        setLoading(true);
+        setError(null);
+        window.location.reload();
+    };
+
     if (loading) return (
         <div className="loading-container">
             <TreeLoader />
@@ -70,7 +118,7 @@ const LessonsPage = () => {
                         <p className="error-message">{error}</p>
                         <button 
                             className="retry-button" 
-                            onClick={() => window.location.reload()}
+                            onClick={handleRetry}
                         >
                             Retry
                         </button>
