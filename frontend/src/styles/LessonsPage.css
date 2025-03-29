@@ -35,6 +35,7 @@
     text-align: center;
     position: relative;
     z-index: 1;
+    padding: 20px 0; /* Add some padding to the container */
 }
 
 /* Header Section */
@@ -115,18 +116,18 @@
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Lesson Grid Layout */
+/* Lesson Grid Layout - Significantly increased spacing between cards */
 .lessons-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 40px;
+    gap: 80px; /* Increased from 60px to 80px for even more space between cards */
     justify-content: center;
-    padding: 30px 0;
+    padding: 40px 0; /* Increased padding from 30px to 40px */
     max-width: 1300px;
     margin: 0 auto;
 }
 
-/* Enhanced lesson cards with fixed dimensions */
+/* Enhanced lesson cards with fixed dimensions and better spacing */
 .lesson-card {
     background: linear-gradient(145deg, #2a2a3d, #262636);
     padding: 35px;
@@ -139,7 +140,7 @@
     flex-direction: column;
     height: 300px !important; /* Fixed height */
     width: 100%; /* Full width within grid cell */
-    max-width: 450px; /* Maximum width */
+    max-width: 400px; /* Reduced from 450px for better fit in grid */
     margin: 0 auto; /* Center in grid cell */
     position: relative;
     overflow: hidden;
@@ -177,6 +178,32 @@
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;
     margin-bottom: 20px;
+}
+
+/* Lesson metadata section - Added margins for better spacing */
+.lesson-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px; /* Added margin bottom */
+    margin-top: 5px;    /* Added margin top */
+}
+
+.difficulty-tag {
+    background: rgba(76, 175, 80, 0.2);
+    color: #7cdb82;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.completed-tag {
+    background: rgba(33, 150, 243, 0.2);
+    color: #64b5f6;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 /* Button container to align buttons at bottom */
@@ -223,7 +250,7 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive Design */
+/* Responsive Design - Adjusted for better spacing */
 @media (max-width: 768px) {
     .lessons-title {
         font-size: 28px;
@@ -236,15 +263,31 @@
     
     .lessons-grid {
         grid-template-columns: 1fr;
-        padding: 10px;
-        gap: 25px;
+        padding: 20px; /* Increased padding */
+        gap: 60px; /* Increased gap for mobile from 40px to 60px */
+    }
+    
+    .lesson-card {
+        max-width: 100%; /* Full width on mobile */
     }
 }
 
-/* Tablet Adjustments */
+/* Tablet Adjustments - Better spacing for tablets */
 @media (min-width: 769px) and (max-width: 1200px) {
     .lessons-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 35px;
+        gap: 70px; /* Increased gap for tablet from 50px to 70px */
+    }
+    
+    .lesson-card {
+        max-width: 90%; /* Slightly narrower on tablets */
+    }
+}
+
+/* Large screens - Add extra space between card columns */
+@media (min-width: 1201px) {
+    .lessons-grid {
+        column-gap: 90px; /* Increased from 70px to 90px for more horizontal space between cards */
+        row-gap: 80px;   /* Increased vertical spacing from 60px to 80px */
     }
 }

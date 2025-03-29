@@ -131,9 +131,12 @@ const LessonsPage = () => {
                                     <h3>{lesson.title}</h3>
                                     <p>{lesson.description}</p>
                                     <div className="lesson-meta">
-                                        <span className="difficulty-tag">
-                                            {lesson.difficulty_level || "All Levels"}
-                                        </span>
+                                        {/* Only show difficulty tag if there's a specific level */}
+                                        {lesson.difficulty_level && (
+                                            <span className="difficulty-tag">
+                                                {lesson.difficulty_level}
+                                            </span>
+                                        )}
                                         {lesson.completed && (
                                             <span className="completed-tag">✓ Completed</span>
                                         )}
