@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/Authcontext';
 
 // Import components with their CORRECT filenames
@@ -16,31 +16,30 @@ import TreeLoader from './components/TreeLoader';
 import LessonsPage from './Pages/LessonsPage';
 import ProfilePage from './Pages/ProfilePage';
 
+// Remove the Router from here - it should only exist in index.js
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <Navbar />
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<SignUpPage />} /> {/* Updated element name */}
-          <Route path="/pathways" element={<PathwaysPage />} />
-          <Route path="/difficulty" element={<DifficultyPage />} />
+    <AuthProvider>
+      <Navbar />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<SignUpPage />} /> {/* Updated element name */}
+        <Route path="/pathways" element={<PathwaysPage />} />
+        <Route path="/difficulty" element={<DifficultyPage />} />
 
-          {/* Protected routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/lessons" element={<LessonsPage />} />
-          <Route path="/lessons/:lessonId" element={<LessonPage />} />
-          <Route path="/study-sessions" element={<StudyCalendar />} />
-          <Route path="/profile" element={<ProfilePage />} />
+        {/* Protected routes */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/lessons" element={<LessonsPage />} />
+        <Route path="/lessons/:lessonId" element={<LessonPage />} />
+        <Route path="/study-sessions" element={<StudyCalendar />} />
+        <Route path="/profile" element={<ProfilePage />} />
 
-          {/* Default route */}
-          <Route path="*" element={<Navigate to="/pathways" replace />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
+        {/* Default route */}
+        <Route path="*" element={<Navigate to="/pathways" replace />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
