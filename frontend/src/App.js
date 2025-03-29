@@ -14,15 +14,7 @@ import TreeLoader from "./components/TreeLoader";
 import LessonsPage from "./Pages/LessonsPage";
 import ProfilePage from "./Pages/ProfilePage";
 
-// Wrap App component with AuthProvider
-const AppWrapper = () => {
-  return (
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  );
-};
-
+// The App component with routes
 function App() {
     const { user } = useContext(AuthContext);
     const location = useLocation();
@@ -61,5 +53,14 @@ function App() {
         </>
     );
 }
+
+// Wrap App component with AuthProvider
+const AppWrapper = () => {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  );
+};
 
 export default AppWrapper;
