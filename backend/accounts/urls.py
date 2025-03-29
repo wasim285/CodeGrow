@@ -5,7 +5,7 @@ from .views import LessonAssistantView
 urlpatterns = [
     # Authentication endpoints
     path('register/', views.RegisterView.as_view(), name='register'),
-    path('login/', views.EnhancedLoginView.as_view(), name='login'),
+    path('login/', views.EnhancedLoginView.as_view(), name='login'),  # Use EnhancedLoginView instead of LoginView
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
     

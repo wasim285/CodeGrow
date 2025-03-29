@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from . import views
+from accounts.views import redirect_based_on_role  # Import directly from accounts.views
 
 urlpatterns = [
     # Django admin
@@ -12,7 +12,7 @@ urlpatterns = [
     path('api/accounts/', include('accounts.urls')),
     
     # Root URL redirector based on user role
-    path('', views.redirect_based_on_role, name='root_redirect'),
+    path('', redirect_based_on_role, name='root_redirect'),
 ]
 
 # Static files and media configuration

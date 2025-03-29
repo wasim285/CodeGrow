@@ -51,14 +51,24 @@ const LoginPage = () => {
             if (response.status === 200) {
                 const userData = response.data;
                 
-                // Pass token AND user data to login function
-                login(userData.token, userData);
-                
-                // Store token in localStorage
+                // Store token, username and role info
                 localStorage.setItem("token", userData.token);
                 
-                // Check if user is admin and redirect accordingly
-                if (userData.role === 'admin' || userData.is_staff || userData.is_superuser) {
+                // Pass BOTH token and user data to login function
+                login(userData.token, userData);
+                
+                // Check admin status directly from response
+                const isUserAdmin = 
+                    userData.role === 'admin' ||
+                    userData.is_staff ||
+                    userData.is_superuser;
+                    
+                console.log("Login successful:", userData.username);
+                console.log("User role:", userData.role);
+                console.log("Is admin:", isUserAdmin);
+                
+                // Redirect based on role
+                if (isUserAdmin) {
                     console.log("Admin user detected, redirecting to admin dashboard");
                     navigate("/admin/dashboard");
                 } else {

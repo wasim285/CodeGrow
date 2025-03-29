@@ -1,101 +1,94 @@
-import { createContext, useState, useEffect } from 'react';
-import { getProfile } from '../utils/api';
+import { createContext, useState, useEffect } from "react";
+import api from "../utils/api";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Check for token on component mount
-        const token = localStorage.getItem('token');
-        const checkAuth = async () => {
-            if (token) {
-                try {
-                    const res = await getProfile(token);
-                    if (res.status === 200) {
-                        const user = res.data;
-                        setUserData(user);
-                        setIsAuthenticated(true);
-                        
-                        // Set admin status based on role, is_staff or is_superuser
-                        const adminStatus = user.role === 'admin' || user.is_staff || user.is_superuser;
-                        setIsAdmin(adminStatus);
-                        console.log(`User authenticated: ${user.username}, Admin: ${adminStatus}`);
-                    } else {
-                        handleLogout();
-                    }
-                } catch (err) {
-                    console.error("Auth verification error:", err);
-                    handleLogout();
-                }
-            }
-            setLoading(false);
-        };
+  useEffect(() => {
+    // Check for token in localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-        checkAuth();
-    }, []);
-
-    const login = (token, userDetails = null) => {
-        localStorage.setItem('token', token);
-        setIsAuthenticated(true);
+    // Fetch user profile using token
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get("profile/");
         
-        // If user details are provided during login, update them immediately
-        if (userDetails) {
-            setUserData(userDetails);
-            const adminStatus = 
-                userDetails.role === 'admin' || 
-                userDetails.is_staff || 
-                userDetails.is_superuser;
-            setIsAdmin(adminStatus);
+        if (response.status === 200) {
+          const userData = response.data;
+          setUser(userData);
+          setIsAuthenticated(true);
+          
+          // Check if user is admin based on their role or permissions
+          const adminStatus = 
+            userData.role === 'admin' || 
+            userData.is_staff || 
+            userData.is_superuser;
+          
+          setIsAdmin(adminStatus);
+          console.log(`Auth verified: ${userData.username}, Admin: ${adminStatus}`);
         }
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userRole');
+      } catch (error) {
+        console.error("Authentication error:", error);
+        // Clear token if invalid
+        localStorage.removeItem("token");
+        setUser(null);
         setIsAuthenticated(false);
-        setUserData(null);
         setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Make additional request to get full user profile after authentication
-    const updateUserProfile = async () => {
-        const token = localStorage.getItem('token');
-        if (token && isAuthenticated) {
-            try {
-                const res = await getProfile(token);
-                if (res.status === 200) {
-                    setUserData(res.data);
-                    const adminStatus = 
-                        res.data.role === 'admin' || 
-                        res.data.is_staff || 
-                        res.data.is_superuser;
-                    setIsAdmin(adminStatus);
-                }
-            } catch (err) {
-                console.error("Error fetching user profile:", err);
-            }
-        }
-    };
+    fetchUserProfile();
+  }, []);
 
-    // Context value
-    const contextValue = {
+  const login = (token, userData = null) => {
+    localStorage.setItem("token", token);
+    
+    // If we received user data with login response, use it
+    if (userData) {
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      // Set admin status based on userData
+      const adminStatus = 
+        userData.role === 'admin' || 
+        userData.is_staff || 
+        userData.is_superuser;
+      
+      setIsAdmin(adminStatus);
+      console.log(`User logged in: ${userData.username}, Admin: ${adminStatus}`);
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    setIsAuthenticated(false);
+    setIsAdmin(false);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
         isAuthenticated,
         isAdmin,
-        user: userData,
         loading,
         login,
-        logout: handleLogout,
-        updateUserProfile
-    };
-
-    return (
-        <AuthContext.Provider value={contextValue}>
-            {children}
-        </AuthContext.Provider>
-    );
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
