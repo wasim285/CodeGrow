@@ -6,11 +6,12 @@ const API_BASE_URL = process.env.REACT_APP_API_URL ||
     ? 'https://codegrow.onrender.com/api'
     : 'http://localhost:8000/api');
 
-console.log('Using API base URL:', `${API_BASE_URL}/accounts/`);
+// Fix: Remove the extra "/accounts/" from the baseURL
+console.log('Using API base URL:', API_BASE_URL);
 
 // Create axios instance with proper configuration
 const apiInstance = axios.create({
-    baseURL: `${API_BASE_URL}/accounts/`,
+    baseURL: API_BASE_URL,
     timeout: 15000 // Increased timeout for slow connections
 });
 
@@ -58,26 +59,26 @@ apiInstance.interceptors.response.use(
     }
 );
 
-// Auth endpoints
+// Auth endpoints - add "accounts/" prefix to each endpoint
 export const loginUser = (credentials) => {
-    return apiInstance.post('login/', credentials);
+    return apiInstance.post('accounts/login/', credentials);
 };
 
 export const registerUser = (userData) => {
-    return apiInstance.post('register/', userData);
+    return apiInstance.post('accounts/register/', userData);
 };
 
 export const logoutUser = () => {
-    return apiInstance.post('logout/');
+    return apiInstance.post('accounts/logout/');
 };
 
 export const getProfile = () => {
-    return apiInstance.get('profile/');
+    return apiInstance.get('accounts/profile/');
 };
 
-// Admin endpoints
+// Admin endpoints - add "accounts/" prefix to each endpoint
 export const getAdminDashboard = () => {
-    return apiInstance.get('admin/dashboard/');
+    return apiInstance.get('accounts/admin/dashboard/');
 };
 
 // Admin User Management
@@ -93,27 +94,27 @@ export const getAdminUsers = (page = 1, search = '', filters = {}) => {
         }
     });
     
-    return apiInstance.get(`admin/users/?${params.toString()}`);
+    return apiInstance.get(`accounts/admin/users/?${params.toString()}`);
 };
 
 export const getAdminUser = (userId) => {
-    return apiInstance.get(`admin/users/${userId}/`);
+    return apiInstance.get(`accounts/admin/users/${userId}/`);
 };
 
 export const createAdminUser = (userData) => {
-    return apiInstance.post('admin/users/', userData);
+    return apiInstance.post('accounts/admin/users/', userData);
 };
 
 export const updateAdminUser = (userId, userData) => {
-    return apiInstance.put(`admin/users/${userId}/`, userData);
+    return apiInstance.put(`accounts/admin/users/${userId}/`, userData);
 };
 
 export const toggleUserStatus = (userId, isActive) => {
-    return apiInstance.patch(`admin/users/${userId}/activate/`, { is_active: isActive });
+    return apiInstance.patch(`accounts/admin/users/${userId}/activate/`, { is_active: isActive });
 };
 
 export const deleteAdminUser = (userId) => {
-    return apiInstance.delete(`admin/users/${userId}/`);
+    return apiInstance.delete(`accounts/admin/users/${userId}/`);
 };
 
 // Admin Pathways Management
@@ -121,23 +122,23 @@ export const getAdminPathways = (page = 1, search = '') => {
     const params = new URLSearchParams();
     params.append('page', page);
     if (search) params.append('search', search);
-    return apiInstance.get(`admin/pathways/?${params.toString()}`);
+    return apiInstance.get(`accounts/admin/pathways/?${params.toString()}`);
 };
 
 export const getAdminPathway = (pathwayId) => {
-    return apiInstance.get(`admin/pathways/${pathwayId}/`);
+    return apiInstance.get(`accounts/admin/pathways/${pathwayId}/`);
 };
 
 export const createAdminPathway = (pathwayData) => {
-    return apiInstance.post('admin/pathways/', pathwayData);
+    return apiInstance.post('accounts/admin/pathways/', pathwayData);
 };
 
 export const updateAdminPathway = (pathwayId, pathwayData) => {
-    return apiInstance.put(`admin/pathways/${pathwayId}/`, pathwayData);
+    return apiInstance.put(`accounts/admin/pathways/${pathwayId}/`, pathwayData);
 };
 
 export const deleteAdminPathway = (pathwayId) => {
-    return apiInstance.delete(`admin/pathways/${pathwayId}/`);
+    return apiInstance.delete(`accounts/admin/pathways/${pathwayId}/`);
 };
 
 // Admin Lessons Management
@@ -153,23 +154,23 @@ export const getAdminLessons = (page = 1, search = '', filters = {}) => {
         }
     });
     
-    return apiInstance.get(`admin/lessons/?${params.toString()}`);
+    return apiInstance.get(`accounts/admin/lessons/?${params.toString()}`);
 };
 
 export const getAdminLesson = (lessonId) => {
-    return apiInstance.get(`admin/lessons/${lessonId}/`);
+    return apiInstance.get(`accounts/admin/lessons/${lessonId}/`);
 };
 
 export const createAdminLesson = (lessonData) => {
-    return apiInstance.post('admin/lessons/', lessonData);
+    return apiInstance.post('accounts/admin/lessons/', lessonData);
 };
 
 export const updateAdminLesson = (lessonId, lessonData) => {
-    return apiInstance.put(`admin/lessons/${lessonId}/`, lessonData);
+    return apiInstance.put(`accounts/admin/lessons/${lessonId}/`, lessonData);
 };
 
 export const deleteAdminLesson = (lessonId) => {
-    return apiInstance.delete(`admin/lessons/${lessonId}/`);
+    return apiInstance.delete(`accounts/admin/lessons/${lessonId}/`);
 };
 
 // Admin Activity Log
@@ -184,7 +185,64 @@ export const getAdminActivityLog = (page = 1, filters = {}) => {
         }
     });
     
-    return apiInstance.get(`admin/activity-log/?${params.toString()}`);
+    return apiInstance.get(`accounts/admin/activity-log/?${params.toString()}`);
+};
+
+// User-facing pathways endpoints
+export const getPathways = () => {
+    return apiInstance.get('accounts/pathways/');
+};
+
+export const getPathwayDetail = (id) => {
+    return apiInstance.get(`accounts/pathways/${id}/`);
+};
+
+export const enrollInPathway = (id) => {
+    return apiInstance.post(`accounts/pathways/${id}/enroll/`);
+};
+
+// User-facing lessons endpoints
+export const getLessons = () => {
+    return apiInstance.get('accounts/lessons/');
+};
+
+export const getLessonDetail = (id) => {
+    return apiInstance.get(`accounts/lessons/${id}/`);
+};
+
+export const completeLesson = (id) => {
+    return apiInstance.post(`accounts/lessons/${id}/complete/`);
+};
+
+export const checkLessonCompletion = (id) => {
+    return apiInstance.get(`accounts/lessons/${id}/check-completion/`);
+};
+
+// Study Sessions
+export const getStudySessions = () => {
+    return apiInstance.get('accounts/study-sessions/');
+};
+
+export const createStudySession = (data) => {
+    return apiInstance.post('accounts/study-sessions/', data);
+};
+
+export const updateStudySession = (id, data) => {
+    return apiInstance.put(`accounts/study-sessions/${id}/`, data);
+};
+
+export const deleteStudySession = (id) => {
+    return apiInstance.delete(`accounts/study-sessions/${id}/`);
+};
+
+// Code execution
+export const runCode = (data) => {
+    return apiInstance.post('accounts/run-code/', data);
+};
+
+// AI assistance
+export const getLessonAssistance = (data) => {
+    return apiInstance.post('accounts/lesson-assistant/', data);
 };
 
 export default apiInstance;
