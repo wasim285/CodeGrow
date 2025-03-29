@@ -11,9 +11,9 @@ import HomePage from './Pages/HomePage';
 import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/ProfilePage';
 import Pathways from './Pages/PathwaysPage';
-import PathwayDetail from './Pages/PathwayDetail'; // Added missing import
+// Removed PathwayDetail import
 import Lesson from './Pages/LessonPage';
-import NotFound from './Pages/NotFound'; // Added missing import
+import NotFound from './Pages/NotFound';
 
 // Admin pages
 import AdminDashboard from './Pages/AdminDashboard';
@@ -47,7 +47,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/pathways" element={<Pathways />} />
-              <Route path="/pathways/:id" element={<PathwayDetail />} />
+              {/* Removed pathway detail route */}
               <Route path="/lessons/:id" element={<Lesson />} />
             </Route>
           </Route>
