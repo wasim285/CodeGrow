@@ -1,29 +1,27 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+import '../styles/AdminStatsCard.css';
 
-const AdminStatsCard = ({ title, value, iconText, color }) => {
-  return (
-    <div className={`admin-stat-card card border-0 h-100 bg-${color}-subtle`}>
-      <div className="card-body p-4">
-        <div className={`admin-stat-icon bg-${color}-subtle text-${color}`}>
-          {iconText}
-        </div>
-        <h3 className={`admin-stat-value text-${color}`}>{value}</h3>
-        <p className="admin-stat-title">{title}</p>
+const AdminStatsCard = ({ title, value, icon, color, link }) => {
+  const cardContent = (
+    <div className={`admin-stats-card ${color}`}>
+      <div className="stats-icon">
+        <i className={`fas fa-${icon}`}></i>
+      </div>
+      <div className="stats-content">
+        <h3 className="stats-value">{value}</h3>
+        <p className="stats-title">{title}</p>
       </div>
     </div>
   );
-};
 
-AdminStatsCard.propTypes = {
-  title: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-  iconText: PropTypes.string.isRequired,
-  color: PropTypes.string
-};
-
-AdminStatsCard.defaultProps = {
-  color: 'primary'
+  return link ? (
+    <Link to={link} className="stats-card-link">
+      {cardContent}
+    </Link>
+  ) : (
+    cardContent
+  );
 };
 
 export default AdminStatsCard;

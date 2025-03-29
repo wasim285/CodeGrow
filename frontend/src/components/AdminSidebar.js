@@ -1,77 +1,82 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AuthContext } from '../context/Authcontext';
-import '../styles/AdminDashboard.css';
+import '../styles/AdminSidebar.css';
 
-const AdminSidebar = () => {
-  const { user, logout } = useContext(AuthContext);
+const AdminSidebar = ({ activePage }) => {
   const location = useLocation();
+  const currentPath = location.pathname;
 
-  const navItems = [
-    {
-      title: 'Dashboard',
-      path: '/admin/dashboard',
-      icon: '📊' // Dashboard icon
-    },
-    {
-      title: 'Users',
-      path: '/admin/users',
-      icon: '👥' // Users icon
-    },
-    {
-      title: 'Learning Pathways',
-      path: '/admin/pathways',
-      icon: '🛣️' // Road/pathway icon
-    },
-    {
-      title: 'Lessons',
-      path: '/admin/lessons',
-      icon: '📚' // Book icon
-    },
-    {
-      title: 'Activity Log',
-      path: '/admin/activity',
-      icon: '📝' // History/log icon
+  const isActive = (path) => {
+    if (activePage) {
+      return activePage === path;
     }
-  ];
+    return currentPath.includes(`/admin/${path}`);
+  };
 
   return (
-    <div className="admin-sidebar-container">
+    <div className="admin-sidebar">
       <div className="admin-sidebar-header">
-        <div className="admin-logo-text">CG</div>
-        <h2 className="admin-title">CodeGrow</h2>
+        <h2>CodeGrow Admin</h2>
       </div>
-
-      <div className="admin-profile-section">
-        <div className="admin-avatar">
-          <div className="admin-avatar-placeholder">
-            {user?.username ? user.username.charAt(0).toUpperCase() : 'A'}
-          </div>
-        </div>
-        <div className="admin-info">
-          <div className="admin-name">{user?.username || 'Admin'}</div>
-          <div className="admin-role">Administrator</div>
-        </div>
-      </div>
-
+      
       <nav className="admin-nav">
-        {navItems.map((item) => (
-          <Link 
-            key={item.path} 
-            to={item.path} 
-            className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
-          >
-            <span className="admin-nav-icon">{item.icon}</span>
-            <span className="admin-nav-text">{item.title}</span>
-          </Link>
-        ))}
+        <ul>
+          <li>
+            <Link to="/admin/dashboard" className={isActive('dashboard') ? 'active' : ''}>
+              <i className="fas fa-tachometer-alt"></i>
+              <span>Dashboard</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/users" className={isActive('users') ? 'active' : ''}>
+              <i className="fas fa-users"></i>
+              <span>Users</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/pathways" className={isActive('pathways') ? 'active' : ''}>
+              <i className="fas fa-route"></i>
+              <span>Learning Pathways</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/lessons" className={isActive('lessons') ? 'active' : ''}>
+              <i className="fas fa-book"></i>
+              <span>Lessons</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/exercises" className={isActive('exercises') ? 'active' : ''}>
+              <i className="fas fa-code"></i>
+              <span>Exercises</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/activity-log" className={isActive('activity-log') ? 'active' : ''}>
+              <i className="fas fa-history"></i>
+              <span>Activity Log</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/reports" className={isActive('reports') ? 'active' : ''}>
+              <i className="fas fa-chart-bar"></i>
+              <span>Reports</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/settings" className={isActive('settings') ? 'active' : ''}>
+              <i className="fas fa-cog"></i>
+              <span>Settings</span>
+            </Link>
+          </li>
+        </ul>
       </nav>
       
       <div className="admin-sidebar-footer">
-        <button onClick={logout} className="admin-logout-btn">
-          <span className="admin-nav-icon">🚪</span>
-          <span>Logout</span>
-        </button>
+        <Link to="/dashboard" className="admin-exit-btn">
+          <i className="fas fa-sign-out-alt"></i>
+          <span>Exit Admin</span>
+        </Link>
       </div>
     </div>
   );

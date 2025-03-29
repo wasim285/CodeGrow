@@ -1,78 +1,106 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../context/Authcontext';
+import { FiSearch, FiEdit, FiTrash2, FiUserCheck, FiUserX } from 'react-icons/fi';
 import AdminSidebar from '../components/AdminSidebar';
-import { getAdminUsers, deleteAdminUser, activateAdminUser } from '../utils/api';
+import api from '../utils/api';
 import '../styles/AdminDashboard.css';
 
 const AdminUsers = () => {
-  const { token } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [filters, setFilters] = useState({
-    role: '',
-    is_active: '',
-    search: ''
-  });
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const response = await getAdminUsers(token, currentPage, filters);
-        setUsers(response.data.results || []);
-        setTotalPages(Math.ceil(response.data.count / 10)); // Assuming 10 items per page
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching users:', err);
-        setError('Failed to load users. Please try again.');
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
-  }, [token, currentPage, filters]);
+  }, [currentPage, searchQuery]);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setCurrentPage(1); // Reset to first page on filter change
-  };
-
-  const handleDeleteUser = async (id, username) => {
-    if (!window.confirm(`Are you sure you want to delete user "${username}"? This cannot be undone.`)) {
-      return;
-    }
-    
+  const fetchUsers = async () => {
     try {
-      await deleteAdminUser(token, id);
-      // Refresh the list
-      setUsers(users.filter(user => user.id !== id));
+      setLoading(true);
+      const params = new URLSearchParams();
+      params.append('page', currentPage);
+      
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+
+      const response = await api.get(`admin/users/?${params.toString()}`);
+      
+      if (response.data.results) {
+        setUsers(response.data.results);
+        setTotalPages(Math.ceil(response.data.count / 10)); // Assuming 10 items per page
+      } else {
+        setUsers(response.data);
+      }
+      
+      setLoading(false);
     } catch (err) {
-      console.error('Error deleting user:', err);
-      setError('Failed to delete user. Please try again.');
+      console.error('Error fetching users:', err);
+      setError('Failed to load users. Please try again.');
+      setLoading(false);
     }
   };
 
-  const handleToggleActive = async (userId, currentStatus) => {
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const toggleUserStatus = async (userId, isCurrentlyActive) => {
     try {
-      await activateAdminUser(token, userId, !currentStatus);
+      await api.patch(`admin/users/${userId}/activate/`, {
+        is_active: !isCurrentlyActive
+      });
+
+      // Update local state
       setUsers(users.map(user => 
-        user.id === userId ? { ...user, is_active: !currentStatus } : user
+        user.id === userId ? { ...user, is_active: !isCurrentlyActive } : user
       ));
     } catch (err) {
       console.error('Error toggling user status:', err);
-      setError('Failed to update user status. Please try again.');
+      alert('Failed to update user status. Please try again.');
+    }
+  };
+
+  const toggleSelectUser = (userId) => {
+    if (selectedUsers.includes(userId)) {
+      setSelectedUsers(selectedUsers.filter(id => id !== userId));
+    } else {
+      setSelectedUsers([...selectedUsers, userId]);
+    }
+  };
+
+  const bulkActivate = async (activate = true) => {
+    if (selectedUsers.length === 0) {
+      alert('Please select users first');
+      return;
+    }
+
+    try {
+      // This would ideally be a bulk endpoint in your API
+      // For now we'll handle each user individually
+      const promises = selectedUsers.map(userId => 
+        api.patch(`admin/users/${userId}/activate/`, {
+          is_active: activate
+        })
+      );
+      
+      await Promise.all(promises);
+      
+      // Update local state
+      setUsers(users.map(user => 
+        selectedUsers.includes(user.id) ? { ...user, is_active: activate } : user
+      ));
+      
+      setSelectedUsers([]);
+      alert(`Successfully ${activate ? 'activated' : 'deactivated'} ${selectedUsers.length} users`);
+    } catch (err) {
+      console.error('Error performing bulk action:', err);
+      alert('Failed to update users. Please try again.');
     }
   };
 
@@ -81,7 +109,10 @@ const AdminUsers = () => {
       <div className="admin-dashboard-container">
         <AdminSidebar />
         <div className="admin-content">
-          <div className="admin-loading">Loading users...</div>
+          <div className="admin-loading">
+            <div className="spinner"></div>
+            <p>Loading users...</p>
+          </div>
         </div>
       </div>
     );
@@ -92,75 +123,86 @@ const AdminUsers = () => {
       <AdminSidebar />
       <div className="admin-content">
         <div className="admin-header">
-          <h1 className="admin-page-title">Users Management</h1>
-          <Link to="/admin/users/new" className="admin-button admin-button-primary">
-            + Add User
-          </Link>
+          <h1 className="admin-page-title">User Management</h1>
         </div>
 
-        <div className="admin-filters-container">
-          <form onSubmit={(e) => e.preventDefault()} className="admin-search-form">
-            <div className="admin-search-input">
+        {/* Search and filters */}
+        <div className="admin-actions-bar">
+          <form onSubmit={handleSearch} className="admin-search-form">
+            <div className="admin-search-input-container">
               <input
                 type="text"
                 placeholder="Search users..."
-                name="search"
-                value={filters.search}
-                onChange={handleFilterChange}
-                className="admin-form-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="admin-search-input"
               />
               <button type="submit" className="admin-search-button">
-                Search
+                <FiSearch />
               </button>
             </div>
           </form>
-
-          <div className="admin-filters">
-            <select
-              name="role"
-              value={filters.role}
-              onChange={handleFilterChange}
-              className="admin-form-select"
+          
+          <div className="admin-bulk-actions">
+            <button 
+              onClick={() => bulkActivate(true)} 
+              disabled={selectedUsers.length === 0}
+              className="admin-button admin-button-secondary"
             >
-              <option value="">All Roles</option>
-              <option value="student">Students</option>
-              <option value="admin">Admins</option>
-            </select>
-
-            <select
-              name="is_active"
-              value={filters.is_active}
-              onChange={handleFilterChange}
-              className="admin-form-select"
+              <FiUserCheck /> Activate Selected
+            </button>
+            <button 
+              onClick={() => bulkActivate(false)} 
+              disabled={selectedUsers.length === 0}
+              className="admin-button admin-button-secondary"
             >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
+              <FiUserX /> Deactivate Selected
+            </button>
           </div>
         </div>
 
+        {/* Users Table */}
         <div className="admin-table-container">
           <table className="admin-table">
             <thead>
               <tr>
+                <th>
+                  <input 
+                    type="checkbox" 
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedUsers(users.map(user => user.id));
+                      } else {
+                        setSelectedUsers([]);
+                      }
+                    }}
+                    checked={selectedUsers.length > 0 && selectedUsers.length === users.length}
+                  />
+                </th>
                 <th>Username</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Joined Date</th>
+                <th>Join Date</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.length > 0 ? (
-                users.map((user) => (
+              {error ? (
+                <tr>
+                  <td colSpan="7" className="admin-error-cell">{error}</td>
+                </tr>
+              ) : users.length > 0 ? (
+                users.map(user => (
                   <tr key={user.id}>
                     <td>
-                      <Link to={`/admin/users/${user.id}`} className="admin-table-link">
-                        {user.username}
-                      </Link>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => toggleSelectUser(user.id)}
+                      />
                     </td>
+                    <td>{user.username}</td>
                     <td>{user.email}</td>
                     <td>{user.role || 'student'}</td>
                     <td>{new Date(user.date_joined).toLocaleDateString()}</td>
@@ -169,81 +211,59 @@ const AdminUsers = () => {
                         {user.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="admin-actions">
-                      <Link 
-                        to={`/admin/users/${user.id}`} 
-                        className="admin-button admin-button-sm"
-                        title="View User"
-                      >
-                        View
-                      </Link>
-                      <Link 
-                        to={`/admin/users/${user.id}/edit`} 
-                        className="admin-button admin-button-sm admin-button-secondary"
-                        title="Edit User"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteUser(user.id, user.username)}
-                        className="admin-button admin-button-sm admin-button-danger"
-                        title="Delete User"
-                      >
-                        Delete
-                      </button>
-                      <button 
-                        onClick={() => handleToggleActive(user.id, user.is_active)} 
-                        className={`admin-action-button ${user.is_active ? 'deactivate' : 'activate'}`}
-                      >
-                        {user.is_active ? 'Deactivate' : 'Activate'}
-                      </button>
+                    <td>
+                      <div className="admin-action-buttons">
+                        <Link 
+                          to={`/admin/users/${user.id}`} 
+                          className="admin-button admin-button-secondary"
+                          title="Edit user"
+                        >
+                          <FiEdit />
+                        </Link>
+                        <button
+                          onClick={() => toggleUserStatus(user.id, user.is_active)}
+                          className={`admin-button ${user.is_active ? 'admin-button-danger' : 'admin-button-primary'}`}
+                          title={user.is_active ? 'Deactivate user' : 'Activate user'}
+                        >
+                          {user.is_active ? <FiUserX /> : <FiUserCheck />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="admin-no-data">
-                    No users found. Try adjusting your filters or create a new user.
-                  </td>
+                  <td colSpan="7" className="admin-empty-cell">No users found</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
 
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="admin-pagination">
-            <button 
-              onClick={() => handlePageChange(currentPage - 1)}
+            <button
               disabled={currentPage === 1}
-              className="admin-pagination-button"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              className="admin-button admin-button-secondary"
             >
               Previous
             </button>
             
-            <div className="admin-pagination-pages">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`admin-pagination-page ${currentPage === page ? 'active' : ''}`}
-                >
-                  {page}
-                </button>
-              ))}
+            <div className="admin-pagination-info">
+              Page {currentPage} of {totalPages}
             </div>
             
-            <button 
-              onClick={() => handlePageChange(currentPage + 1)}
+            <button
               disabled={currentPage === totalPages}
-              className="admin-pagination-button"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              className="admin-button admin-button-secondary"
             >
               Next
             </button>
           </div>
         )}
-
-        {error && <div className="admin-error-message">{error}</div>}
       </div>
     </div>
   );
