@@ -201,4 +201,52 @@ export const checkCodeOutput = (userOutput, expectedOutput) => {
   };
 };
 
+/**
+ * Admin Dashboard API Functions
+ */
+
+// Fetch admin dashboard data
+export const fetchAdminDashboardData = async () => {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_BASE_URL}/admin/dashboard/`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${token}`
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch dashboard data');
+  }
+  
+  return response.json();
+};
+
+// Fetch users with pagination, filtering, and sorting
+export const fetchUsers = async (params = {}) => {
+  const token = localStorage.getItem('token');
+  const queryParams = new URLSearchParams();
+  
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') {
+      queryParams.append(key, value);
+    }
+  });
+  
+  const response = await fetch(`${API_BASE_URL}/admin/users/?${queryParams.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Token ${token}`
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
+  }
+  
+  return response.json();
+};
+
 export default api;

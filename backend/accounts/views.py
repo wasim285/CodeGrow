@@ -1,18 +1,26 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status, generics, filters
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from rest_framework.pagination import PageNumberPagination
+from django.utils import timezone
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserProgressSerializer, 
-    LessonSerializer, ProfileSerializer, StudySessionSerializer
+    LessonSerializer, ProfileSerializer, StudySessionSerializer,
+    AdminUserSerializer, AdminUserCreateSerializer, AdminUserUpdateSerializer,
+    LearningPathwaySerializer, AdminLessonSerializer, AdminActivityLogSerializer
 )
-from .models import CustomUser, UserProgress, Lesson, StudySession
+from .models import (
+    CustomUser, UserProgress, Lesson, StudySession, 
+    LearningPathway, AdminActivityLog
+)
+from .permissions import IsAdminUser
 import subprocess
 import sys
 from django.http import JsonResponse
@@ -353,12 +361,6 @@ class CreateSuperUserView(View):
             return JsonResponse({"message": "Superuser already exists."}, status=200)
 
 
-# REMOVED: CodeFeedbackView class that provided AI code review
-
-
-# REMOVED: LessonFeedbackView class that provided AI feedback on lessons
-
-
 class LessonAssistantView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -604,3 +606,317 @@ Make sure to put your text inside quotes (single or double), and use commas to s
         
         # Default fallback
         return "I understand you're asking about Python programming. Could you provide more specific details about what you're trying to learn or which concept you're having trouble with?"
+
+
+class IsAdminUser(IsAuthenticated):
+    """
+    Permission to only allow admin users to access the view
+    """
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.role == "admin"
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class AdminDashboardView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        try:
+            total_users = CustomUser.objects.count()
+            active_users = CustomUser.objects.filter(is_active=True).count()
+            total_lessons = Lesson.objects.count()
+            total_pathways = LearningPathway.objects.count()
+            
+            recent_users = CustomUser.objects.filter(
+                role="student"
+            ).order_by('-date_joined')[:5]
+            
+            recent_activity = AdminActivityLog.objects.all().order_by('-timestamp')[:10]
+            
+            learning_goal_stats = {}
+            for goal, _ in CustomUser.LEARNING_GOALS:
+                count = CustomUser.objects.filter(learning_goal=goal).count()
+                learning_goal_stats[goal] = count
+            
+            difficulty_level_stats = {}
+            for level, _ in CustomUser.DIFFICULTY_LEVELS:
+                count = CustomUser.objects.filter(difficulty_level=level).count()
+                difficulty_level_stats[level] = count
+                
+            return Response({
+                "total_users": total_users,
+                "active_users": active_users,
+                "total_lessons": total_lessons,
+                "total_pathways": total_pathways,
+                "recent_users": AdminUserSerializer(recent_users, many=True).data,
+                "recent_activity": AdminActivityLogSerializer(recent_activity, many=True).data,
+                "learning_goal_stats": learning_goal_stats,
+                "difficulty_level_stats": difficulty_level_stats
+            })
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to load admin dashboard: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AdminUserListView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['username', 'email', 'first_name', 'last_name']
+    ordering_fields = ['username', 'date_joined', 'last_login', 'is_active']
+    ordering = ['-date_joined']
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AdminUserCreateSerializer
+        return AdminUserSerializer
+    
+    def get_queryset(self):
+        queryset = CustomUser.objects.all()
+        
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            is_active = is_active.lower() == 'true'
+            queryset = queryset.filter(is_active=is_active)
+            
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+            
+        learning_goal = self.request.query_params.get('learning_goal')
+        if learning_goal:
+            queryset = queryset.filter(learning_goal=learning_goal)
+            
+        difficulty_level = self.request.query_params.get('difficulty_level')
+        if difficulty_level:
+            queryset = queryset.filter(difficulty_level=difficulty_level)
+            
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class AdminUserDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminUserUpdateSerializer
+    queryset = CustomUser.objects.all()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return AdminUserSerializer
+        return AdminUserUpdateSerializer
+
+
+class AdminUserActivateView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def post(self, request, pk):
+        try:
+            user = CustomUser.objects.get(pk=pk)
+            
+            activate = request.data.get('activate')
+            if activate is None:
+                activate = not user.is_active
+            else:
+                activate = activate.lower() == 'true'
+            
+            if activate:
+                user.activate()
+                message = f"User {user.username} has been activated"
+                action_type = "activate_user"
+            else:
+                user.deactivate()
+                message = f"User {user.username} has been deactivated"
+                action_type = "deactivate_user"
+                
+            AdminActivityLog.objects.create(
+                admin_user=request.user,
+                action_type=action_type,
+                target_user=user,
+                action_details=message,
+                ip_address=request.META.get('REMOTE_ADDR')
+            )
+            
+            return Response({"message": message}, status=status.HTTP_200_OK)
+            
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"error": "User not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AdminLearningPathwayListView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = LearningPathwaySerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'description', 'code']
+    ordering_fields = ['name', 'created_at']
+    ordering = ['name']
+    
+    def get_queryset(self):
+        queryset = LearningPathway.objects.all()
+        
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            is_active = is_active.lower() == 'true'
+            queryset = queryset.filter(is_active=is_active)
+            
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class AdminLearningPathwayDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = LearningPathwaySerializer
+    queryset = LearningPathway.objects.all()
+    
+    def perform_destroy(self, instance):
+        AdminActivityLog.objects.create(
+            admin_user=self.request.user,
+            action_type='delete_pathway',
+            target_pathway=instance,
+            action_details=f"Deleted pathway: {instance.name}",
+            ip_address=self.request.META.get('REMOTE_ADDR')
+        )
+        
+        instance.delete()
+
+
+class AdminLessonListView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminLessonSerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title', 'description']
+    ordering_fields = ['title', 'learning_goal', 'difficulty_level', 'order', 'created_at']
+    ordering = ['learning_goal', 'difficulty_level', 'order']
+    
+    def get_queryset(self):
+        queryset = Lesson.objects.all()
+        
+        learning_goal = self.request.query_params.get('learning_goal')
+        if learning_goal:
+            queryset = queryset.filter(learning_goal=learning_goal)
+            
+        difficulty_level = self.request.query_params.get('difficulty_level')
+        if difficulty_level:
+            queryset = queryset.filter(difficulty_level=difficulty_level)
+            
+        is_published = self.request.query_params.get('is_published')
+        if is_published is not None:
+            is_published = is_published.lower() == 'true'
+            queryset = queryset.filter(is_published=is_published)
+            
+        pathway_id = self.request.query_params.get('pathway')
+        if pathway_id:
+            queryset = queryset.filter(learning_pathway_id=pathway_id)
+            
+        return queryset
+    
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class AdminLessonDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminLessonSerializer
+    queryset = Lesson.objects.all()
+    
+    def perform_destroy(self, instance):
+        AdminActivityLog.objects.create(
+            admin_user=self.request.user,
+            action_type='delete_lesson',
+            target_lesson=instance,
+            action_details=f"Deleted lesson: {instance.title}",
+            ip_address=self.request.META.get('REMOTE_ADDR')
+        )
+        
+        instance.delete()
+
+
+class AdminActivityLogView(generics.ListAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminActivityLogSerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['action_type', 'admin_user__username', 'action_details']
+    ordering_fields = ['timestamp', 'admin_user__username', 'action_type']
+    ordering = ['-timestamp']
+    
+    def get_queryset(self):
+        queryset = AdminActivityLog.objects.all()
+        
+        action_type = self.request.query_params.get('action_type')
+        if action_type:
+            queryset = queryset.filter(action_type=action_type)
+            
+        admin_id = self.request.query_params.get('admin_id')
+        if admin_id:
+            queryset = queryset.filter(admin_user_id=admin_id)
+            
+        target_user_id = self.request.query_params.get('target_user_id')
+        if target_user_id:
+            queryset = queryset.filter(target_user_id=target_user_id)
+            
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        
+        if start_date:
+            try:
+                queryset = queryset.filter(timestamp__gte=start_date)
+            except (ValueError, TypeError):
+                pass
+                
+        if end_date:
+            try:
+                queryset = queryset.filter(timestamp__lte=end_date)
+            except (ValueError, TypeError):
+                pass
+                
+        return queryset
+
+
+class EnhancedLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data
+            token, _ = Token.objects.get_or_create(user=user)
+            
+            user.last_login_ip = request.META.get('REMOTE_ADDR')
+            user.save(update_fields=['last_login_ip'])
+            
+            response_data = {
+                "token": token.key,
+                "username": user.username,
+                "role": user.role,
+            }
+            
+            if user.role == "student":
+                response_data.update({
+                    "learning_goal": user.learning_goal,
+                    "difficulty_level": user.difficulty_level,
+                })
+                
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)

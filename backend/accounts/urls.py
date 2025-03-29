@@ -21,4 +21,23 @@ urlpatterns = [
     
     # AI Assistant endpoint
     path("lesson-assistant/", LessonAssistantView.as_view(), name="lesson-assistant"),
+    
+    # Admin routes
+    path("admin/dashboard/", views.AdminDashboardView.as_view(), name="admin-dashboard"),
+    
+    # Admin user management
+    path("admin/users/", views.AdminUserListView.as_view(), name="admin-users"),
+    path("admin/users/<int:pk>/", views.AdminUserDetailView.as_view(), name="admin-user-detail"),
+    path("admin/users/<int:pk>/activate/", views.AdminUserActivateView.as_view(), name="admin-user-activate"),
+    
+    # Admin learning pathway management
+    path("admin/pathways/", views.AdminPathwayListView.as_view(), name="admin-pathways"),
+    path("admin/pathways/<int:pk>/", views.AdminPathwayDetailView.as_view(), name="admin-pathway-detail"),
+    
+    # Admin lesson management
+    path("admin/lessons/", views.AdminLessonListView.as_view(), name="admin-lessons"),
+    path("admin/lessons/<int:pk>/", views.AdminLessonDetailView.as_view(), name="admin-lesson-detail"),
+    
+    # Admin activity log
+    path("admin/activity-log/", views.AdminActivityLogView.as_view(), name="admin-activity-log"),
 ]
