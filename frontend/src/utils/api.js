@@ -1,248 +1,244 @@
-import axios from 'axios';
+import axios from "axios";
 
-// Determine API base URL based on environment
-const API_BASE_URL = process.env.REACT_APP_API_URL || 
-  (window.location.hostname.includes('onrender.com')
-    ? 'https://codegrow.onrender.com/api'
-    : 'http://localhost:8000/api');
+const API_BASE_URL =
+  window.location.hostname.includes("onrender.com")
+    ? "https://codegrow.onrender.com/api/accounts/"
+    : "http://127.0.0.1:8000/api/accounts/";
 
-// Fix: Remove the extra "/accounts/" from the baseURL
-console.log('Using API base URL:', API_BASE_URL);
-
-// Create axios instance with proper configuration
-const apiInstance = axios.create({
-    baseURL: API_BASE_URL,
-    timeout: 15000 // Increased timeout for slow connections
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000, 
 });
 
-// Add a request interceptor to include the token
-apiInstance.interceptors.request.use(
-    config => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Make sure we set the header correctly
-            config.headers['Authorization'] = `Token ${token}`;
-            console.log('Adding token to request:', `Token ${token.substring(0, 5)}...`);
-        }
-        return config;
-    },
-    error => {
-        console.error('Request error interceptor:', error);
-        return Promise.reject(error);
+export const registerUser = async (userData) => {
+  try {
+    return await api.post("register/", userData);
+  } catch (error) {
+    console.error("Register API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const loginUser = async (userData) => {
+  try {
+    return await api.post("login/", userData);
+  } catch (error) {
+    console.error("Login API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getProfile = async (token) => {
+  try {
+    return await api.get("profile/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+  } catch (error) {
+    console.error("Profile API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getAllLessons = async (token) => {
+  try {
+    return await api.get("lessons/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+  } catch (error) {
+    console.error("Lessons API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getStudySessions = async (token) => {
+  try {
+    return await api.get("study-sessions/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+  } catch (error) {
+    console.error("Study Sessions API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const logoutUser = async (token) => {
+  try {
+    return await api.post("logout/", {}, {
+      headers: { Authorization: `Token ${token}` },
+    });
+  } catch (error) {
+    console.error("Logout API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getAIReview = async (userCode, lessonId) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}ai-feedback/`,
+      {
+        code: userCode,
+        lesson_id: lessonId,  // ✅ Pass lesson ID for feedback tracking
+      },
+      {
+        headers: { Authorization: `Token ${token}` },
+      }
+    );
+
+    return response.data.feedback; // or full response if you want
+  } catch (error) {
+    console.error("AI Feedback API Error:", error.response?.data || error.message);
+    return { error: "Failed to retrieve AI feedback." };
+  }
+};
+
+export const getLessonFeedback = async (feedbackData) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}lesson-feedback/`,
+      {
+        code: feedbackData.code,
+        expected_output: feedbackData.expected_output,
+        user_output: feedbackData.user_output, 
+        question: feedbackData.question
+      },
+      {
+        headers: { Authorization: `Token ${token}` },
+      }
+    );
+
+    return {
+      success: true,
+      feedback: response.data.feedback
+    };
+  } catch (error) {
+    console.error("Lesson Feedback API Error:", error.response?.data || error.message);
+    return { 
+      success: false,
+      error: error.response?.data?.error || "Failed to retrieve lesson feedback."
+    };
+  }
+};
+
+/**
+ * Get AI learning assistant response for a student's question
+ * @param {Object} assistantData - Data for the AI assistant
+ * @param {string} assistantData.lessonId - ID of the current lesson
+ * @param {number} assistantData.currentStep - Current step in the lesson (1, 2, or 3)
+ * @param {string} assistantData.userCode - User's current code (optional)
+ * @param {string} assistantData.expectedOutput - Expected output for the challenge (optional)
+ * @param {string} assistantData.question - Student's question
+ * @returns {Promise<Object>} - Response from the AI assistant
+ */
+export const getAIAssistantResponse = async (requestData) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  // First attempt with normal timeout
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}lesson-assistant/`,
+      requestData,
+      {
+        headers: { Authorization: `Token ${token}` },
+        timeout: 15000 // 15 second timeout for first attempt
+      }
+    );
+    
+    return response.data;
+  } catch (error) {
+    // If it's a timeout error, try once more with a longer timeout
+    if (error.code === 'ECONNABORTED') {
+      console.log("First attempt timed out, trying again with longer timeout...");
+      
+      try {
+        const retryResponse = await axios.post(
+          `${API_BASE_URL}lesson-assistant/`,
+          requestData,
+          {
+            headers: { Authorization: `Token ${token}` },
+            timeout: 30000 // 30 second timeout for second attempt
+          }
+        );
+        
+        return retryResponse.data;
+      } catch (retryError) {
+        console.error("Retry also failed:", retryError);
+        throw retryError;
+      }
+    } else {
+      // For non-timeout errors, just throw the original error
+      throw error;
     }
-);
-
-// Add a response interceptor to handle common errors
-apiInstance.interceptors.response.use(
-    response => response,
-    error => {
-        if (error.response) {
-            if (error.response.status === 401) {
-                console.log('Unauthorized API request - token may be expired');
-                // Token expired, go to login
-                if (window.location.pathname !== '/login') {
-                    localStorage.removeItem('token');
-                    // Don't redirect when already on login page to avoid loops
-                    if (!window.location.pathname.includes('/login')) {
-                        window.location = '/login';
-                    }
-                }
-            } else {
-                console.error('API error response:', error.response.status, error.response.data);
-            }
-        } else if (error.request) {
-            console.error('No response received:', error.request);
-        } else {
-            console.error('Error setting up request:', error.message);
-        }
-        return Promise.reject(error);
-    }
-);
-
-// Auth endpoints - add "accounts/" prefix to each endpoint
-export const loginUser = (credentials) => {
-    return apiInstance.post('accounts/login/', credentials);
+  }
 };
 
-export const registerUser = (userData) => {
-    return apiInstance.post('accounts/register/', userData);
+/**
+ * Generate a fallback response when the API call fails
+ * @param {string} question - The user's question
+ * @param {number} step - The current lesson step
+ * @returns {string} - A helpful fallback response
+ */
+const getFallbackResponse = (question, step) => {
+  const questionLower = question.toLowerCase();
+  
+  // Check for common patterns
+  if (questionLower.includes("explain") || questionLower.includes("what is")) {
+    return "This concept is a fundamental part of programming that helps you solve problems by breaking them down into manageable steps. If you'd like more specific help, try asking about a particular part you're struggling with.";
+  }
+  
+  if (questionLower.includes("error") || questionLower.includes("not working")) {
+    return "When debugging code, check for these common issues: syntax errors (like missing colons or parentheses), variable naming inconsistencies, and logic errors in your conditions. Reading the error message carefully often gives you clues about what's wrong.";
+  }
+  
+  if (questionLower.includes("hint") || questionLower.includes("stuck")) {
+    return "Try breaking down the problem into smaller steps. First, understand what inputs you're working with. Then, think about what transformations you need to apply. Finally, format your output according to what's expected.";
+  }
+  
+  // Step-specific fallbacks
+  const stepNum = Number(step) || 1;
+  switch(stepNum) {
+    case 1:
+      return "The introduction is meant to give you a foundation for the concepts in this lesson. Take your time to understand each part, and don't worry if it doesn't all click immediately. Learning programming is a step-by-step process.";
+    case 2:
+      return "In the guided example, try to understand each line of code. What is its purpose? How does it contribute to the overall solution? Experimenting by changing small parts of the code can help you see how it works.";
+    case 3:
+      return "For challenges, start by making sure you understand what the problem is asking. Then sketch a plan before coding. Break down your solution into steps, and implement one step at a time.";
+    default:
+      return "I'm here to help with this lesson. Could you tell me more specifically what you're struggling with?";
+  }
 };
 
-export const logoutUser = () => {
-    return apiInstance.post('accounts/logout/');
+/**
+ * Simple method to check if student's answer matches expected output
+ * No AI feedback, just direct comparison
+ * @param {string} userOutput - Output from user's code
+ * @param {string} expectedOutput - Expected correct output
+ * @returns {Object} - Result with success flag and message
+ */
+export const checkCodeOutput = (userOutput, expectedOutput) => {
+  if (!userOutput || !expectedOutput) {
+    return {
+      correct: false,
+      message: "Missing output to compare."
+    };
+  }
+
+  // Simple string comparison
+  const isCorrect = userOutput.trim() === expectedOutput.trim();
+  
+  return {
+    correct: isCorrect,
+    message: isCorrect 
+      ? "✅ Great job! Your solution is correct!" 
+      : "❌ Your solution doesn't match the expected output. Try asking the AI Assistant for help."
+  };
 };
 
-export const getProfile = () => {
-    return apiInstance.get('accounts/profile/');
-};
-
-// Admin endpoints - add "accounts/" prefix to each endpoint
-export const getAdminDashboard = () => {
-    return apiInstance.get('accounts/admin/dashboard/');
-};
-
-// Admin User Management
-export const getAdminUsers = (page = 1, search = '', filters = {}) => {
-    const params = new URLSearchParams();
-    params.append('page', page);
-    if (search) params.append('search', search);
-    
-    // Add any additional filters
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value !== '' && value !== undefined) {
-            params.append(key, value);
-        }
-    });
-    
-    return apiInstance.get(`accounts/admin/users/?${params.toString()}`);
-};
-
-export const getAdminUser = (userId) => {
-    return apiInstance.get(`accounts/admin/users/${userId}/`);
-};
-
-export const createAdminUser = (userData) => {
-    return apiInstance.post('accounts/admin/users/', userData);
-};
-
-export const updateAdminUser = (userId, userData) => {
-    return apiInstance.put(`accounts/admin/users/${userId}/`, userData);
-};
-
-export const toggleUserStatus = (userId, isActive) => {
-    return apiInstance.patch(`accounts/admin/users/${userId}/activate/`, { is_active: isActive });
-};
-
-export const deleteAdminUser = (userId) => {
-    return apiInstance.delete(`accounts/admin/users/${userId}/`);
-};
-
-// Admin Pathways Management
-export const getAdminPathways = (page = 1, search = '') => {
-    const params = new URLSearchParams();
-    params.append('page', page);
-    if (search) params.append('search', search);
-    return apiInstance.get(`accounts/admin/pathways/?${params.toString()}`);
-};
-
-export const getAdminPathway = (pathwayId) => {
-    return apiInstance.get(`accounts/admin/pathways/${pathwayId}/`);
-};
-
-export const createAdminPathway = (pathwayData) => {
-    return apiInstance.post('accounts/admin/pathways/', pathwayData);
-};
-
-export const updateAdminPathway = (pathwayId, pathwayData) => {
-    return apiInstance.put(`accounts/admin/pathways/${pathwayId}/`, pathwayData);
-};
-
-export const deleteAdminPathway = (pathwayId) => {
-    return apiInstance.delete(`accounts/admin/pathways/${pathwayId}/`);
-};
-
-// Admin Lessons Management
-export const getAdminLessons = (page = 1, search = '', filters = {}) => {
-    const params = new URLSearchParams();
-    params.append('page', page);
-    if (search) params.append('search', search);
-    
-    // Add any additional filters
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value !== '' && value !== undefined) {
-            params.append(key, value);
-        }
-    });
-    
-    return apiInstance.get(`accounts/admin/lessons/?${params.toString()}`);
-};
-
-export const getAdminLesson = (lessonId) => {
-    return apiInstance.get(`accounts/admin/lessons/${lessonId}/`);
-};
-
-export const createAdminLesson = (lessonData) => {
-    return apiInstance.post('accounts/admin/lessons/', lessonData);
-};
-
-export const updateAdminLesson = (lessonId, lessonData) => {
-    return apiInstance.put(`accounts/admin/lessons/${lessonId}/`, lessonData);
-};
-
-export const deleteAdminLesson = (lessonId) => {
-    return apiInstance.delete(`accounts/admin/lessons/${lessonId}/`);
-};
-
-// Admin Activity Log
-export const getAdminActivityLog = (page = 1, filters = {}) => {
-    const params = new URLSearchParams();
-    params.append('page', page);
-    
-    // Add any filters
-    Object.entries(filters).forEach(([key, value]) => {
-        if (value !== '' && value !== undefined) {
-            params.append(key, value);
-        }
-    });
-    
-    return apiInstance.get(`accounts/admin/activity-log/?${params.toString()}`);
-};
-
-// User-facing pathways endpoints
-export const getPathways = () => {
-    return apiInstance.get('accounts/pathways/');
-};
-
-export const getPathwayDetail = (id) => {
-    return apiInstance.get(`accounts/pathways/${id}/`);
-};
-
-export const enrollInPathway = (id) => {
-    return apiInstance.post(`accounts/pathways/${id}/enroll/`);
-};
-
-// User-facing lessons endpoints
-export const getLessons = () => {
-    return apiInstance.get('accounts/lessons/');
-};
-
-export const getLessonDetail = (id) => {
-    return apiInstance.get(`accounts/lessons/${id}/`);
-};
-
-export const completeLesson = (id) => {
-    return apiInstance.post(`accounts/lessons/${id}/complete/`);
-};
-
-export const checkLessonCompletion = (id) => {
-    return apiInstance.get(`accounts/lessons/${id}/check-completion/`);
-};
-
-// Study Sessions
-export const getStudySessions = () => {
-    return apiInstance.get('accounts/study-sessions/');
-};
-
-export const createStudySession = (data) => {
-    return apiInstance.post('accounts/study-sessions/', data);
-};
-
-export const updateStudySession = (id, data) => {
-    return apiInstance.put(`accounts/study-sessions/${id}/`, data);
-};
-
-export const deleteStudySession = (id) => {
-    return apiInstance.delete(`accounts/study-sessions/${id}/`);
-};
-
-// Code execution
-export const runCode = (data) => {
-    return apiInstance.post('accounts/run-code/', data);
-};
-
-// AI assistance
-export const getLessonAssistance = (data) => {
-    return apiInstance.post('accounts/lesson-assistant/', data);
-};
-
-export default apiInstance;
+export default api;

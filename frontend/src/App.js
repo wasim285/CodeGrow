@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";  
 import { useContext, useState, useEffect } from "react";
-import { AuthContext, AuthProvider } from "./context/Authcontext";
+import { AuthContext } from "./context/Authcontext";
 import Navbar from "./components/navbar";
 import HomePage from "./Pages/HomePage";
 import LoginPage from "./Pages/LoginPage";
@@ -14,7 +14,6 @@ import TreeLoader from "./components/TreeLoader";
 import LessonsPage from "./Pages/LessonsPage";
 import ProfilePage from "./Pages/ProfilePage";
 
-// The App component with routes
 function App() {
     const { user } = useContext(AuthContext);
     const location = useLocation();
@@ -38,29 +37,21 @@ function App() {
             {user && !hideNavbarPaths.includes(location.pathname) && !loading && <Navbar />}
 
             <Routes>
-                <Route path="/" element={user ? <Navigate to="/pathways" /> : <HomePage />} />
-                <Route path="/login" element={user ? <Navigate to="/pathways" /> : <LoginPage />} />
-                <Route path="/register" element={user ? <Navigate to="/pathways" /> : <RegisterPage />} />
-                <Route path="/pathways" element={user ? <PathwaysPage /> : <Navigate to="/" />} />
-                <Route path="/difficulty" element={user ? <DifficultyPage /> : <Navigate to="/" />} />
-                <Route path="/dashboard" element={loading ? <TreeLoader /> : user ? <Dashboard /> : <Navigate to="/" />} />
-                <Route path="/lessons" element={user ? <LessonsPage /> : <Navigate to="/" />} />
-                <Route path="/lessons/:lessonId" element={user ? <LessonPage /> : <Navigate to="/" />} />
-                <Route path="/study-sessions" element={user ? <StudyCalendar /> : <Navigate to="/" />} />
-                <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
-                <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
+    <Route path="/" element={user ? <Navigate to="/pathways" /> : <HomePage />} />
+    <Route path="/login" element={user ? <Navigate to="/pathways" /> : <LoginPage />} />
+    <Route path="/register" element={user ? <Navigate to="/pathways" /> : <RegisterPage />} />
+    <Route path="/pathways" element={user ? <PathwaysPage /> : <Navigate to="/" />} />
+    <Route path="/difficulty" element={user ? <DifficultyPage /> : <Navigate to="/" />} />
+    <Route path="/dashboard" element={loading ? <TreeLoader /> : user ? <Dashboard /> : <Navigate to="/" />} />
+    <Route path="/lessons" element={user ? <LessonsPage /> : <Navigate to="/" />} />
+    <Route path="/lessons/:lessonId" element={user ? <LessonPage /> : <Navigate to="/" />} />
+    <Route path="/study-sessions" element={user ? <StudyCalendar /> : <Navigate to="/" />} />
+    <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
+    <Route path="*" element={<Navigate to="/" />} />
+</Routes>
+
         </>
     );
 }
 
-// Wrap App component with AuthProvider
-const AppWrapper = () => {
-  return (
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  );
-};
-
-export default AppWrapper;
+export default App;

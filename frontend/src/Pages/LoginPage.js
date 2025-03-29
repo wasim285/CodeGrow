@@ -49,34 +49,12 @@ const LoginPage = () => {
             const response = await loginUser(formData);
 
             if (response.status === 200) {
-                const userData = response.data;
-                
-                // Store token, username and role info
-                localStorage.setItem("token", userData.token);
-                
-                // Pass BOTH token and user data to login function
-                login(userData.token, userData);
-                
-                // Check admin status directly from response
-                const isUserAdmin = 
-                    userData.role === 'admin' ||
-                    userData.is_staff ||
-                    userData.is_superuser;
-                    
-                console.log("Login successful:", userData.username);
-                console.log("User role:", userData.role);
-                console.log("Is admin:", isUserAdmin);
-                
-                // Redirect based on role
-                if (isUserAdmin) {
-                    console.log("Admin user detected, redirecting to admin dashboard");
-                    navigate("/admin/dashboard");
-                } else {
-                    console.log("Regular user detected, redirecting to pathways");
-                    navigate("/pathways");
-                }
+                const data = response.data;
+                login(data.token);
+                localStorage.setItem("token", data.token);
+                navigate("/pathways");
             } else {
-                // Handle errors as before
+                // Handle specific error cases
                 if (response.data?.non_field_errors) {
                     setErrors({ general: response.data.non_field_errors[0] });
                 } else if (response.data?.username) {
