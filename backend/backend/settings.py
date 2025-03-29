@@ -64,12 +64,32 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=600, ssl_require=True
-    )
-}
+# Database configuration
+if os.getenv('RENDER', None):
+    # Use PostgreSQL in production
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+    print("Using PostgreSQL database on Render")
+else:
+    # Use SQLite locally
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    print("Using SQLite database locally")
+
+# Add this after your database configuration to help debug migration issues
+if os.getenv('RENDER_DEBUG_MIGRATIONS', None):
+    print(f"Database Engine: {DATABASES['default'].get('ENGINE', 'Not specified')}")
+    print(f"Database Name: {DATABASES['default'].get('NAME', 'Not specified')}")
+    print(f"Using DATABASE_URL: {os.getenv('DATABASE_URL', 'Not set')}")
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
