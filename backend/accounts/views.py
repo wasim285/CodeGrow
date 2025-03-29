@@ -213,46 +213,10 @@ class LessonDetailView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        lesson = self.get_object()
-        return Response({
-            "title": lesson.title,
-            "description": lesson.description,
-            "step1_content": lesson.step1_content,
-            "step2_content": lesson.step2_content,
-            "step3_challenge": lesson.step3_challenge,
-            "code_snippet": lesson.code_snippet,
-        }, status=status.HTTP_200_OK)
-
-
-class LessonListView(generics.ListAPIView):
-    serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if not user.learning_goal or not user.difficulty_level:
-            return Lesson.objects.none()
-
-        return Lesson.objects.filter(
-            learning_goal=user.learning_goal.strip(),
-            difficulty_level=user.difficulty_level.strip()
-        ).order_by("order")
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        lessons_data = [
-            {
-                "title": lesson.title,
-                "description": lesson.description,
-                "step1_content": lesson.step1_content,
-                "step2_content": lesson.step2_content,
-                "step3_challenge": lesson.step3_challenge,
-                "code_snippet": lesson.code_snippet,
-            }
-            for lesson in queryset
-        ]
-        return Response(lessons_data, status=status.HTTP_200_OK)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 class AllLessonsView(generics.ListAPIView):
@@ -262,45 +226,42 @@ class AllLessonsView(generics.ListAPIView):
     def get_queryset(self):
         return Lesson.objects.all().order_by("order")
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        lessons_data = [
-            {
-                "title": lesson.title,
-                "description": lesson.description,
-                "step1_content": lesson.step1_content,
-                "step2_content": lesson.step2_content,
-                "step3_challenge": lesson.step3_challenge,
-                "code_snippet": lesson.code_snippet,
-            }
-            for lesson in queryset
-        ]
-        return Response(lessons_data, status=status.HTTP_200_OK)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 class DashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        progress, _ = UserProgress.objects.get_or_create(user=user)
+        try:
+            user = request.user
+            progress, _ = UserProgress.objects.get_or_create(user=user)
 
-        available_lessons = Lesson.objects.filter(
-            learning_goal=user.learning_goal,
-            difficulty_level=user.difficulty_level
-        ).order_by("order")
+            available_lessons = Lesson.objects.filter(
+                learning_goal=user.learning_goal,
+                difficulty_level=user.difficulty_level
+            ).order_by("order")
 
-        current_lesson = available_lessons.first()
-        study_sessions = StudySession.objects.filter(user=user)
+            current_lesson = available_lessons.first()
+            study_sessions = StudySession.objects.filter(user=user)
 
-        recommended_lessons = available_lessons.exclude(id__in=progress.completed_lessons.all())[:3]
+            recommended_lessons = available_lessons.exclude(id__in=progress.completed_lessons.all())[:3]
 
-        return Response({
-            "current_lesson": LessonSerializer(current_lesson).data if current_lesson else None,
-            "recommended_lessons": LessonSerializer(recommended_lessons, many=True).data,
-            "study_sessions": StudySessionSerializer(study_sessions, many=True).data,
-            "progress": UserProgressSerializer(progress).data,
-        })
+            return Response({
+                "current_lesson": LessonSerializer(current_lesson).data if current_lesson else None,
+                "recommended_lessons": LessonSerializer(recommended_lessons, many=True).data,
+                "study_sessions": StudySessionSerializer(study_sessions, many=True).data,
+                "progress": UserProgressSerializer(progress).data,
+            })
+        except Exception as e:
+            print(f"Dashboard error: {str(e)}")
+            return Response(
+                {"error": "Failed to load dashboard data"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class StudySessionListCreateView(generics.ListCreateAPIView):
@@ -387,120 +348,10 @@ class CreateSuperUserView(View):
             return JsonResponse({"message": "Superuser already exists."}, status=200)
 
 
-class CodeFeedbackView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        code = request.data.get("code", "").strip()
-
-        if not code:
-            return Response({"error": "No code provided."}, status=status.HTTP_400_BAD_REQUEST)
-
-        HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-        API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-
-        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
-        payload = {"inputs": f"Review this Python code and suggest improvements:\n{code}"}
-
-        try:
-            response = requests.post(API_URL, headers=headers, json=payload)
-            feedback = response.json()
-
-            if "error" in feedback:
-                return Response({"error": "AI feedback failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            return Response({"feedback": feedback}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# REMOVED: CodeFeedbackView class that provided AI code review
 
 
-class LessonFeedbackView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        # Use serializer for validation
-        from .serializers import LessonFeedbackSerializer
-        
-        serializer = LessonFeedbackSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                {"error": serializer.errors}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Extract validated data
-        code = serializer.validated_data.get("code")
-        expected_output = serializer.validated_data.get("expected_output")
-        user_output = serializer.validated_data.get("user_output")
-        question = serializer.validated_data.get("question")
-        
-        # Get API key from environment variables
-        HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-        API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoder"
-
-        # Prepare prompt with context about the error
-        prompt = f"""
-        The student was asked to solve this question:
-        {question}
-        
-        They wrote this code:
-        ```python
-        {code}
-        ```
-        
-        Expected output: {expected_output}
-        Actual output: {user_output}
-        
-        Please explain what's wrong with their code, where they went wrong, and provide a helpful hint to fix it. 
-        Do not provide the full solution, just guidance to help them learn.
-        """
-
-        headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
-        payload = {"inputs": prompt}
-
-        try:
-            response = requests.post(API_URL, headers=headers, json=payload)
-            
-            if response.status_code != 200:
-                return Response(
-                    {"error": f"API request failed with status code {response.status_code}"}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-                
-            feedback_data = response.json()
-            
-            # Extract the generated text
-            if isinstance(feedback_data, list) and len(feedback_data) > 0:
-                feedback_text = feedback_data[0].get("generated_text", "")
-            else:
-                feedback_text = feedback_data.get("generated_text", "")
-            
-            if not feedback_text:
-                return Response(
-                    {"error": "No feedback was generated"}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-
-            # Optional: You can save the feedback in the database for future reference
-            # LessonFeedback.objects.create(
-            #     user=request.user,
-            #     code=code,
-            #     question=question,
-            #     expected_output=expected_output,
-            #     actual_output=user_output,
-            #     feedback=feedback_text
-            # )
-
-            return Response({"feedback": feedback_text}, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            return Response(
-                {"error": f"Failed to get AI feedback: {str(e)}"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+# REMOVED: LessonFeedbackView class that provided AI feedback on lessons
 
 
 class LessonAssistantView(APIView):
@@ -513,6 +364,7 @@ class LessonAssistantView(APIView):
         user_code = request.data.get("userCode", "")
         expected_output = request.data.get("expectedOutput", "")
         question = request.data.get("question", "")
+        learning_pathway = request.data.get("learningPathway", "")
         
         if not lesson_id or not question:
             return Response(
@@ -529,7 +381,7 @@ class LessonAssistantView(APIView):
             )
         
         # Build a detailed prompt for the AI model
-        prompt = self.build_prompt(question, lesson, current_step, user_code, expected_output)
+        prompt = self.build_prompt(question, lesson, current_step, user_code, expected_output, learning_pathway)
         
         try:
             # Get response from Hugging Face model
@@ -546,7 +398,7 @@ class LessonAssistantView(APIView):
             fallback_response = self.get_fallback_response(question, lesson, current_step, user_code, expected_output)
             return Response({"response": fallback_response}, status=status.HTTP_200_OK)
     
-    def build_prompt(self, question, lesson, current_step, user_code, expected_output):
+    def build_prompt(self, question, lesson, current_step, user_code, expected_output, learning_pathway=""):
         """Build a detailed prompt for the AI model with all context"""
         # Get the appropriate content based on the step
         step_content = ""
@@ -564,11 +416,24 @@ class LessonAssistantView(APIView):
             # Limit length to avoid token limits
             step_content = step_content[:500] + "..." if len(step_content) > 500 else step_content
         
+        # Add learning pathway context if available
+        pathway_context = ""
+        if learning_pathway:
+            pathway_details = {
+                "School": "helping students master concepts for academic success",
+                "Portfolio": "helping users build practical projects for their coding portfolio",
+                "Career Growth": "helping professionals develop industry-standard coding practices"
+            }
+            
+            pathway_details_text = pathway_details.get(learning_pathway, "")
+            if pathway_details_text:
+                pathway_context = f"Learning Pathway: {learning_pathway} - Focus on {pathway_details_text}.\n"
+        
         # Format for Mistral's instruction format
         prompt = f"""<s>[INST] You are a helpful AI learning assistant named CodeGrow for a Python programming education platform.
 
 CONTEXT:
-Lesson: {lesson.title}
+{pathway_context}Lesson: {lesson.title}
 Description: {lesson.description}
 Current Step: {current_step} ({'Introduction' if current_step == 1 else 'Guided Example' if current_step == 2 else 'Challenge'})
 Step Content: {step_content}

@@ -72,58 +72,6 @@ export const logoutUser = async (token) => {
   }
 };
 
-export const getAIReview = async (userCode, lessonId) => {
-  const token = localStorage.getItem("token");
-
-  try {
-    const response = await axios.post(
-      `${API_BASE_URL}ai-feedback/`,
-      {
-        code: userCode,
-        lesson_id: lessonId,  // ✅ Pass lesson ID for feedback tracking
-      },
-      {
-        headers: { Authorization: `Token ${token}` },
-      }
-    );
-
-    return response.data.feedback; // or full response if you want
-  } catch (error) {
-    console.error("AI Feedback API Error:", error.response?.data || error.message);
-    return { error: "Failed to retrieve AI feedback." };
-  }
-};
-
-export const getLessonFeedback = async (feedbackData) => {
-  const token = localStorage.getItem("token");
-
-  try {
-    const response = await axios.post(
-      `${API_BASE_URL}lesson-feedback/`,
-      {
-        code: feedbackData.code,
-        expected_output: feedbackData.expected_output,
-        user_output: feedbackData.user_output, 
-        question: feedbackData.question
-      },
-      {
-        headers: { Authorization: `Token ${token}` },
-      }
-    );
-
-    return {
-      success: true,
-      feedback: response.data.feedback
-    };
-  } catch (error) {
-    console.error("Lesson Feedback API Error:", error.response?.data || error.message);
-    return { 
-      success: false,
-      error: error.response?.data?.error || "Failed to retrieve lesson feedback."
-    };
-  }
-};
-
 /**
  * Get AI learning assistant response for a student's question
  * @param {Object} assistantData - Data for the AI assistant

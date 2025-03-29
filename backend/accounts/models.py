@@ -189,24 +189,18 @@ def assign_lessons_on_signup(sender, instance, created, **kwargs):
         Lesson.create_default_lessons(instance)
 
 
-
 class LessonFeedback(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    # Fields from first definition
+    # Keep only these fields for tracking user interactions
     code_submitted = models.TextField(blank=True, null=True)
-    ai_feedback = models.TextField(blank=True, null=True)
-    
-    # Fields from second definition
-    code = models.TextField(blank=True, null=True)
     question = models.TextField(blank=True, null=True)
     expected_output = models.TextField(blank=True, null=True)
     actual_output = models.TextField(blank=True, null=True)
-    feedback = models.TextField(blank=True, null=True)
 
     def __str__(self):
         if self.lesson:
-            return f"Feedback by {self.user.username} for {self.lesson.title} on {self.created_at.date()}"
-        return f"Feedback for {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"
+            return f"Question by {self.user.username} for {self.lesson.title} on {self.created_at.date()}"
+        return f"Question from {self.user.username} on {self.created_at.strftime('%Y-%m-%d')}"
