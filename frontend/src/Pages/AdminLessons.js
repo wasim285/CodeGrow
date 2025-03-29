@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAdminLessons } from '../utils/api';
+import '../styles/AdminDashboard.css';
 
 const AdminLessons = () => {
   const [lessons, setLessons] = useState([]);
@@ -56,7 +57,7 @@ const AdminLessons = () => {
   return (
     <>
       <div className="admin-header">
-        <h1>Lesson Management</h1>
+        <h1 className="admin-page-title">Lesson Management</h1>
         <div className="admin-header-actions">
           <Link to="/admin/lessons/new" className="admin-button admin-button-primary">
             Add New Lesson
@@ -110,31 +111,57 @@ const AdminLessons = () => {
         </div>
       </div>
 
-      <div className="admin-table-container">
-        {loading ? (
-          <div className="admin-loading">Loading lessons...</div>
-        ) : lessons.length > 0 ? (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Difficulty</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lessons.map((lesson) => (
-                <tr key={lesson.id}>
-                  <td>{lesson.title}</td>
-                  <td>{lesson.difficulty_level}</td>
-                  <td>{lesson.is_active ? 'Active' : 'Inactive'}</td>
+      <div className="admin-section">
+        <div className="admin-table-container">
+          {loading ? (
+            <div className="admin-loading">
+              <div className="spinner"></div>
+              <p>Loading lessons...</p>
+            </div>
+          ) : lessons.length > 0 ? (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Difficulty</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="admin-no-data">No lessons found.</div>
-        )}
+              </thead>
+              <tbody>
+                {lessons.map((lesson) => (
+                  <tr key={lesson.id}>
+                    <td>{lesson.title}</td>
+                    <td>{lesson.difficulty_level}</td>
+                    <td>
+                      <span className={`admin-status ${lesson.is_active ? 'active' : 'inactive'}`}>
+                        {lesson.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="admin-action-buttons">
+                        <Link 
+                          to={`/admin/lessons/${lesson.id}`} 
+                          className="admin-button admin-button-secondary"
+                        >
+                          View
+                        </Link>
+                        <Link 
+                          to={`/admin/lessons/${lesson.id}/edit`} 
+                          className="admin-button admin-button-primary"
+                        >
+                          Edit
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="admin-empty-state">No lessons found</div>
+          )}
+        </div>
       </div>
 
       {totalPages > 1 && (
@@ -142,7 +169,7 @@ const AdminLessons = () => {
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="admin-pagination-button"
+            className="admin-button admin-button-secondary"
           >
             Previous
           </button>
@@ -152,7 +179,7 @@ const AdminLessons = () => {
           <button
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="admin-pagination-button"
+            className="admin-button admin-button-secondary"
           >
             Next
           </button>
