@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api";
 import "../styles/Dashboard.css";
 import Navbar from "../components/navbar";
-
-const API_BASE_URL = "https://codegrow.onrender.com/api/accounts/";
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -30,9 +28,8 @@ const Dashboard = () => {
             }
 
             try {
-                const response = await axios.get(`${API_BASE_URL}dashboard/`, {
-                    headers: { Authorization: `Token ${token}` },
-                });
+                // Use our API utility for consistent environment handling
+                const response = await api.get("dashboard/");
 
                 setLessonsCompleted(response.data.progress?.total_lessons_completed || 0);
                 setTotalLessons(response.data.total_lessons || 10);
@@ -87,11 +84,10 @@ const Dashboard = () => {
         if (!sessionToDelete) return;
         
         try {
-            const response = await axios.delete(`${API_BASE_URL}study-sessions/${sessionToDelete}/`, {
-                headers: { Authorization: `Token ${token}` },
-            });
+            // Use the API utility for consistent behavior
+            const response = await api.delete(`study-sessions/${sessionToDelete}/`);
             
-            if (response.status === 204) {
+            if (response.status === 204 || response.status === 200) {
                 // Update the sessions list
                 setStudySessions(studySessions.filter(session => session.id !== sessionToDelete));
                 // Show success message
@@ -126,6 +122,13 @@ const Dashboard = () => {
                 {showSuccessMessage && (
                     <div className="success-alert">
                         {successMessage}
+                    </div>
+                )}
+
+                {/* Error Message */}
+                {error && (
+                    <div className="error-alert">
+                        <p>{error}</p>
                     </div>
                 )}
 
@@ -164,7 +167,9 @@ const Dashboard = () => {
                                                 className="clickable-session"
                                             >
                                                 <strong>{session.lesson_title || "No Lesson Name"}</strong>
-                                                <span>{session.date} {session.start_time.slice(0, 5)} - {session.end_time.slice(0, 5)}</span>
+                                                <span>
+                                                    {session.date} {session.start_time?.slice(0, 5)} - {session.end_time?.slice(0, 5)}
+                                                </span>
                                             </li>
                                         ))}
                                     </ul>

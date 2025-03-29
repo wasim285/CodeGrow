@@ -9,11 +9,6 @@ import { python } from "@codemirror/lang-python";
 import api from "../utils/api";
 import AILearningAssistant from "../components/AILearningAssistant";
 
-const API_BASE_URL =
-  window.location.hostname.includes("onrender.com")
-    ? "https://codegrow.onrender.com/api/accounts/"
-    : "http://127.0.0.1:8000/api/accounts/";
-
 const LessonPage = () => {
   const { user } = useContext(AuthContext);
   const { lessonId } = useParams();
@@ -47,9 +42,9 @@ const LessonPage = () => {
           return;
         }
 
-        const response = await api.get(`lessons/${lessonId}/`, {
-          headers: { Authorization: `Token ${token}` },
-        });
+        // api utility already includes Authorization header from interceptors
+        // so we don't need to add it explicitly
+        const response = await api.get(`lessons/${lessonId}/`);
 
         setLesson(response.data);
         
@@ -79,9 +74,7 @@ const LessonPage = () => {
         }
 
         // Check if lesson is already completed
-        const completionResponse = await api.get(`check-lesson-completion/${lessonId}/`, {
-          headers: { Authorization: `Token ${token}` },
-        });
+        const completionResponse = await api.get(`check-lesson-completion/${lessonId}/`);
         setIsCompleted(completionResponse.data.is_completed);
         
       } catch (error) {
@@ -96,11 +89,8 @@ const LessonPage = () => {
 
   const markAsCompleted = async () => {
     try {
-      const response = await api.post(
-        `complete-lesson/${lessonId}/`,
-        {},
-        { headers: { Authorization: `Token ${localStorage.getItem("token")}` } }
-      );
+      // Use the api utility instead of direct fetch
+      const response = await api.post(`complete-lesson/${lessonId}/`, {});
 
       if (response.status === 200) {
         setIsCompleted(true);
@@ -125,10 +115,10 @@ const LessonPage = () => {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("User not authenticated.");
 
+      // Use api utility for consistent behavior
       const response = await api.post(
         `run-code/`,
-        { code: userCode.trim(), lesson_id: lessonId },
-        { headers: { Authorization: `Token ${token}` } }
+        { code: userCode.trim(), lesson_id: lessonId }
       );
 
       setOutput(response.data.output || "No output.");

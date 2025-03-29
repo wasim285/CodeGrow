@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { registerUser } from '../utils/api';
 import "../styles/SignUpPage.css";
 
 const SignupPage = () => {
@@ -8,10 +9,11 @@ const SignupPage = () => {
         email: '',
         username: '',
         password: '',
-        confirmPassword: ''
+        password2: '' // Changed to match Django's expected field name
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const validateForm = () => {
         const newErrors = {};
@@ -44,8 +46,8 @@ const SignupPage = () => {
         }
 
         // Confirm password validation
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Passwords do not match';
+        if (formData.password !== formData.password2) {
+            newErrors.password2 = 'Passwords do not match';
         }
 
         setErrors(newErrors);
@@ -55,6 +57,8 @@ const SignupPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
+        setErrors({});
+        setSuccessMessage('');
 
         if (!validateForm()) {
             setIsLoading(false);
@@ -62,44 +66,64 @@ const SignupPage = () => {
         }
 
         try {
-            const response = await fetch('https://codegrow.onrender.com/api/accounts/register/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    username: formData.username,
-                    password: formData.password,
-                }),
+            console.log("Submitting registration with:", {
+                email: formData.email,
+                username: formData.username,
+                // Password is sensitive, so we don't log it
             });
 
-            const data = await response.json();
+            const response = await registerUser(formData);
 
-            if (!response.ok) {
+            if (response.status === 201) {
+                setSuccessMessage('Account created successfully! Redirecting to login...');
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
+            } else {
+                console.log("Registration failed with status:", response.status);
+                
                 // Handle API error responses
-                if (data.username) {
-                    setErrors(prev => ({ ...prev, username: data.username[0] }));
+                if (response.data?.username) {
+                    setErrors(prev => ({ ...prev, username: Array.isArray(response.data.username) ? response.data.username[0] : response.data.username }));
                 }
-                if (data.email) {
-                    setErrors(prev => ({ ...prev, email: data.email[0] }));
+                if (response.data?.email) {
+                    setErrors(prev => ({ ...prev, email: Array.isArray(response.data.email) ? response.data.email[0] : response.data.email }));
                 }
-                if (data.password) {
-                    setErrors(prev => ({ ...prev, password: data.password[0] }));
+                if (response.data?.password) {
+                    setErrors(prev => ({ ...prev, password: Array.isArray(response.data.password) ? response.data.password[0] : response.data.password }));
                 }
-                throw new Error(data.detail || 'Registration failed');
+                if (response.data?.password2) {
+                    setErrors(prev => ({ ...prev, password2: Array.isArray(response.data.password2) ? response.data.password2[0] : response.data.password2 }));
+                }
+                if (response.data?.non_field_errors) {
+                    setErrors(prev => ({ ...prev, submit: Array.isArray(response.data.non_field_errors) ? response.data.non_field_errors[0] : response.data.non_field_errors }));
+                }
+                
+                // If no specific error was set but we know the request failed
+                if (!Object.keys(errors).length && response.data?.error) {
+                    setErrors({ submit: response.data.error });
+                }
             }
-
-            // Registration successful
-            navigate('/login');
         } catch (error) {
             console.error('Registration error:', error);
-            setErrors(prev => ({
-                ...prev,
-                submit: error.message || 'Registration failed. Please try again.'
-            }));
+            setErrors({ submit: "An unexpected error occurred. Please try again." });
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    // Handle input changes
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // Clear related error when user types
+        if (errors[name]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
         }
     };
 
@@ -116,6 +140,10 @@ const SignupPage = () => {
                 <div className="signup-box">
                     <h2>Create Account</h2>
                     
+                    {successMessage && (
+                        <div className="success-message">{successMessage}</div>
+                    )}
+                    
                     {errors.submit && (
                         <div className="error-message general">{errors.submit}</div>
                     )}
@@ -124,9 +152,10 @@ const SignupPage = () => {
                         <div className="form-group">
                             <input
                                 type="email"
+                                name="email"
                                 placeholder="Email"
                                 value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                onChange={handleInputChange}
                                 className={errors.email ? 'error' : ''}
                                 disabled={isLoading}
                             />
@@ -136,9 +165,10 @@ const SignupPage = () => {
                         <div className="form-group">
                             <input
                                 type="text"
+                                name="username"
                                 placeholder="Username"
                                 value={formData.username}
-                                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                                onChange={handleInputChange}
                                 className={errors.username ? 'error' : ''}
                                 disabled={isLoading}
                             />
@@ -148,9 +178,10 @@ const SignupPage = () => {
                         <div className="form-group">
                             <input
                                 type="password"
+                                name="password"
                                 placeholder="Password"
                                 value={formData.password}
-                                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                onChange={handleInputChange}
                                 className={errors.password ? 'error' : ''}
                                 disabled={isLoading}
                             />
@@ -160,13 +191,14 @@ const SignupPage = () => {
                         <div className="form-group">
                             <input
                                 type="password"
+                                name="password2"
                                 placeholder="Confirm Password"
-                                value={formData.confirmPassword}
-                                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                                className={errors.confirmPassword ? 'error' : ''}
+                                value={formData.password2}
+                                onChange={handleInputChange}
+                                className={errors.password2 ? 'error' : ''}
                                 disabled={isLoading}
                             />
-                            {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                            {errors.password2 && <span className="error-message">{errors.password2}</span>}
                         </div>
 
                         <button 

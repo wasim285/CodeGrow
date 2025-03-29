@@ -1,30 +1,61 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  window.location.hostname.includes("onrender.com")
-    ? "https://codegrow.onrender.com/api/accounts/"
-    : "http://127.0.0.1:8000/api/accounts/";
+// Detect environment more reliably
+const isLocalhost = 
+  window.location.hostname === "localhost" || 
+  window.location.hostname === "127.0.0.1";
+
+// Set the appropriate base URL based on environment
+const API_BASE_URL = isLocalhost
+  ? "http://127.0.0.1:8000/api/accounts/"
+  : "https://codegrow-backend.onrender.com/api/accounts/";
+
+console.log("API is using base URL:", API_BASE_URL); // Debug log
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, 
+  timeout: 30000,
+  headers: {
+    "Content-Type": "application/json"
+  }
 });
+
+// Add request interceptor for authentication
+api.interceptors.request.use(
+  (config) => {
+    // Add token to all requests except login and register
+    const token = localStorage.getItem("token");
+    if (token && !config.url.includes('login') && !config.url.includes('register')) {
+      config.headers.Authorization = `Token ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export const registerUser = async (userData) => {
   try {
-    return await api.post("register/", userData);
+    const response = await api.post("register/", userData);
+    return response;
   } catch (error) {
     console.error("Register API Error:", error.response?.data || error.message);
-    throw error;
+    return { 
+      status: error.response?.status || 500, 
+      data: error.response?.data || { error: "Registration failed" } 
+    };
   }
 };
 
 export const loginUser = async (userData) => {
   try {
-    return await api.post("login/", userData);
+    const response = await api.post("login/", userData);
+    return response;
   } catch (error) {
     console.error("Login API Error:", error.response?.data || error.message);
-    throw error;
+    return { 
+      status: error.response?.status || 500, 
+      data: error.response?.data || { error: "Login failed" } 
+    };
   }
 };
 
@@ -76,18 +107,18 @@ export const getAIReview = async (userCode, lessonId) => {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}ai-feedback/`,
+    const response = await api.post(
+      "ai-feedback/",
       {
         code: userCode,
-        lesson_id: lessonId,  // ✅ Pass lesson ID for feedback tracking
+        lesson_id: lessonId,
       },
       {
         headers: { Authorization: `Token ${token}` },
       }
     );
 
-    return response.data.feedback; // or full response if you want
+    return response.data.feedback;
   } catch (error) {
     console.error("AI Feedback API Error:", error.response?.data || error.message);
     return { error: "Failed to retrieve AI feedback." };
@@ -98,8 +129,8 @@ export const getLessonFeedback = async (feedbackData) => {
   const token = localStorage.getItem("token");
 
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}lesson-feedback/`,
+    const response = await api.post(
+      "lesson-feedback/",
       {
         code: feedbackData.code,
         expected_output: feedbackData.expected_output,
@@ -126,12 +157,12 @@ export const getLessonFeedback = async (feedbackData) => {
 
 /**
  * Get AI learning assistant response for a student's question
- * @param {Object} assistantData - Data for the AI assistant
- * @param {string} assistantData.lessonId - ID of the current lesson
- * @param {number} assistantData.currentStep - Current step in the lesson (1, 2, or 3)
- * @param {string} assistantData.userCode - User's current code (optional)
- * @param {string} assistantData.expectedOutput - Expected output for the challenge (optional)
- * @param {string} assistantData.question - Student's question
+ * @param {Object} requestData - Data for the AI assistant
+ * @param {string} requestData.lessonId - ID of the current lesson
+ * @param {number} requestData.currentStep - Current step in the lesson (1, 2, or 3)
+ * @param {string} requestData.userCode - User's current code (optional)
+ * @param {string} requestData.expectedOutput - Expected output for the challenge (optional)
+ * @param {string} requestData.question - Student's question
  * @returns {Promise<Object>} - Response from the AI assistant
  */
 export const getAIAssistantResponse = async (requestData) => {
@@ -142,8 +173,8 @@ export const getAIAssistantResponse = async (requestData) => {
 
   // First attempt with normal timeout
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}lesson-assistant/`,
+    const response = await api.post(
+      "lesson-assistant/",
       requestData,
       {
         headers: { Authorization: `Token ${token}` },
@@ -158,8 +189,8 @@ export const getAIAssistantResponse = async (requestData) => {
       console.log("First attempt timed out, trying again with longer timeout...");
       
       try {
-        const retryResponse = await axios.post(
-          `${API_BASE_URL}lesson-assistant/`,
+        const retryResponse = await api.post(
+          "lesson-assistant/",
           requestData,
           {
             headers: { Authorization: `Token ${token}` },
@@ -170,11 +201,19 @@ export const getAIAssistantResponse = async (requestData) => {
         return retryResponse.data;
       } catch (retryError) {
         console.error("Retry also failed:", retryError);
-        throw retryError;
+        return {
+          success: false,
+          message: "The request timed out. Please try a shorter question or try again later.",
+          fallback: getFallbackResponse(requestData.question, requestData.currentStep)
+        };
       }
     } else {
-      // For non-timeout errors, just throw the original error
-      throw error;
+      console.error("AI Assistant API Error:", error.response?.data || error.message);
+      return {
+        success: false,
+        message: "Failed to get a response. Please try again.",
+        fallback: getFallbackResponse(requestData.question, requestData.currentStep)
+      };
     }
   }
 };
@@ -230,8 +269,11 @@ export const checkCodeOutput = (userOutput, expectedOutput) => {
     };
   }
 
-  // Simple string comparison
-  const isCorrect = userOutput.trim() === expectedOutput.trim();
+  // Simple string comparison with normalization
+  const normalizedUser = userOutput.trim().replace(/\r\n/g, '\n');
+  const normalizedExpected = expectedOutput.trim().replace(/\r\n/g, '\n');
+  
+  const isCorrect = normalizedUser === normalizedExpected;
   
   return {
     correct: isCorrect,

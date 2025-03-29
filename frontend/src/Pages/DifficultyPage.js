@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../utils/api"; 
+import api, { getProfile } from "../utils/api"; 
 import "../styles/Difficulty.css";
 import PathwaysNavbar from "../components/PathwaysNavbar";
 
@@ -25,6 +25,14 @@ const DifficultyPage = () => {
         return () => clearInterval(interval);
     }, [difficultyLevels]);
 
+    useEffect(() => {
+        // Check if user is authenticated
+        const token = localStorage.getItem("token");
+        if (!token) {
+            navigate("/login");
+        }
+    }, [navigate]);
+
     const handleDifficultySelect = async (level) => {
         setLoading(true);
     
@@ -35,35 +43,50 @@ const DifficultyPage = () => {
                 navigate("/login");
                 return;
             }
-    
-            const currentGoal = localStorage.getItem("learning_goal") || "School"; // ✅ Get from localStorage instead of API
-    
-            // 🔹 Send API request to update difficulty_level
-            const updateResponse = await fetch("https://codegrow.onrender.com/api/accounts/profile/", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Token ${token}`,
-                },
-                body: JSON.stringify({ difficulty_level: level, learning_goal: currentGoal }), 
-            });
-    
-            if (!updateResponse.ok) {
-                throw new Error("Failed to update difficulty level.");
+            
+            // Get current learning goal (either from localStorage or profile)
+            let currentGoal = localStorage.getItem("learning_goal") || "School";
+            
+            try {
+                // Try to get the latest data from profile
+                const profileResponse = await getProfile(token);
+                if (profileResponse?.data?.learning_goal) {
+                    currentGoal = profileResponse.data.learning_goal;
+                }
+            } catch (profileError) {
+                console.warn("Could not fetch profile, using stored learning goal:", currentGoal);
             }
-    
-            localStorage.setItem("difficulty_level", level); // ✅ Save locally too
+
+            console.log(`Updating difficulty to: ${level}, with goal: ${currentGoal}`);
+            
+            // Use our API utility to ensure it works in all environments
+            const updateResponse = await api.patch("profile/", 
+                { 
+                    difficulty_level: level,
+                    learning_goal: currentGoal 
+                }
+            );
+            
+            console.log("Profile update response:", updateResponse.status);
+            
+            // Save to localStorage for faster access later
+            localStorage.setItem("difficulty_level", level);
             navigate("/dashboard");
-    
+            
         } catch (error) {
             console.error("Error updating difficulty level:", error);
-            alert("Something went wrong. Please try again.");
+            
+            // More specific error message
+            if (!navigator.onLine) {
+                alert("You appear to be offline. Please check your internet connection and try again.");
+            } else {
+                alert("Failed to update difficulty level. Please try again.");
+            }
         } finally {
             setLoading(false);
         }
     };
     
-
     return (
         <>
             <PathwaysNavbar />
@@ -72,12 +95,15 @@ const DifficultyPage = () => {
                 <div className="difficulty-options">
                     <div className="card" onClick={() => handleDifficultySelect("Beginner")}>
                         <h2>{loading ? "Saving..." : "Beginner"}</h2>
+                        <p>Perfect for those new to programming</p>
                     </div>
                     <div className="card" onClick={() => handleDifficultySelect("Intermediate")}>
                         <h2>{loading ? "Saving..." : "Intermediate"}</h2>
+                        <p>For those with some coding experience</p>
                     </div>
                     <div className="card" onClick={() => handleDifficultySelect("Advanced")}>
                         <h2>{loading ? "Saving..." : "Advanced"}</h2>
+                        <p>Challenging content for experienced coders</p>
                     </div>
                 </div>
             </div>
