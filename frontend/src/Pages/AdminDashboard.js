@@ -9,8 +9,9 @@ import {
 } from 'react-icons/fa';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+import { Link } from 'react-router-dom';
 import AdminSidebar from '../components/AdminSidebar';
-import { AuthContext } from '../contexts/AuthContext';
+import { AuthContext } from '../context/Authcontext'; // Lowercase c is correct
 import api from '../utils/api';
 import '../styles/AdminDashboard.css';
 

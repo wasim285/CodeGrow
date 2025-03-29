@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../context/Authcontext';
+import { AuthContext } from '../context/Authcontext'; // Lowercase c is correct
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminPathway, deleteAdminPathway } from '../utils/api';
 import { FaEdit, FaTrash, FaArrowLeft } from 'react-icons/fa';
