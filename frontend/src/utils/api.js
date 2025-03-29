@@ -1,14 +1,31 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  window.location.hostname.includes("onrender.com")
+// More robust API base URL detection
+const API_BASE_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname.includes("onrender.com") || window.location.hostname === "localhost"
     ? "https://codegrow.onrender.com/api/accounts/"
-    : "http://127.0.0.1:8000/api/accounts/";
+    : "http://127.0.0.1:8000/api/accounts/");
+
+console.log("Using API base URL:", API_BASE_URL); // Helpful for debugging
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, 
+  timeout: 30000, // 30 seconds
 });
+
+// Add request interceptor to handle expired tokens
+api.interceptors.response.use(
+  response => response,
+  error => {
+    // Handle 401 unauthorized errors that might be due to expired tokens
+    if (error.response && error.response.status === 401) {
+      console.warn("Unauthorized API request - token may be expired");
+      // Optional: You could automatically redirect to login
+      // window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const registerUser = async (userData) => {
   try {

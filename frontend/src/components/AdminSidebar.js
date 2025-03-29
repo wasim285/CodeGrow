@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/Authcontext';
+import { logoPlaceholder } from '../assets';
 import '../styles/AdminDashboard.css';
 
 const AdminSidebar = () => {
