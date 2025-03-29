@@ -1,12 +1,11 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/Authcontext';
 
 // Import components with their CORRECT filenames
 import Navbar from './components/navbar';
 import HomePage from './Pages/HomePage';
 import LoginPage from './Pages/LoginPage';
-import SignUpPage from './Pages/SignUpPage'; // Changed from RegisterPage to SignUpPage
+import SignUpPage from './Pages/SignUpPage';
 import PathwaysPage from './Pages/PathwaysPage';
 import DifficultyPage from './Pages/DifficultyPage';
 import Dashboard from './Pages/Dashboard';
@@ -16,16 +15,15 @@ import TreeLoader from './components/TreeLoader';
 import LessonsPage from './Pages/LessonsPage';
 import ProfilePage from './Pages/ProfilePage';
 
-// Remove the Router from here - it should only exist in index.js
 function App() {
   return (
-    <AuthProvider>
+    <>
       <Navbar />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<SignUpPage />} /> {/* Updated element name */}
+        <Route path="/register" element={<SignUpPage />} />
         <Route path="/pathways" element={<PathwaysPage />} />
         <Route path="/difficulty" element={<DifficultyPage />} />
 
@@ -39,7 +37,7 @@ function App() {
         {/* Default route */}
         <Route path="*" element={<Navigate to="/pathways" replace />} />
       </Routes>
-    </AuthProvider>
+    </>
   );
 }
 
