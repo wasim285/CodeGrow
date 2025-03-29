@@ -1,82 +1,57 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/Authcontext';
-import Layout from './components/Layout';
-import AdminLayout from './components/AdminLayout';
-import PrivateRoute from './components/PrivateRoute';
-
-// Standard pages - fixing imports to match your file structure
-import LoginPage from './Pages/LoginPage';
-import HomePage from './Pages/HomePage';
-import Dashboard from './Pages/Dashboard';
-import Profile from './Pages/ProfilePage';
-import Pathways from './Pages/PathwaysPage';
-import Lesson from './Pages/LessonPage';
-
-// Admin pages
-import AdminDashboard from './Pages/AdminDashboard';
-import AdminUsers from './Pages/AdminUsers';
-import AdminUserDetail from './Pages/AdminUserDetail';
-import AdminUserForm from './Pages/AdminUserForm';
-import AdminPathways from './Pages/AdminPathways';
-import AdminPathwayDetail from './Pages/AdminPathwayDetail';
-import AdminPathwayForm from './Pages/AdminPathwayForm';
-import AdminLessons from './Pages/AdminLessons';
-import AdminLessonDetail from './Pages/AdminLessonDetail';
-import AdminLessonForm from './Pages/AdminLessonForm';
-
-import './App.css';
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";  
+import { useContext, useState, useEffect } from "react";
+import { AuthContext } from "./context/Authcontext";
+import Navbar from "./components/navbar";
+import HomePage from "./Pages/HomePage";
+import LoginPage from "./Pages/LoginPage";
+import RegisterPage from "./Pages/SignUpPage";
+import PathwaysPage from "./Pages/PathwaysPage";
+import DifficultyPage from "./Pages/DifficultyPage";
+import Dashboard from "./Pages/Dashboard";
+import LessonPage from "./Pages/LessonPage"; 
+import StudyCalendar from "./Pages/StudyCalendar"; 
+import TreeLoader from "./components/TreeLoader";
+import LessonsPage from "./Pages/LessonsPage";
+import ProfilePage from "./Pages/ProfilePage";
 
 function App() {
-  return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public routes (with regular layout) */}
-          <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            {/* Register path removed since you already have a signup page */}
-          </Route>
-          
-          {/* Protected routes (with regular layout) */}
-          <Route element={<PrivateRoute />}>
-            <Route element={<Layout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/pathways" element={<Pathways />} />
-              <Route path="/lessons/:id" element={<Lesson />} />
-            </Route>
-          </Route>
-          
-          {/* Admin routes (with admin layout) */}
-          <Route element={<PrivateRoute adminOnly={true} />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              
-              {/* User management */}
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/users/new" element={<AdminUserForm />} />
-              <Route path="/admin/users/:id" element={<AdminUserDetail />} />
-              <Route path="/admin/users/:id/edit" element={<AdminUserForm />} />
-              
-              {/* Pathway management */}
-              <Route path="/admin/pathways" element={<AdminPathways />} />
-              <Route path="/admin/pathways/new" element={<AdminPathwayForm />} />
-              <Route path="/admin/pathways/:id" element={<AdminPathwayDetail />} />
-              <Route path="/admin/pathways/:id/edit" element={<AdminPathwayForm />} />
-              
-              {/* Lesson management */}
-              <Route path="/admin/lessons" element={<AdminLessons />} />
-              <Route path="/admin/lessons/new" element={<AdminLessonForm />} />
-              <Route path="/admin/lessons/:id" element={<AdminLessonDetail />} />
-              <Route path="/admin/lessons/:id/edit" element={<AdminLessonForm />} />
-            </Route>
-          </Route>
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
+    const { user } = useContext(AuthContext);
+    const location = useLocation();
+    const [loading, setLoading] = useState(false);
+
+    const hideNavbarPaths = ["/", "/login", "/register", "/pathways", "/difficulty"];
+
+    useEffect(() => {
+        if (location.pathname === "/dashboard") {
+            setLoading(true);
+            setTimeout(() => {
+                setLoading(false);
+            }, 2000);
+        } else {
+            setLoading(false);
+        }
+    }, [location.pathname]);
+
+    return (
+        <>
+            {user && !hideNavbarPaths.includes(location.pathname) && !loading && <Navbar />}
+
+            <Routes>
+    <Route path="/" element={user ? <Navigate to="/pathways" /> : <HomePage />} />
+    <Route path="/login" element={user ? <Navigate to="/pathways" /> : <LoginPage />} />
+    <Route path="/register" element={user ? <Navigate to="/pathways" /> : <RegisterPage />} />
+    <Route path="/pathways" element={user ? <PathwaysPage /> : <Navigate to="/" />} />
+    <Route path="/difficulty" element={user ? <DifficultyPage /> : <Navigate to="/" />} />
+    <Route path="/dashboard" element={loading ? <TreeLoader /> : user ? <Dashboard /> : <Navigate to="/" />} />
+    <Route path="/lessons" element={user ? <LessonsPage /> : <Navigate to="/" />} />
+    <Route path="/lessons/:lessonId" element={user ? <LessonPage /> : <Navigate to="/" />} />
+    <Route path="/study-sessions" element={user ? <StudyCalendar /> : <Navigate to="/" />} />
+    <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
+    <Route path="*" element={<Navigate to="/" />} />
+</Routes>
+
+        </>
+    );
 }
 
 export default App;
