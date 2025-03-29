@@ -9,9 +9,11 @@ import PrivateRoute from './components/PrivateRoute';
 import LoginPage from './Pages/LoginPage';
 import HomePage from './Pages/HomePage';
 import Dashboard from './Pages/Dashboard';
-import Profile from './Pages/ProfilePage'; // Changed to match your file structure
-import Pathways from './Pages/PathwaysPage'; // Changed to match your file structure
-import Lesson from './Pages/LessonPage'; // Changed to match your file structure
+import Profile from './Pages/ProfilePage';
+import Pathways from './Pages/PathwaysPage';
+import PathwayDetail from './Pages/PathwayDetail'; // Added missing import
+import Lesson from './Pages/LessonPage';
+import NotFound from './Pages/NotFound'; // Added missing import
 
 // Admin pages
 import AdminDashboard from './Pages/AdminDashboard';
