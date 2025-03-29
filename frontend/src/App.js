@@ -15,6 +15,9 @@ import StudyCalendar from './Pages/StudyCalendar';
 import TreeLoader from './components/TreeLoader';
 import LessonsPage from './Pages/LessonsPage';
 import ProfilePage from './Pages/ProfilePage';
+// Import admin components or create them if needed
+import AdminDashboard from './Pages/AdminDashboard';
+import AdminUsers from './Pages/AdminUsers';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
@@ -27,8 +30,23 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+// Admin route wrapper
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isAdmin, loading } = useContext(AuthContext);
+  
+  if (loading) {
+    return <TreeLoader />;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  return isAdmin ? children : <Navigate to="/dashboard" />;
+};
+
 function App() {
-  const { user } = useContext(AuthContext);
+  const { user, isAdmin } = useContext(AuthContext);
 
   return (
     <>
@@ -76,6 +94,18 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Admin routes */}
+        <Route path="/admin/dashboard" element={
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        } />
+        <Route path="/admin/users" element={
+          <AdminRoute>
+            <AdminUsers />
+          </AdminRoute>
+        } />
+        
         {/* Default route */}
         <Route path="*" element={<Navigate to="/pathways" replace />} />
       </Routes>
