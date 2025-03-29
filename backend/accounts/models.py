@@ -122,6 +122,14 @@ class Lesson(models.Model):
                 },
             )
 
+    def save(self, *args, **kwargs):
+        # Normalize the expected output if present
+        if self.expected_output:
+            # Remove trailing whitespace and normalize newlines
+            self.expected_output = self.expected_output.strip().replace('\r\n', '\n')
+        
+        super().save(*args, **kwargs)
+
 
 class UserProgress(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=CASCADE, related_name="progress")

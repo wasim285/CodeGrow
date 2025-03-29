@@ -304,10 +304,14 @@ class RunCodeView(APIView):
                 capture_output=True, text=True, timeout=5
             )
 
-            output = result.stdout if result.stdout else result.stderr
+            # Normalize output to handle line endings consistently
+            output = (result.stdout or result.stderr).strip()
+            
+            # Normalize line endings
+            output = output.replace('\r\n', '\n')
 
             return JsonResponse({
-                "output": output.strip(),
+                "output": output,
                 "status_code": result.returncode
             }, status=status.HTTP_200_OK)
 
@@ -315,6 +319,7 @@ class RunCodeView(APIView):
             return Response({"error": "Execution timeout exceeded."}, status=status.HTTP_408_REQUEST_TIMEOUT)
         except Exception as e:
             return Response({"error": f"Execution failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @receiver(post_save, sender=CustomUser)
 def assign_lessons_on_signup(sender, instance, created, **kwargs):

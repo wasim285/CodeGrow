@@ -52,7 +52,16 @@ const LessonPage = () => {
         });
 
         setLesson(response.data);
-        setExpectedOutput(response.data.expected_output || "");
+        
+        // Handle expected output properly
+        if (response.data.expected_output) {
+          // Normalize expected output to account for line endings
+          const normalized = response.data.expected_output.trim().replace(/\r\n/g, '\n');
+          setExpectedOutput(normalized);
+          console.log("Expected output:", normalized); // Debug log
+        } else {
+          setExpectedOutput("");
+        }
 
         // Handle code snippets based on step
         if (step === 2) {
@@ -141,8 +150,11 @@ const LessonPage = () => {
     try {
       const userOutput = await runCode(); // Run the code to get output
       
-      // Simple output comparison
-      if (userOutput.trim() === expectedOutput.trim()) {
+      // Better output comparison - normalize both outputs for comparison
+      const normalizedUserOutput = userOutput.trim().replace(/\r\n/g, '\n');
+      const normalizedExpectedOutput = expectedOutput.trim().replace(/\r\n/g, '\n');
+      
+      if (normalizedUserOutput === normalizedExpectedOutput) {
         setCheckResult({
           correct: true,
           message: "✅ Correct! Your solution matches the expected output.",

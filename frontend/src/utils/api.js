@@ -178,8 +178,20 @@ export const checkCodeOutput = (userOutput, expectedOutput) => {
     };
   }
 
-  // Simple string comparison
-  const isCorrect = userOutput.trim() === expectedOutput.trim();
+  // Normalize both strings before comparing (trim whitespace, normalize line endings)
+  const normalizeOutput = (output) => {
+    return output
+      .trim()
+      .replace(/\r\n/g, '\n')     // Convert Windows line endings
+      .replace(/\s+/g, ' ')       // Normalize multiple spaces
+      .replace(/\n+/g, '\n')      // Normalize multiple line breaks
+      .trim();
+  };
+
+  const normalizedUser = normalizeOutput(userOutput);
+  const normalizedExpected = normalizeOutput(expectedOutput);
+  
+  const isCorrect = normalizedUser === normalizedExpected;
   
   return {
     correct: isCorrect,
