@@ -1,142 +1,77 @@
-import { createContext, useState, useEffect } from "react";
-import api, { getProfile } from "../utils/api";
+import React, { createContext, useState, useEffect } from 'react';
+import api from '../utils/api';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Set token expiry check (checking every minute)
+  // Check if user is already logged in on page load
   useEffect(() => {
-    let tokenCheckInterval;
-    
-    if (isAuthenticated) {
-      tokenCheckInterval = setInterval(() => {
-        checkTokenExpiry();
-      }, 60000); // Check once per minute
-    }
-    
-    return () => {
-      if (tokenCheckInterval) clearInterval(tokenCheckInterval);
-    };
-  }, [isAuthenticated]);
-  
-  const checkTokenExpiry = async () => {
-    const tokenTimestamp = localStorage.getItem('tokenTimestamp');
-    if (!tokenTimestamp) return;
-    
-    // If token is older than 1 hour, refresh it
-    const tokenAge = Date.now() - parseInt(tokenTimestamp);
-    if (tokenAge > 3600000) { // 1 hour in milliseconds
+    const checkAuthStatus = async () => {
       try {
-        console.log('Token is old, refreshing...');
-        const response = await api.post('token/refresh/');
-        if (response.status === 200) {
-          // Update token in localStorage
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('tokenTimestamp', Date.now().toString());
-          console.log('Token refreshed successfully');
-        }
-      } catch (error) {
-        console.error('Failed to refresh token:', error);
-        if (error.response && error.response.status === 401) {
-          // Token is invalid, logout
-          logout();
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    const verifyAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
+        setLoading(true);
+        const response = await api.get('accounts/profile/');
+        setUser(response.data);
         setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await getProfile();
-        
-        if (response && response.data) {
-          const userData = response.data;
-          setUser(userData);
-          setIsAuthenticated(true);
-          
-          // Determine admin status
-          const adminStatus = 
-            userData.role === 'admin' || 
-            userData.is_staff || 
-            userData.is_superuser;
-          
-          setIsAdmin(adminStatus);
-          console.log(`User authenticated: ${userData.username}, Admin: ${adminStatus}`);
-          
-          // Set timestamp for token refresh logic if not already set
-          if (!localStorage.getItem('tokenTimestamp')) {
-            localStorage.setItem('tokenTimestamp', Date.now().toString());
-          }
-        }
-      } catch (error) {
-        console.error("Authentication error:", error);
-        // Don't clear token here - let the interceptor handle 401 errors
-      } finally {
+      } catch (err) {
+        console.log('No active session found');
+        setUser(null);
         setLoading(false);
       }
     };
 
-    verifyAuth();
+    checkAuthStatus();
   }, []);
 
-  const login = (token, userData = null) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem('tokenTimestamp', Date.now().toString());
-    
-    if (userData) {
-      setUser(userData);
-      setIsAuthenticated(true);
-      
-      const adminStatus = 
-        userData.role === 'admin' || 
-        userData.is_staff || 
-        userData.is_superuser;
-      
-      setIsAdmin(adminStatus);
-      console.log(`User logged in: ${userData.username}, Admin: ${adminStatus}`);
+  const login = async (credentials) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.post('accounts/login/', credentials);
+      setUser(response.data);
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Login failed. Please try again.');
+      setLoading(false);
+      return { success: false, error: err.response?.data?.detail || 'Login failed' };
     }
   };
 
-  const logout = () => {
-    // Try to call logout API first
-    api.post('logout/').catch(err => {
-      console.log('Logout API call failed, continuing with local logout');
-    }).finally(() => {
-      // Always clear local storage and state
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenTimestamp");
+  const register = async (userData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.post('accounts/register/', userData);
+      setUser(response.data);
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 
+                          err.response?.data?.email?.[0] ||
+                          'Registration failed. Please try again.';
+      setError(errorMessage);
+      setLoading(false);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await api.post('accounts/logout/');
       setUser(null);
-      setIsAuthenticated(false);
-      setIsAdmin(false);
-      
-      // Redirect to login
-      window.location.href = '/login';
-    });
+    } catch (err) {
+      console.error('Error during logout:', err);
+      // Still clear user state even if API call fails
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        isAdmin,
-        loading,
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
