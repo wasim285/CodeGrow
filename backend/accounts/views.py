@@ -10,6 +10,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserProgressSerializer, 
     LessonSerializer, ProfileSerializer, StudySessionSerializer,
@@ -613,7 +615,13 @@ class IsAdminUser(IsAuthenticated):
     Permission to only allow admin users to access the view
     """
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role == "admin"
+        # Check both role field and is_staff/is_superuser status
+        is_authorized = super().has_permission(request, view) and (
+            request.user.role == "admin" or 
+            request.user.is_staff or 
+            request.user.is_superuser
+        )
+        return is_authorized
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -905,13 +913,24 @@ class EnhancedLoginView(APIView):
             user.last_login_ip = request.META.get('REMOTE_ADDR')
             user.save(update_fields=['last_login_ip'])
             
+            # Determine role based on Django permissions if role field is empty
+            role = user.role
+            if not role and (user.is_staff or user.is_superuser):
+                role = "admin"
+                
+                # Optionally update the role field
+                user.role = "admin"
+                user.save(update_fields=['role'])
+            
             response_data = {
                 "token": token.key,
                 "username": user.username,
-                "role": user.role,
+                "role": role,
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser
             }
             
-            if user.role == "student":
+            if role == "student":
                 response_data.update({
                     "learning_goal": user.learning_goal,
                     "difficulty_level": user.difficulty_level,
@@ -962,3 +981,11 @@ class AdminPathwayDetailView(generics.RetrieveUpdateDestroyAPIView):
         )
         
         instance.delete()
+
+
+@login_required
+def redirect_based_on_role(request):
+    if request.user.is_staff or request.user.is_superuser or request.user.role == 'admin':
+        return redirect('/admin/')
+    else:
+        return redirect('/dashboard/')  # Or wherever regular users should go

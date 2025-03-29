@@ -112,26 +112,11 @@ class StudySessionSerializer(serializers.ModelSerializer):
 
 # Admin Serializers
 class AdminUserSerializer(serializers.ModelSerializer):
-    is_active = serializers.BooleanField(read_only=False, required=False)
-    date_joined = serializers.DateTimeField(read_only=True)
-    lessons_completed = serializers.SerializerMethodField()
-    
     class Meta:
         model = CustomUser
-        fields = [
-            'id', 'username', 'email', 'first_name', 'last_name',
-            'is_active', 'date_joined', 'role', 'learning_goal',
-            'difficulty_level', 'profile_picture', 'bio',
-            'date_deactivated', 'lessons_completed', 'created_at',
-            'updated_at'
-        ]
-    
-    def get_lessons_completed(self, obj):
-        try:
-            progress = UserProgress.objects.get(user=obj)
-            return progress.lessons_completed
-        except UserProgress.DoesNotExist:
-            return 0
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 
+                  'is_active', 'date_joined', 'last_login', 'is_staff', 'is_superuser']
+        read_only_fields = ['date_joined', 'last_login']
 
 
 class AdminUserCreateSerializer(serializers.ModelSerializer):
