@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthContext } from './context/Authcontext';
 
-// Import components with their CORRECT filenames
+// Import components
 import Navbar from './components/navbar';
 import HomePage from './Pages/HomePage';
 import LoginPage from './Pages/LoginPage';
@@ -15,7 +16,20 @@ import TreeLoader from './components/TreeLoader';
 import LessonsPage from './Pages/LessonsPage';
 import ProfilePage from './Pages/ProfilePage';
 
+// Protected route wrapper
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useContext(AuthContext);
+  
+  if (loading) {
+    return <TreeLoader />;
+  }
+  
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
+
 function App() {
+  const { user } = useContext(AuthContext);
+
   return (
     <>
       <Navbar />
@@ -24,15 +38,43 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<SignUpPage />} />
-        <Route path="/pathways" element={<PathwaysPage />} />
-        <Route path="/difficulty" element={<DifficultyPage />} />
-
+        
         {/* Protected routes */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/lessons" element={<LessonsPage />} />
-        <Route path="/lessons/:lessonId" element={<LessonPage />} />
-        <Route path="/study-sessions" element={<StudyCalendar />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/pathways" element={
+          <ProtectedRoute>
+            <PathwaysPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/difficulty" element={
+          <ProtectedRoute>
+            <DifficultyPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/lessons" element={
+          <ProtectedRoute>
+            <LessonsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/lessons/:lessonId" element={
+          <ProtectedRoute>
+            <LessonPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/study-sessions" element={
+          <ProtectedRoute>
+            <StudyCalendar />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
 
         {/* Default route */}
         <Route path="*" element={<Navigate to="/pathways" replace />} />
