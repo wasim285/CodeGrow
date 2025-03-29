@@ -1,54 +1,72 @@
 import axios from "axios";
 
-// Detect environment more reliably
-const isLocalhost = 
-  window.location.hostname === "localhost" || 
-  window.location.hostname === "127.0.0.1";
+// Updated URL handling - use live site URL instead of backend URL
+const API_BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000/api/"
+    : "https://codegrow.onrender.com/api/"; // Changed from codegrow-backend.onrender.com
 
-// Set the appropriate base URL based on environment
-const API_BASE_URL = isLocalhost
-  ? "http://127.0.0.1:8000/api/accounts/"
-  : "https://codegrow-backend.onrender.com/api/accounts/";
-
-console.log("API is using base URL:", API_BASE_URL); // Debug log
+console.log("Using API base URL:", API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
     "Content-Type": "application/json"
-  }
+  },
+  // Add withCredentials to handle CORS with credentials
+  withCredentials: true
 });
 
-// Add request interceptor for authentication
 api.interceptors.request.use(
   (config) => {
-    // Add token to all requests except login and register
+    // Add token to all requests
     const token = localStorage.getItem("token");
-    if (token && !config.url.includes('login') && !config.url.includes('register')) {
+    if (token) {
       config.headers.Authorization = `Token ${token}`;
+      console.log("Adding token to request");
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
+// Add response interceptor for better error handling
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response) {
+      console.error("API Error Response:", error.response.status, error.response.data);
+    } else if (error.request) {
+      console.error("API No Response:", error.request);
+    } else {
+      console.error("API Request Error:", error.message);
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const registerUser = async (userData) => {
   try {
-    const response = await api.post("register/", userData);
+    // Add accounts/ prefix to endpoint
+    const response = await api.post("accounts/register/", userData);
+    console.log("Registration successful:", response.data);
+    
+    // Store token if provided
+    if (response.data && response.data.token) {
+      localStorage.setItem("token", response.data.token);
+    }
+    
     return response;
   } catch (error) {
-    console.error("Register API Error:", error.response?.data || error.message);
-    return { 
-      status: error.response?.status || 500, 
-      data: error.response?.data || { error: "Registration failed" } 
-    };
+    console.error("Register API Error:", error);
+    throw error;
   }
 };
 
 export const loginUser = async (userData) => {
   try {
-    const response = await api.post("login/", userData);
+    const response = await api.post("accounts/login/", userData);
     return response;
   } catch (error) {
     console.error("Login API Error:", error.response?.data || error.message);
@@ -61,7 +79,7 @@ export const loginUser = async (userData) => {
 
 export const getProfile = async (token) => {
   try {
-    return await api.get("profile/", {
+    return await api.get("accounts/profile/", {
       headers: { Authorization: `Token ${token}` },
     });
   } catch (error) {
@@ -72,7 +90,7 @@ export const getProfile = async (token) => {
 
 export const getAllLessons = async (token) => {
   try {
-    return await api.get("lessons/", {
+    return await api.get("accounts/lessons/", {
       headers: { Authorization: `Token ${token}` },
     });
   } catch (error) {
@@ -83,7 +101,7 @@ export const getAllLessons = async (token) => {
 
 export const getStudySessions = async (token) => {
   try {
-    return await api.get("study-sessions/", {
+    return await api.get("accounts/study-sessions/", {
       headers: { Authorization: `Token ${token}` },
     });
   } catch (error) {
@@ -94,7 +112,7 @@ export const getStudySessions = async (token) => {
 
 export const logoutUser = async (token) => {
   try {
-    return await api.post("logout/", {}, {
+    return await api.post("accounts/logout/", {}, {
       headers: { Authorization: `Token ${token}` },
     });
   } catch (error) {
@@ -108,7 +126,7 @@ export const getAIReview = async (userCode, lessonId) => {
 
   try {
     const response = await api.post(
-      "ai-feedback/",
+      "accounts/ai-feedback/",
       {
         code: userCode,
         lesson_id: lessonId,
@@ -130,7 +148,7 @@ export const getLessonFeedback = async (feedbackData) => {
 
   try {
     const response = await api.post(
-      "lesson-feedback/",
+      "accounts/lesson-feedback/",
       {
         code: feedbackData.code,
         expected_output: feedbackData.expected_output,
@@ -174,7 +192,7 @@ export const getAIAssistantResponse = async (requestData) => {
   // First attempt with normal timeout
   try {
     const response = await api.post(
-      "lesson-assistant/",
+      "accounts/lesson-assistant/",
       requestData,
       {
         headers: { Authorization: `Token ${token}` },
@@ -190,7 +208,7 @@ export const getAIAssistantResponse = async (requestData) => {
       
       try {
         const retryResponse = await api.post(
-          "lesson-assistant/",
+          "accounts/lesson-assistant/",
           requestData,
           {
             headers: { Authorization: `Token ${token}` },
