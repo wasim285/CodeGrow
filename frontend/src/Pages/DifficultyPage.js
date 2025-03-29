@@ -59,8 +59,8 @@ const DifficultyPage = () => {
 
             console.log(`Updating difficulty to: ${level}, with goal: ${currentGoal}`);
             
-            // Use our API utility to ensure it works in all environments
-            const updateResponse = await api.patch("profile/", 
+            // IMPORTANT FIX: Use 'accounts/profile/' instead of just 'profile/'
+            const updateResponse = await api.patch("accounts/profile/", 
                 { 
                     difficulty_level: level,
                     learning_goal: currentGoal 
@@ -76,9 +76,15 @@ const DifficultyPage = () => {
         } catch (error) {
             console.error("Error updating difficulty level:", error);
             
-            // More specific error message
+            // More specific error message with details about what went wrong
             if (!navigator.onLine) {
                 alert("You appear to be offline. Please check your internet connection and try again.");
+            } else if (error.response) {
+                if (error.response.status === 404) {
+                    alert("API endpoint not found. This might be a configuration issue. Please contact support.");
+                } else {
+                    alert(`Error (${error.response.status}): ${error.response.data?.error || "Failed to update difficulty level"}`);
+                }
             } else {
                 alert("Failed to update difficulty level. Please try again.");
             }
