@@ -4,7 +4,7 @@ import { AuthContext, AuthProvider } from './context/Authcontext';
 
 // Import your components with correct filenames
 import LoginPage from './Pages/LoginPage';  // Updated from Login to LoginPage
-import RegisterPage from './Pages/RegisterPage';
+import SignUpPage from './Pages/SignUpPage';  // Changed from RegisterPage to SignUpPage
 import Dashboard from './Pages/Dashboard';
 import AdminDashboard from './Pages/AdminDashboard';
 import AdminUsers from './Pages/AdminUsers';
@@ -57,7 +57,7 @@ function AppRoutes() {
     <Routes>
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} /> {/* Updated path */}
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/register" element={<SignUpPage />} /> {/* Updated element name */}
       <Route path="/" element={<Navigate to="/pathways" replace />} /> {/* Updated default route */}
       <Route path="/pathways" element={<PathwaysPage />} />
 
