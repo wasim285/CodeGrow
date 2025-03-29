@@ -4,7 +4,6 @@ import { AuthContext } from '../context/Authcontext';
 import AdminSidebar from '../components/AdminSidebar';
 import { getAdminUsers, deleteAdminUser, activateAdminUser } from '../utils/api';
 import '../styles/AdminDashboard.css';
-import { FaUserPlus, FaSearch, FaUserCheck, FaUserSlash, FaEye } from 'react-icons/fa';
 
 const AdminUsers = () => {
   const { token } = useContext(AuthContext);
@@ -95,7 +94,7 @@ const AdminUsers = () => {
         <div className="admin-header">
           <h1 className="admin-page-title">Users Management</h1>
           <Link to="/admin/users/new" className="admin-button admin-button-primary">
-            <FaUserPlus style={{ marginRight: '0.5rem' }} /> Add User
+            + Add User
           </Link>
         </div>
 
@@ -111,7 +110,7 @@ const AdminUsers = () => {
                 className="admin-form-input"
               />
               <button type="submit" className="admin-search-button">
-                <FaSearch />
+                Search
               </button>
             </div>
           </form>
@@ -176,7 +175,7 @@ const AdminUsers = () => {
                         className="admin-button admin-button-sm"
                         title="View User"
                       >
-                        <FaEye />
+                        View
                       </Link>
                       <Link 
                         to={`/admin/users/${user.id}/edit`} 
@@ -196,7 +195,7 @@ const AdminUsers = () => {
                         onClick={() => handleToggleActive(user.id, user.is_active)} 
                         className={`admin-action-button ${user.is_active ? 'deactivate' : 'activate'}`}
                       >
-                        {user.is_active ? <FaUserSlash /> : <FaUserCheck />}
+                        {user.is_active ? 'Deactivate' : 'Activate'}
                       </button>
                     </td>
                   </tr>
