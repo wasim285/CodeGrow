@@ -49,12 +49,24 @@ const LoginPage = () => {
             const response = await loginUser(formData);
 
             if (response.status === 200) {
-                const data = response.data;
-                login(data.token);
-                localStorage.setItem("token", data.token);
-                navigate("/pathways");
+                const userData = response.data;
+                
+                // Pass token AND user data to login function
+                login(userData.token, userData);
+                
+                // Store token in localStorage
+                localStorage.setItem("token", userData.token);
+                
+                // Check if user is admin and redirect accordingly
+                if (userData.role === 'admin' || userData.is_staff || userData.is_superuser) {
+                    console.log("Admin user detected, redirecting to admin dashboard");
+                    navigate("/admin/dashboard");
+                } else {
+                    console.log("Regular user detected, redirecting to pathways");
+                    navigate("/pathways");
+                }
             } else {
-                // Handle specific error cases
+                // Handle errors as before
                 if (response.data?.non_field_errors) {
                     setErrors({ general: response.data.non_field_errors[0] });
                 } else if (response.data?.username) {

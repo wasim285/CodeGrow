@@ -910,27 +910,34 @@ class EnhancedLoginView(APIView):
             user = serializer.validated_data
             token, _ = Token.objects.get_or_create(user=user)
             
+            # Update login IP
             user.last_login_ip = request.META.get('REMOTE_ADDR')
             user.save(update_fields=['last_login_ip'])
             
-            # Determine role based on Django permissions if role field is empty
-            role = user.role
-            if not role and (user.is_staff or user.is_superuser):
-                role = "admin"
-                
-                # Optionally update the role field
-                user.role = "admin"
-                user.save(update_fields=['role'])
+            # Determine role - prioritize Django staff/superuser status over role field
+            user_role = 'student'  # default
+            
+            if user.is_staff or user.is_superuser:
+                user_role = 'admin'
+                # Also update the role field if needed
+                if user.role != 'admin':
+                    user.role = 'admin'
+                    user.save(update_fields=['role'])
+            elif user.role:
+                user_role = user.role
+            
+            # Log login activity
+            print(f"User login: {user.username}, Staff: {user.is_staff}, Superuser: {user.is_superuser}, Role: {user_role}")
             
             response_data = {
                 "token": token.key,
                 "username": user.username,
-                "role": role,
+                "role": user_role,
                 "is_staff": user.is_staff,
                 "is_superuser": user.is_superuser
             }
             
-            if role == "student":
+            if user_role == "student":
                 response_data.update({
                     "learning_goal": user.learning_goal,
                     "difficulty_level": user.difficulty_level,
