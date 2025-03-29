@@ -249,4 +249,145 @@ export const fetchUsers = async (params = {}) => {
   return response.json();
 };
 
+// Admin endpoints
+export const getAdminDashboard = (token) => {
+  return axios.get(`${API_BASE_URL}/admin/dashboard/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+// Admin user management
+export const getAdminUsers = (token, page = 1, filters = {}) => {
+  let queryParams = new URLSearchParams({ page });
+  
+  // Add any filters
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      queryParams.append(key, value);
+    }
+  });
+  
+  return axios.get(`${API_BASE_URL}/admin/users/?${queryParams.toString()}`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const getAdminUser = (token, userId) => {
+  return axios.get(`${API_BASE_URL}/admin/users/${userId}/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const createAdminUser = (token, userData) => {
+  return axios.post(`${API_BASE_URL}/admin/users/`, userData, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const updateAdminUser = (token, userId, userData) => {
+  return axios.patch(`${API_BASE_URL}/admin/users/${userId}/`, userData, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const activateAdminUser = (token, userId, activate = true) => {
+  return axios.post(`${API_BASE_URL}/admin/users/${userId}/activate/`, 
+    { activate }, 
+    { headers: { Authorization: `Token ${token}` } }
+  );
+};
+
+// Admin learning pathway management
+export const getAdminPathways = (token, page = 1, filters = {}) => {
+  let queryParams = new URLSearchParams({ page });
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      queryParams.append(key, value);
+    }
+  });
+  
+  return axios.get(`${API_BASE_URL}/admin/pathways/?${queryParams.toString()}`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const getAdminPathway = (token, pathwayId) => {
+  return axios.get(`${API_BASE_URL}/admin/pathways/${pathwayId}/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const createAdminPathway = (token, pathwayData) => {
+  return axios.post(`${API_BASE_URL}/admin/pathways/`, pathwayData, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const updateAdminPathway = (token, pathwayId, pathwayData) => {
+  return axios.patch(`${API_BASE_URL}/admin/pathways/${pathwayId}/`, pathwayData, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const deleteAdminPathway = (token, pathwayId) => {
+  return axios.delete(`${API_BASE_URL}/admin/pathways/${pathwayId}/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+// Admin lesson management
+export const getAdminLessons = (token, page = 1, filters = {}) => {
+  let queryParams = new URLSearchParams({ page });
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      queryParams.append(key, value);
+    }
+  });
+  
+  return axios.get(`${API_BASE_URL}/admin/lessons/?${queryParams.toString()}`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const getAdminLesson = (token, lessonId) => {
+  return axios.get(`${API_BASE_URL}/admin/lessons/${lessonId}/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const createAdminLesson = (token, lessonData) => {
+  return axios.post(`${API_BASE_URL}/admin/lessons/`, lessonData, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const updateAdminLesson = (token, lessonId, lessonData) => {
+  return axios.patch(`${API_BASE_URL}/admin/lessons/${lessonId}/`, lessonData, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+export const deleteAdminLesson = (token, lessonId) => {
+  return axios.delete(`${API_BASE_URL}/admin/lessons/${lessonId}/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
+// Admin activity log
+export const getAdminActivityLog = (token, page = 1, filters = {}) => {
+  let queryParams = new URLSearchParams({ page });
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      queryParams.append(key, value);
+    }
+  });
+  
+  return axios.get(`${API_BASE_URL}/admin/activity-log/?${queryParams.toString()}`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
 export default api;

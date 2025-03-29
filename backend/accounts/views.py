@@ -920,3 +920,28 @@ class EnhancedLoginView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
 
         return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminPathwayListView(generics.ListCreateAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = LearningPathwaySerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'description', 'code']
+    ordering_fields = ['name', 'created_at', 'is_active']
+    ordering = ['name']
+    
+    def get_queryset(self):
+        queryset = LearningPathway.objects.all()
+        
+        is_active = self.request.query_params.get('is_active')
+        if is_active is not None:
+            is_active = is_active.lower() == 'true'
+            queryset = queryset.filter(is_active=is_active)
+            
+        return queryset
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
