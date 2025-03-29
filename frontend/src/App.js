@@ -4,16 +4,18 @@ import { AuthProvider } from './context/Authcontext';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import PrivateRoute from './components/PrivateRoute';
+
+// Standard pages - use proper casing based on your actual files
 import LoginPage from './Pages/LoginPage';
 import HomePage from './Pages/HomePage';
-import DashboardPage from './Pages/DashboardPage';
-import ProfilePage from './Pages/ProfilePage';
-import PathwaysPage from './Pages/PathwaysPage';
-import PathwayDetailPage from './Pages/PathwayDetailPage';
-import LessonPage from './Pages/LessonPage';
-import NotFoundPage from './Pages/NotFoundPage';
+import Dashboard from './Pages/Dashboard'; // Changed from DashboardPage
+import Profile from './Pages/Profile'; // Changed from ProfilePage
+import Pathways from './Pages/Pathways'; // Changed from PathwaysPage
+import PathwayDetail from './Pages/PathwayDetail'; // Changed from PathwayDetailPage
+import Lesson from './Pages/Lesson'; // Changed from LessonPage
+import NotFound from './Pages/NotFound'; // Changed from NotFoundPage
 
-// Admin pages
+// Admin pages - these look correct based on your imports
 import AdminDashboard from './Pages/AdminDashboard';
 import AdminUsers from './Pages/AdminUsers';
 import AdminUserDetail from './Pages/AdminUserDetail';
@@ -42,11 +44,11 @@ function App() {
           {/* Protected routes (with regular layout) */}
           <Route element={<PrivateRoute />}>
             <Route element={<Layout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/pathways" element={<PathwaysPage />} />
-              <Route path="/pathways/:id" element={<PathwayDetailPage />} />
-              <Route path="/lessons/:id" element={<LessonPage />} />
+              <Route path="/dashboard" element={<Dashboard />} /> {/* Changed */}
+              <Route path="/profile" element={<Profile />} /> {/* Changed */}
+              <Route path="/pathways" element={<Pathways />} /> {/* Changed */}
+              <Route path="/pathways/:id" element={<PathwayDetail />} /> {/* Changed */}
+              <Route path="/lessons/:id" element={<Lesson />} /> {/* Changed */}
             </Route>
           </Route>
           
@@ -76,7 +78,7 @@ function App() {
           </Route>
           
           {/* Catch-all route */}
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFound />} /> {/* Changed */}
         </Routes>
       </Router>
     </AuthProvider>
