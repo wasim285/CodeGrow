@@ -1,11 +1,10 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/Authcontext';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import PrivateRoute from './components/PrivateRoute';
 import LoginPage from './Pages/LoginPage';
-import RegisterPage from './Pages/RegisterPage';
 import HomePage from './Pages/HomePage';
 import DashboardPage from './Pages/DashboardPage';
 import ProfilePage from './Pages/ProfilePage';
@@ -37,7 +36,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            {/* Register path removed since you already have a signup page */}
           </Route>
           
           {/* Protected routes (with regular layout) */}

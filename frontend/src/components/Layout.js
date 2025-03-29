@@ -35,7 +35,7 @@ const Layout = () => {
           ) : (
             <>
               <Link to="/login" className="nav-item">Login</Link>
-              <Link to="/register" className="nav-button">Sign Up</Link>
+              <Link to="/login?signup=true" className="nav-button">Sign Up</Link>
             </>
           )}
         </nav>
