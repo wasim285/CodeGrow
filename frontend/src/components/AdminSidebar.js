@@ -1,81 +1,60 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import '../styles/AdminSidebar.css';
+import '../styles/AdminDashboard.css';
 
-const AdminSidebar = ({ activePage }) => {
+const AdminSidebar = () => {
   const location = useLocation();
-  const currentPath = location.pathname;
-
-  const isActive = (path) => {
-    if (activePage) {
-      return activePage === path;
-    }
-    return currentPath.includes(`/admin/${path}`);
-  };
-
+  
   return (
     <div className="admin-sidebar">
-      <div className="admin-sidebar-header">
-        <h2>CodeGrow Admin</h2>
+      <div className="admin-logo">
+        <Link to="/admin/dashboard">CodeGrow Admin</Link>
       </div>
       
       <nav className="admin-nav">
-        <ul>
-          <li>
-            <Link to="/admin/dashboard" className={isActive('dashboard') ? 'active' : ''}>
-              <i className="fas fa-tachometer-alt"></i>
-              <span>Dashboard</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/users" className={isActive('users') ? 'active' : ''}>
-              <i className="fas fa-users"></i>
-              <span>Users</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/pathways" className={isActive('pathways') ? 'active' : ''}>
-              <i className="fas fa-route"></i>
-              <span>Learning Pathways</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/lessons" className={isActive('lessons') ? 'active' : ''}>
-              <i className="fas fa-book"></i>
-              <span>Lessons</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/exercises" className={isActive('exercises') ? 'active' : ''}>
-              <i className="fas fa-code"></i>
-              <span>Exercises</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/activity-log" className={isActive('activity-log') ? 'active' : ''}>
-              <i className="fas fa-history"></i>
-              <span>Activity Log</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/reports" className={isActive('reports') ? 'active' : ''}>
-              <i className="fas fa-chart-bar"></i>
-              <span>Reports</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/admin/settings" className={isActive('settings') ? 'active' : ''}>
-              <i className="fas fa-cog"></i>
-              <span>Settings</span>
-            </Link>
-          </li>
-        </ul>
+        <Link 
+          to="/admin/dashboard" 
+          className={`admin-nav-item ${location.pathname === '/admin/dashboard' ? 'active' : ''}`}
+        >
+          Dashboard
+        </Link>
+        
+        <Link 
+          to="/admin/users" 
+          className={`admin-nav-item ${location.pathname === '/admin/users' ? 'active' : ''}`}
+        >
+          User Management
+        </Link>
+        
+        <Link 
+          to="/admin/pathways" 
+          className={`admin-nav-item ${location.pathname.includes('/admin/pathways') ? 'active' : ''}`}
+        >
+          Learning Pathways
+        </Link>
+        
+        <Link 
+          to="/admin/lessons" 
+          className={`admin-nav-item ${location.pathname.includes('/admin/lessons') ? 'active' : ''}`}
+        >
+          Lessons
+        </Link>
+        
+        <Link 
+          to="/admin/activity-log" 
+          className={`admin-nav-item ${location.pathname === '/admin/activity-log' ? 'active' : ''}`}
+        >
+          Activity Log
+        </Link>
       </nav>
       
       <div className="admin-sidebar-footer">
-        <Link to="/dashboard" className="admin-exit-btn">
-          <i className="fas fa-sign-out-alt"></i>
-          <span>Exit Admin</span>
+        <Link to="/dashboard" className="admin-nav-item">
+          Back to User Dashboard
+        </Link>
+        
+        <Link to="/logout" className="admin-nav-item">
+          Logout
         </Link>
       </div>
     </div>

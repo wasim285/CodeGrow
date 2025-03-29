@@ -1,26 +1,28 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/AdminStatsCard.css';
+import '../styles/AdminDashboard.css';
 
-const AdminStatsCard = ({ title, value, icon, color, link }) => {
-  const cardContent = (
-    <div className={`admin-stats-card ${color}`}>
-      <div className="stats-icon">
-        <i className={`fas fa-${icon}`}></i>
+const AdminStatsCard = ({ title, value, icon, color }) => {
+  const getColorClass = () => {
+    switch (color) {
+      case 'blue': return 'admin-stats-blue';
+      case 'green': return 'admin-stats-green';
+      case 'amber': return 'admin-stats-amber';
+      case 'purple': return 'admin-stats-purple';
+      case 'red': return 'admin-stats-red';
+      default: return 'admin-stats-blue';
+    }
+  };
+
+  return (
+    <div className={`admin-stats-card ${getColorClass()}`}>
+      <div className="admin-stats-card-content">
+        <h3 className="admin-stats-title">{title}</h3>
+        <div className="admin-stats-value">{value}</div>
       </div>
-      <div className="stats-content">
-        <h3 className="stats-value">{value}</h3>
-        <p className="stats-title">{title}</p>
+      <div className="admin-stats-icon">
+        {icon}
       </div>
     </div>
-  );
-
-  return link ? (
-    <Link to={link} className="stats-card-link">
-      {cardContent}
-    </Link>
-  ) : (
-    cardContent
   );
 };
 
