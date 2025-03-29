@@ -37,14 +37,14 @@ class CustomUser(AbstractUser):
     )
     
     # Optional profile fields - helpful for admin management
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    profile_picture = models.URLField(max_length=255, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     date_deactivated = models.DateTimeField(null=True, blank=True)
     last_login_ip = models.GenericIPAddressField(null=True, blank=True)
     
     # Timestamps for account management
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
     
     # Update related_name to avoid clashes
     groups = models.ManyToManyField(
