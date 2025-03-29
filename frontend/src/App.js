@@ -25,7 +25,7 @@ import AdminLessons from './Pages/AdminLessons';
 import AdminLessonDetail from './Pages/AdminLessonDetail';
 import AdminLessonForm from './Pages/AdminLessonForm';
 
-import './utils/App.css';
+import './App.css';
 
 function App() {
   return (
