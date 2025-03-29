@@ -307,6 +307,12 @@ export const updateAdminUser = (token, userId, userData) => {
   });
 };
 
+export const deleteAdminUser = (token, userId) => {
+  return axios.delete(`${API_BASE_URL}/admin/users/${userId}/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
 export const activateAdminUser = (token, userId, activate = true) => {
   return axios.post(`${API_BASE_URL}/admin/users/${userId}/activate/`, 
     { activate }, 
@@ -413,5 +419,9 @@ export const getAdminStats = (token) => {
     headers: { Authorization: `Token ${token}` },
   });
 };
+
+// Alias exports for compatibility with different import names
+export { getAdminStats as getAdminDashboardStats };
+export { getAdminStats as getAdminStatistics };
 
 export default api;
