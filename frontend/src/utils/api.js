@@ -407,4 +407,11 @@ export const getAdminActivityLog = (token, page = 1, filters = {}) => {
   });
 };
 
+// Admin statistics endpoint
+export const getAdminStats = (token) => {
+  return axios.get(`${API_BASE_URL}/admin/stats/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
 export default api;
