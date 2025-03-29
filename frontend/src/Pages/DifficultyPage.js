@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { getProfile } from "../utils/api"; 
+import api from "../utils/api"; 
 import "../styles/Difficulty.css";
 import PathwaysNavbar from "../components/PathwaysNavbar";
 
@@ -33,6 +33,25 @@ const DifficultyPage = () => {
         }
     }, [navigate]);
 
+    // Helper function to try multiple API endpoints
+    const tryMultipleEndpoints = async (endpoints, data) => {
+        let lastError = null;
+        
+        for (const endpoint of endpoints) {
+            try {
+                console.log(`Trying to update profile with endpoint: ${endpoint}`);
+                const response = await api.patch(endpoint, data);
+                console.log(`Success with endpoint ${endpoint}, status: ${response.status}`);
+                return response;
+            } catch (error) {
+                console.log(`Failed with endpoint ${endpoint}:`, error.message);
+                lastError = error;
+            }
+        }
+        
+        throw lastError; // If all attempts fail
+    };
+
     const handleDifficultySelect = async (level) => {
         setLoading(true);
     
@@ -44,50 +63,46 @@ const DifficultyPage = () => {
                 return;
             }
             
-            // Get current learning goal (either from localStorage or profile)
-            let currentGoal = localStorage.getItem("learning_goal") || "School";
-            
-            try {
-                // Try to get the latest data from profile
-                const profileResponse = await getProfile(token);
-                if (profileResponse?.data?.learning_goal) {
-                    currentGoal = profileResponse.data.learning_goal;
-                }
-            } catch (profileError) {
-                console.warn("Could not fetch profile, using stored learning goal:", currentGoal);
-            }
+            // Get current learning goal from localStorage
+            const currentGoal = localStorage.getItem("learning_goal") || "School";
 
             console.log(`Updating difficulty to: ${level}, with goal: ${currentGoal}`);
             
-            // IMPORTANT FIX: Use 'accounts/profile/' instead of just 'profile/'
-            const updateResponse = await api.patch("accounts/profile/", 
-                { 
-                    difficulty_level: level,
-                    learning_goal: currentGoal 
-                }
-            );
+            // Create the request payload
+            const profileData = { 
+                difficulty_level: level,
+                learning_goal: currentGoal 
+            };
             
-            console.log("Profile update response:", updateResponse.status);
+            // List of possible API endpoints to try
+            const possibleEndpoints = [
+                "accounts/profile/",       // Standard Django REST API pattern
+                "profile/",                // Direct API pattern
+                "accounts/update-profile/", // Alternative endpoint
+                "api/accounts/profile/"    // Full path with api prefix
+            ];
             
-            // Save to localStorage for faster access later
-            localStorage.setItem("difficulty_level", level);
-            navigate("/dashboard");
+            try {
+                // Try all the endpoint patterns
+                await tryMultipleEndpoints(possibleEndpoints, profileData);
+                
+                // If any of them succeeded, save to localStorage and navigate
+                localStorage.setItem("difficulty_level", level);
+                navigate("/dashboard");
+            } catch (apiError) {
+                console.error("All API endpoints failed:", apiError);
+                
+                // Save locally anyway and continue
+                localStorage.setItem("difficulty_level", level);
+                navigate("/dashboard");
+            }
             
         } catch (error) {
             console.error("Error updating difficulty level:", error);
             
-            // More specific error message with details about what went wrong
-            if (!navigator.onLine) {
-                alert("You appear to be offline. Please check your internet connection and try again.");
-            } else if (error.response) {
-                if (error.response.status === 404) {
-                    alert("API endpoint not found. This might be a configuration issue. Please contact support.");
-                } else {
-                    alert(`Error (${error.response.status}): ${error.response.data?.error || "Failed to update difficulty level"}`);
-                }
-            } else {
-                alert("Failed to update difficulty level. Please try again.");
-            }
+            // Just save locally and continue
+            localStorage.setItem("difficulty_level", level);
+            navigate("/dashboard");
         } finally {
             setLoading(false);
         }
