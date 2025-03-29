@@ -297,7 +297,13 @@ export const activateAdminUser = (token, userId, activate = true) => {
   );
 };
 
-// Admin learning pathway management
+// Admin pathway endpoints
+export const getAdminPathway = (token, pathwayId) => {
+  return axios.get(`${API_BASE_URL}/admin/pathways/${pathwayId}/`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+};
+
 export const getAdminPathways = (token, page = 1, filters = {}) => {
   let queryParams = new URLSearchParams({ page });
   
@@ -308,12 +314,6 @@ export const getAdminPathways = (token, page = 1, filters = {}) => {
   });
   
   return axios.get(`${API_BASE_URL}/admin/pathways/?${queryParams.toString()}`, {
-    headers: { Authorization: `Token ${token}` },
-  });
-};
-
-export const getAdminPathway = (token, pathwayId) => {
-  return axios.get(`${API_BASE_URL}/admin/pathways/${pathwayId}/`, {
     headers: { Authorization: `Token ${token}` },
   });
 };
