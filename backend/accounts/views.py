@@ -945,3 +945,20 @@ class AdminPathwayListView(generics.ListCreateAPIView):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+
+class AdminPathwayDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAdminUser]
+    serializer_class = LearningPathwaySerializer
+    queryset = LearningPathway.objects.all()
+    
+    def perform_destroy(self, instance):
+        AdminActivityLog.objects.create(
+            admin_user=self.request.user,
+            action_type='delete_pathway',
+            target_pathway=instance,
+            action_details=f"Deleted pathway: {instance.name}",
+            ip_address=self.request.META.get('REMOTE_ADDR')
+        )
+        
+        instance.delete()
