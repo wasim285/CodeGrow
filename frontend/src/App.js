@@ -11,7 +11,6 @@ import HomePage from './Pages/HomePage';
 import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/ProfilePage'; // Changed to match your file structure
 import Pathways from './Pages/PathwaysPage'; // Changed to match your file structure
-import PathwayDetail from './Pages/PathwayDetail'; // This might not exist - check if you need to create it
 import Lesson from './Pages/LessonPage'; // Changed to match your file structure
 import NotFound from './Pages/NotFound'; // This might not exist - you might need to create it
 
