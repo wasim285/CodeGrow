@@ -2,19 +2,16 @@ import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext, AuthProvider } from './context/Authcontext';
 
-// Import your components
-import Login from './Pages/Login';
-import Register from './Pages/Register';
+// Import your components with correct filenames
+import LoginPage from './Pages/LoginPage';  // Updated from Login to LoginPage
+import RegisterPage from './Pages/RegisterPage';
 import Dashboard from './Pages/Dashboard';
 import AdminDashboard from './Pages/AdminDashboard';
 import AdminUsers from './Pages/AdminUsers';
 import Navbar from './components/navbar';
-import HomePage from './Pages/HomePage';
 import PathwaysPage from './Pages/PathwaysPage';
-import DifficultyPage from './Pages/DifficultyPage';
 import LessonPage from './Pages/LessonPage';
 import StudyCalendar from './Pages/StudyCalendar';
-import LessonsPage from './Pages/LessonsPage';
 import ProfilePage from './Pages/ProfilePage';
 import AdminUserDetail from './Pages/AdminUserDetail';
 import AdminPathways from './Pages/AdminPathways';
@@ -59,11 +56,10 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} /> {/* Updated path */}
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/" element={<Navigate to="/pathways" replace />} /> {/* Updated default route */}
       <Route path="/pathways" element={<PathwaysPage />} />
-      <Route path="/difficulty" element={<DifficultyPage />} />
 
       {/* Protected routes for all authenticated users */}
       <Route path="/dashboard" element={
@@ -71,12 +67,7 @@ function AppRoutes() {
           <Dashboard />
         </ProtectedRoute>
       } />
-      <Route path="/lessons" element={
-        <ProtectedRoute>
-          <LessonsPage />
-        </ProtectedRoute>
-      } />
-      <Route path="/lessons/:lessonId" element={
+      <Route path="/lesson/:lessonId" element={
         <ProtectedRoute>
           <LessonPage />
         </ProtectedRoute>
@@ -134,8 +125,8 @@ function AppRoutes() {
         </AdminRoute>
       } />
 
-      {/* Default route - redirect based on authentication */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Default route */}
+      <Route path="*" element={<Navigate to="/pathways" replace />} /> {/* Updated default route */}
     </Routes>
   );
 }
