@@ -43,9 +43,8 @@ const PathwaysPage = () => {
                 return;
             }
     
-            // IMPORTANT FIX: Remove the extra 'accounts/' in the URL path
-            // since the api instance already includes the base URL
-            const response = await api.patch("profile/", 
+            // The correct endpoint should include 'accounts' before 'profile'
+            const response = await api.patch("accounts/profile/", 
                 { learning_goal: pathway },
                 {
                     headers: {
@@ -69,7 +68,7 @@ const PathwaysPage = () => {
                 if (error.response.status === 404) {
                     alert("API endpoint not found. Please contact support.");
                 } else {
-                    alert(`Error: ${error.response.data.error || "Failed to update learning goal"}`);
+                    alert(`Error: ${error.response.data?.error || "Failed to update learning goal"}`);
                 }
             } else if (error.request) {
                 // The request was made but no response was received

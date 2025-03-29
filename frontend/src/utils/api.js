@@ -1,10 +1,14 @@
 import axios from "axios";
 
-// Updated URL handling - use live site URL instead of backend URL
-const API_BASE_URL =
-  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-    ? "http://127.0.0.1:8000/api/"
-    : "https://codegrow.onrender.com/api/"; // Changed from codegrow-backend.onrender.com
+// Detect environment
+const isLocalhost = 
+  window.location.hostname === "localhost" || 
+  window.location.hostname === "127.0.0.1";
+
+// Set API base URL based on environment
+const API_BASE_URL = isLocalhost
+  ? "http://127.0.0.1:8000/api/"
+  : "https://codegrow.onrender.com/api/";
 
 console.log("Using API base URL:", API_BASE_URL);
 
@@ -13,34 +17,29 @@ const api = axios.create({
   timeout: 30000,
   headers: {
     "Content-Type": "application/json"
-  },
-  // Add withCredentials to handle CORS with credentials
-  withCredentials: true
+  }
 });
 
+// Add request interceptor for authentication
 api.interceptors.request.use(
   (config) => {
-    // Add token to all requests
+    // Add token to all requests except login and register
     const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Token ${token}`;
+    if (token && !config.url.includes('login') && !config.url.includes('register')) {
       console.log("Adding token to request");
+      config.headers.Authorization = `Token ${token}`;
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Add response interceptor for better error handling
+// Add response interceptor for debugging
 api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response) {
-      console.error("API Error Response:", error.response.status, error.response.data);
-    } else if (error.request) {
-      console.error("API No Response:", error.request);
-    } else {
-      console.error("API Request Error:", error.message);
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 404) {
+      console.log("API Error Response:", error.response.status, error.response.data);
     }
     return Promise.reject(error);
   }
@@ -48,11 +47,9 @@ api.interceptors.response.use(
 
 export const registerUser = async (userData) => {
   try {
-    // Add accounts/ prefix to endpoint
     const response = await api.post("accounts/register/", userData);
     console.log("Registration successful:", response.data);
     
-    // Store token if provided
     if (response.data && response.data.token) {
       localStorage.setItem("token", response.data.token);
     }
