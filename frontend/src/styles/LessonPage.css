@@ -224,11 +224,11 @@
 }
 
 .check-result.success p::before {
-    content: "✅";
+    content: "";
 }
 
 .check-result.error p::before {
-    content: "❌";
+    content: "";
 }
 
 /* Feedback Loading */
@@ -283,23 +283,64 @@
 .previous-btn {
     background: linear-gradient(135deg, #f44336, #d32f2f);
     color: white;
-    box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+    box-shadow: 0 4px 16px rgba(244, 67, 54, 0.35), 0 0 12px 2px rgba(244, 67, 54, 0.18);
+    font-weight: 600;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 24px;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.previous-btn:before {
-    content: "◀";
-    font-size: 12px;
+.previous-btn:hover {
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    box-shadow: 0 8px 24px rgba(244, 67, 54, 0.45), 0 0 16px 4px rgba(244, 67, 54, 0.22);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.previous-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
 }
 
 .next-btn {
-    background: linear-gradient(135deg, #ff9800, #f57c00);
+    background: linear-gradient(135deg, #4caf50, #388e3c);
     color: white;
-    box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+    box-shadow: 0 4px 16px rgba(76, 175, 80, 0.35), 0 0 12px 2px rgba(76, 175, 80, 0.18);
+    font-weight: 600;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 24px;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .next-btn:after {
     content: "▶";
     font-size: 12px;
+}
+
+.next-btn:hover {
+    background: linear-gradient(135deg, #388e3c, #2e7031);
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.45), 0 0 16px 4px rgba(76, 175, 80, 0.22);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.next-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.25);
 }
 
 .mark-btn {
@@ -313,154 +354,55 @@
     font-size: 14px;
 }
 
-.previous-btn:hover, .next-btn:hover, .mark-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-}
-
-.previous-btn:active, .next-btn:active, .mark-btn:active {
-    transform: translateY(1px);
-}
-
-.mark-btn.completed {
-    background: linear-gradient(135deg, #9e9e9e, #757575);
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.mark-btn.completed:before {
-    content: "✓";
-}
-
-/* Mini challenge section */
-.mini-challenge {
-    border: 1px solid rgba(76, 175, 80, 0.3);
+/* Reveal Solution Button - CodeGrow style */
+.reveal-solution-btn, .reveal-btn {
+    background: linear-gradient(135deg, #a259f7, #6f00ff 90%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
     border-radius: 12px;
-    padding: 20px;
-    margin-top: 20px;
+    padding: 12px 28px;
+    box-shadow: 0 4px 18px rgba(162, 89, 247, 0.18), 0 0 12px 2px rgba(111, 0, 255, 0.18);
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    display: inline-block;
+    letter-spacing: 0.5px;
+    outline: none;
     position: relative;
-    background: rgba(25, 30, 45, 0.5);
+    overflow: hidden;
+    text-transform: uppercase;
+    font-size: 14px;
 }
 
-.mini-challenge h3 {
-    color: #4caf50;
-    margin-top: 0;
+.reveal-solution-btn:hover, .reveal-solution-btn:focus,
+.reveal-btn:hover, .reveal-btn:focus {
+    background: linear-gradient(135deg, #6f00ff, #a259f7 80%);
+    box-shadow: 0 8px 28px rgba(162, 89, 247, 0.28), 0 0 18px 4px rgba(111, 0, 255, 0.22);
+    transform: translateY(-2px) scale(1.03);
 }
 
-.mini-challenge p {
-    color: #b8bcc6;
+.reveal-solution-btn {
+  background-color: #7c3aed; /* purple-600 */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-/* Feedback container */
-.feedback-container {
-    margin-top: 20px;
-    padding: 20px;
-    border-radius: 12px;
-    background: rgba(25, 30, 50, 0.7);
-    border-left: 3px solid #4caf50;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.5s ease;
-}
-
-.feedback-container h3 {
-    color: #4caf50;
-    margin-top: 0;
-    margin-bottom: 15px;
-    border-bottom: 1px solid rgba(76, 175, 80, 0.3);
-    padding-bottom: 8px;
-    font-size: 18px;
-}
-
-.feedback-content {
-    color: #dce0e8;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-.feedback-content code {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: #ff9800;
-}
-
-.error-message {
-    background: rgba(244, 67, 54, 0.15);
-    border-left: 3px solid #f44336;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 20px 0;
-    color: #e57373;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Improved Mobile Responsiveness */
-@media (max-width: 900px) {
-    .lesson-container {
-        width: 95%;
-        padding: 20px;
-        margin-top: 10px;
-    }
-
-    .lesson-content {
-        padding: 10px;
-    }
-    
-    .lesson-content h1 {
-        font-size: 26px;
-    }
-    
-    .lesson-content p, .lesson-description {
-        font-size: 16px;
-    }
-    
-    .code-editor {
-        padding: 10px;
-    }
-    
-    .cm-editor {
-        font-size: 14px;
-    }
-    
-    .button-group {
-        flex-direction: column;
-    }
-    
-    .run-btn, .check-btn,
-    .previous-btn, .next-btn, .mark-btn {
-        font-size: 14px;
-        padding: 12px 20px;
-        width: 100%;
-    }
-    
-    .step-navigation {
-        flex-direction: column;
-    }
-}
-
-/* Dark mode enhancements */
-@media (prefers-color-scheme: dark) {
-    .code-editor {
-        background: #171722;
-    }
-    
-    .output {
-        background: rgba(20, 20, 35, 0.9);
-    }
-    
-    .feedback-container {
-        background: rgba(20, 25, 40, 0.8);
-    }
+.solution-block {
+  background-color: #1e293b; /* slate-800 */
+  color: #f8fafc; /* slate-50 */
+  font-family: "Fira Code", monospace;
+  font-size: 16px;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 16px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  border: 1px solid #334155;
 }

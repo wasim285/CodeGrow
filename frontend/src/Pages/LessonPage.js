@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Authcontext";
 import "../styles/LessonPage.css";
-import Navbar from "../components/navbar";
+import Navbar from "../components/navbar"; // ⬅️ FIXED: use lowercase 'navbar'
 import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
@@ -27,6 +27,8 @@ const LessonPage = () => {
   const [expectedOutput, setExpectedOutput] = useState("");
   const [checkResult, setCheckResult] = useState(null);
   const [checking, setChecking] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
+  const [solution, setSolution] = useState("");
 
   // Helper function to try multiple endpoints
   const tryEndpoints = async (baseEndpoint, method = 'get', data = null) => {
@@ -38,22 +40,17 @@ const LessonPage = () => {
     
     for (const endpoint of endpoints) {
       try {
-        console.log(`Trying endpoint: ${endpoint}`);
-        
         if (method === 'get') {
           const response = await api.get(endpoint);
-          console.log(`Success with GET endpoint ${endpoint}`);
           return response;
         } else if (method === 'post') {
           const response = await api.post(endpoint, data || {});
-          console.log(`Success with POST endpoint ${endpoint}`);
           return response;
         }
       } catch (endpointError) {
-        console.log(`Endpoint ${endpoint} failed:`, endpointError.message);
+        // Try next endpoint
       }
     }
-    
     throw new Error(`All endpoints failed for ${baseEndpoint}`);
   };
 
@@ -76,7 +73,6 @@ const LessonPage = () => {
         try {
           response = await tryEndpoints(`lessons/${lessonId}/`);
         } catch (lessonError) {
-          // Try without lessons/ prefix since it might be included in the endpoints array
           try {
             response = await tryEndpoints(`${lessonId}/`);
           } catch (error) {
@@ -85,16 +81,11 @@ const LessonPage = () => {
         }
 
         setLesson(response.data);
-        
-        // Handle expected output properly
-        if (response.data.expected_output) {
-          // Normalize expected output to account for line endings
-          const normalized = response.data.expected_output.trim().replace(/\r\n/g, '\n');
-          setExpectedOutput(normalized);
-          console.log("Expected output:", normalized); // Debug log
-        } else {
-          setExpectedOutput("");
-        }
+        setExpectedOutput(
+          response.data.expected_output
+            ? response.data.expected_output.trim().replace(/\r\n/g, '\n')
+            : ""
+        );
 
         // Handle code snippets based on step
         if (step === 2) {
@@ -115,13 +106,11 @@ const LessonPage = () => {
         try {
           const completionResponse = await tryEndpoints(`check-lesson-completion/${lessonId}/`);
           setIsCompleted(completionResponse.data.is_completed);
-        } catch (completionError) {
-          console.log("Could not check lesson completion:", completionError.message);
+        } catch {
           setIsCompleted(false);
         }
         
       } catch (error) {
-        console.error("Error fetching lesson:", error);
         setError(error.message || "Lesson not found.");
       } finally {
         setLoading(false);
@@ -129,6 +118,7 @@ const LessonPage = () => {
     };
 
     fetchLesson();
+    // eslint-disable-next-line
   }, [user, lessonId, navigate, step]);
 
   const markAsCompleted = async () => {
@@ -145,14 +135,11 @@ const LessonPage = () => {
             })
           );
         }
-      } catch (error) {
-        console.error("Could not mark lesson as completed with any endpoint");
+      } catch {
         // Still mark as completed in the UI for better experience
         setIsCompleted(true);
       }
-    } catch (error) {
-      console.error("Error completing lesson:", error);
-    }
+    } catch {}
   };
 
   const runCode = async () => {
@@ -174,13 +161,11 @@ const LessonPage = () => {
 
         setOutput(response.data.output || "No output.");
         return response.data.output || ""; // Return output for checkAnswer
-      } catch (error) {
-        console.error("All run code endpoints failed:", error);
+      } catch {
         setOutput("Error executing code. Please try again.");
         return "Error"; // Return error for checkAnswer
       }
-    } catch (error) {
-      console.error("Run Code Error:", error);
+    } catch {
       setOutput("Error executing code.");
       return "Error"; // Return error for checkAnswer
     } finally {
@@ -203,17 +188,16 @@ const LessonPage = () => {
       if (normalizedUserOutput === normalizedExpectedOutput) {
         setCheckResult({
           correct: true,
-          message: "✅ Correct! Your solution matches the expected output.",
+          message: "Correct! Your solution matches the expected output.",
         });
         markAsCompleted(); // Mark lesson as completed
       } else {
         setCheckResult({
           correct: false,
-          message: "❌ Incorrect. Your solution doesn't match the expected output. Try asking the AI Assistant for help.",
+          message: "Incorrect. Your solution doesn't match the expected output. Try asking the AI Assistant for help.",
         });
       }
-    } catch (error) {
-      console.error("Check Answer Error:", error);
+    } catch {
       setCheckResult({
         correct: false,
         message: "Error checking your answer. Please try again.",
@@ -243,6 +227,39 @@ const LessonPage = () => {
     setStep(step - 1);
     setOutput("");  // Clear output
     setCheckResult(null);  // Clear check results
+  };
+
+  // Reveal solution using the correct endpoint
+  const handleRevealSolution = async () => {
+    if (showSolution) {
+      setShowSolution(false);
+      setSolution("");
+      return;
+    }
+
+    setShowSolution(true);
+
+    try {
+      // Try the dedicated solution endpoint first
+      try {
+        const response = await tryEndpoints(`lessons/${lessonId}/solution/`);
+        if (response.data.solution) {
+          setSolution(response.data.solution);
+          return;
+        }
+      } catch {}
+      // Fallback: try lesson detail endpoint
+      try {
+        const response = await tryEndpoints(`accounts/lessons/${lessonId}/`);
+        if (response.data.solution) {
+          setSolution(response.data.solution);
+          return;
+        }
+      } catch {}
+      setSolution("No solution provided for this lesson.");
+    } catch {
+      setSolution("Error fetching solution. Please try again.");
+    }
   };
 
   if (loading) return <TreeLoader />;
@@ -316,8 +333,6 @@ const LessonPage = () => {
                           placeholder="Write your solution here..."
                         />
                       </div>
-                      
-                      {/* Button Group */}
                       <div className="button-group">
                         <button 
                           className="run-btn" 
@@ -334,18 +349,28 @@ const LessonPage = () => {
                           {checking ? "Checking..." : "Check Answer"}
                         </button>
                       </div>
-                      
                       <div className="output">
                         <h3>Output:</h3>
                         <pre>{output}</pre>
                       </div>
-                      
-                      {/* Simple Check Result */}
                       {checkResult && (
                         <div className={`check-result ${checkResult.correct ? 'success' : 'error'}`}>
                           <p>{checkResult.message}</p>
                         </div>
                       )}
+                      <div className="mt-4">
+                        <button
+                          onClick={handleRevealSolution}
+                          className="reveal-solution-btn"
+                        >
+                          {showSolution ? "Hide Solution" : "Reveal Solution"}
+                        </button>
+                        {showSolution && (
+                          <pre className="solution-block">
+                            {solution}
+                          </pre>
+                        )}
+                      </div>
                     </>
                   ) : (
                     <p className="error-message">No challenge available for this lesson.</p>
@@ -353,7 +378,6 @@ const LessonPage = () => {
                 </div>
               )}
 
-              {/* Update the step navigation section */}
               <div className="step-navigation">
                 {step > 1 && (
                   <button className="previous-btn" onClick={goToPreviousStep}>
@@ -365,22 +389,12 @@ const LessonPage = () => {
                     Next
                   </button>
                 )}
-                {step === 3 && (
-                  <button
-                    className={`mark-btn ${isCompleted ? "completed" : ""}`}
-                    onClick={markAsCompleted}
-                    disabled={isCompleted}
-                  >
-                    {isCompleted ? "Completed" : "Mark as Completed"}
-                  </button>
-                )}
               </div>
+              {/* Removed general quiz button */}
             </>
           )}
         </div>
       </div>
-      
-      {/* AI Learning Assistant - Now positioned absolutely by CSS */}
       {lesson && (
         <AILearningAssistant 
           lessonId={lessonId}

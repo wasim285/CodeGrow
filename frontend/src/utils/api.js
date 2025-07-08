@@ -298,4 +298,41 @@ export const checkCodeOutput = (userOutput, expectedOutput) => {
   };
 };
 
+export const getLessonSolution = async (lessonId) => {
+  const token = localStorage.getItem("token");
+  try {
+    // Use the correct endpoint for your backend
+    return await api.get(`accounts/lessons/${lessonId}/`, {
+      headers: { Authorization: `Token ${token}` },
+    });
+  } catch (error) {
+    console.error("Lesson Solution API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+/**
+ * General Quiz API
+ * Use these for the stand-alone /quiz page (site-wide quiz)
+ */
+export const getGeneralQuizQuestions = async () => {
+  try {
+    // Correct endpoint for general quiz questions
+    return await api.get("accounts/quiz-questions/");
+  } catch (error) {
+    console.error("General Quiz Questions API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const submitGeneralQuizAnswers = async (answers) => {
+  try {
+    // Correct endpoint for submitting general quiz answers
+    return await api.post("accounts/quiz-questions/submit/", { answers });
+  } catch (error) {
+    console.error("General Quiz Submit API Error:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default api;

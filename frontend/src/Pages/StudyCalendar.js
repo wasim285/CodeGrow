@@ -27,6 +27,19 @@ const StudyCalendar = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const token = localStorage.getItem("token");
 
+    // Move fetchSessions outside of useEffect so it can be reused
+    const fetchSessions = async () => {
+        if (!token) return;
+        try {
+            const response = await axios.get(`${API_BASE_URL}study-sessions/`, {
+                headers: { Authorization: `Token ${token}` },
+            });
+            setSessions(response.data);
+        } catch (error) {
+            console.error("Error fetching study sessions:", error);
+        }
+    };
+
     useEffect(() => {
         const fetchLessons = async () => {
             try {
@@ -42,19 +55,22 @@ const StudyCalendar = () => {
     }, [token]);
 
     useEffect(() => {
-        if (!token) return;
-        const fetchSessions = async () => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}study-sessions/`, {
-                    headers: { Authorization: `Token ${token}` },
-                });
-                setSessions(response.data);
-            } catch (error) {
-                console.error("Error fetching study sessions:", error);
-            }
-        };
+        // Initial fetch of sessions
         fetchSessions();
     }, [token]);
+
+    useEffect(() => {
+        // Listen for session removal from other pages
+        const handleSessionRemoved = () => {
+            fetchSessions(); // Now this will work since fetchSessions is defined in component scope
+        };
+        
+        window.addEventListener("studySessionRemoved", handleSessionRemoved);
+        
+        return () => {
+            window.removeEventListener("studySessionRemoved", handleSessionRemoved);
+        };
+    }, []);
 
     const handleDateClick = (arg) => {
         setSelectedDate(arg.dateStr);
@@ -90,6 +106,11 @@ const StudyCalendar = () => {
             setStartTime("10:00");
             setEndTime("11:00");
             showSuccessPopup("✅ Lesson booked successfully!");
+
+            // Dispatch events to update other components
+            window.dispatchEvent(new CustomEvent("studySessionAdded"));
+            window.dispatchEvent(new CustomEvent("activityUpdate"));
+            
         } catch (error) {
             console.error("Error booking study session:", error);
             setErrorMessage("⚠️ Failed to book the session. Please try again.");
@@ -124,6 +145,11 @@ const StudyCalendar = () => {
                 console.log("Session deleted successfully:", sessionToDelete);
                 setSessions((prevSessions) => prevSessions.filter((session) => session.id !== sessionToDelete));
                 showSuccessPopup("🗑️ Study session removed successfully!");
+                
+                // Dispatch event to notify other components
+                window.dispatchEvent(new CustomEvent("studySessionRemoved"));
+                window.dispatchEvent(new CustomEvent("activityUpdate"));
+                
             } else {
                 console.error("Failed to delete session:", response.data);
                 setErrorMessage("⚠️ Failed to remove the session. Please try again.");

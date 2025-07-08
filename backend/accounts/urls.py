@@ -1,6 +1,10 @@
 from django.urls import path
 from . import views
-from .views import CodeFeedbackView, LessonFeedbackView, LessonAssistantView
+from .views import (
+    CodeFeedbackView, LessonFeedbackView, LessonAssistantView, LessonSolutionView,
+    LessonQuizView, LessonQuizSubmitView,
+    GeneralQuizView, GeneralQuizSubmitView, DashboardView, ActivityListView  # <-- import your new quiz views
+)
 
 urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
@@ -20,7 +24,20 @@ urlpatterns = [
     path("check-lesson-completion/<int:lesson_id>/", views.check_lesson_completion, name="check-lesson-completion"),
     
     # AI feedback endpoints
-    path("ai-feedback/", CodeFeedbackView.as_view(), name="ai-feedback"),  # Keep for backward compatibility
-    path("lesson-feedback/", LessonFeedbackView.as_view(), name="lesson-feedback"),  # New endpoint for challenge feedback
-    path("lesson-assistant/", LessonAssistantView.as_view(), name="lesson-assistant"),  # New endpoint for AI assistant
+    path("ai-feedback/", CodeFeedbackView.as_view(), name="ai-feedback"),
+    path("lesson-feedback/", LessonFeedbackView.as_view(), name="lesson-feedback"),
+    path("lesson-assistant/", LessonAssistantView.as_view(), name="lesson-assistant"),
+    path("lessons/<int:pk>/solution/", LessonSolutionView.as_view(), name="lesson-solution"),
+    path("lessons/<int:lesson_id>/quiz/", LessonQuizView.as_view(), name="lesson-quiz"),
+    path("lessons/<int:lesson_id>/submit-quiz/", LessonQuizSubmitView.as_view(), name="submit-quiz"),
+
+    # General quiz endpoints (not tied to a lesson)
+    path("quiz/", GeneralQuizView.as_view(), name="general-quiz"),
+    path("quiz/submit/", GeneralQuizSubmitView.as_view(), name="general-quiz-submit"),
+
+    # Additional URLs
+    path("quiz-questions/",        GeneralQuizView.as_view(),       name="quiz-general"),
+    path("quiz-questions/submit/", GeneralQuizSubmitView.as_view(), name="quiz-general-submit"),
+    path('accounts/dashboard/', DashboardView.as_view(), name='accounts-dashboard'),
+    path('activities/', ActivityListView.as_view(), name='activity-list'),
 ]

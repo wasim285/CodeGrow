@@ -1,0 +1,318 @@
+.activity-container {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: white;
+    font-family: "Inter", sans-serif;
+    min-height: 100vh;
+    padding: 90px 40px 20px 40px;
+}
+
+.activity-content {
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.activity-header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.activity-header h1 {
+    font-size: 36px;
+    font-weight: 600;
+    color: #4caf50;
+    margin: 0 0 12px 0;
+    font-family: "Outfit", sans-serif;
+}
+
+.activity-header p {
+    font-size: 18px;
+    color: #b2b2b2;
+    margin: 0;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 18px;
+    color: #b2b2b2;
+}
+
+.error-message {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    color: #ff6b6b;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.activity-timeline {
+    position: relative;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #4caf50, rgba(76, 175, 80, 0.1));
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+    padding-left: 80px;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border: 3px solid rgba(22, 28, 46, 1);
+    z-index: 2;
+}
+
+.timeline-icon.lesson_completed {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+}
+
+.timeline-icon.quiz_passed {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+}
+
+.timeline-icon.streak_milestone {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+}
+
+.timeline-icon.level_up {
+    background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+}
+
+.timeline-icon.account_created {
+    background: linear-gradient(135deg, #e91e63, #c2185b);
+}
+
+.timeline-icon.study_session_added {
+    background: linear-gradient(135deg, #00bcd4, #0097a7);
+}
+
+.timeline-icon.xp_earned {
+    background: linear-gradient(135deg, #ffeb3b, #fbc02d);
+}
+
+.timeline-content {
+    background: rgba(22, 28, 46, 0.8);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.timeline-content:hover {
+    transform: translateY(-2px);
+    border-color: rgba(76, 175, 80, 0.3);
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 16px;
+}
+
+.timeline-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+.timeline-time {
+    font-size: 14px;
+    color: #8e8e8e;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.timeline-description {
+    font-size: 16px;
+    color: #b2b2b2;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+}
+
+.inline-xp {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.timeline-badges {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.timeline-xp {
+    display: inline-block;
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    margin-right: 8px;
+}
+
+.timeline-score {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.timeline-streak {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.empty-activity {
+    text-align: center;
+    padding: 80px 20px;
+    background: rgba(22, 28, 46, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+}
+
+.empty-activity h3 {
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    margin: 0 0 12px 0;
+}
+
+.empty-activity p {
+    font-size: 16px;
+    color: #b2b2b2;
+    margin: 0 0 32px 0;
+}
+
+.start-learning-btn {
+    background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.start-learning-btn:hover {
+    background: linear-gradient(135deg, #388e3c, #2e7031);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.refresh-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: rgba(76, 175, 80, 0.4);
+    transform: translateY(-1px);
+}
+
+.refresh-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .activity-container {
+        padding: 90px 20px 20px 20px;
+    }
+    
+    .timeline-item {
+        padding-left: 70px;
+    }
+    
+    .timeline-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        left: 6px;
+    }
+    
+    .activity-timeline::before {
+        left: 24px;
+    }
+    
+    .timeline-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .timeline-title {
+        font-size: 18px;
+    }
+    
+    .activity-header h1 {
+        font-size: 28px;
+    }
+    
+    .refresh-btn {
+        position: static;
+        margin-top: 16px;
+        width: 100%;
+    }
+}

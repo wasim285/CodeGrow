@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser, UserProgress, Lesson, StudySession
+from .models import CustomUser, UserProgress, Lesson, StudySession, QuizQuestion, UserActivity
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -80,19 +80,40 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
+        model  = Lesson
+        fields = [
+            "id",
+            "title",
+            "description",
+            "step1_content",
+            "step2_content",
+            "step3_challenge",
+            "code_snippet",
+            "expected_output",
+            "solution",           #  ← add this line
+        ]
+
+
+class LessonWithSolutionSerializer(serializers.ModelSerializer):
+    class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "step1_content", "step2_content", "step3_challenge", "code_snippet"]
+        fields = "__all__"
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
+    level = serializers.SerializerMethodField()
     total_lessons_completed = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProgress
-        fields = ["streak", "total_lessons_completed", "last_active"]
+        fields = ["streak", "total_lessons_completed", "xp", "level", "last_active"]
 
     def get_total_lessons_completed(self, obj):
         return obj.completed_lessons.count()
+
+    def get_level(self, obj):
+        # Always calculate level from XP
+        return (obj.xp // 50) + 1
 
 
 class StudySessionSerializer(serializers.ModelSerializer):
@@ -107,3 +128,49 @@ class StudySessionSerializer(serializers.ModelSerializer):
         if data["end_time"] <= data["start_time"]:
             raise serializers.ValidationError("End time must be after start time.")
         return data
+
+
+class QuizQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizQuestion
+        fields = ["id", "question", "option_a", "option_b", "option_c", "option_d"]
+
+
+class QuizSubmitSerializer(serializers.Serializer):
+    answers = serializers.DictField(
+        child=serializers.CharField(max_length=1),  # {"<question_id>": "A"}
+        allow_empty=False
+    )
+
+
+class UserActivitySerializer(serializers.ModelSerializer):
+    time_ago = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = UserActivity
+        fields = [
+            'id', 'activity_type', 'title', 'description', 
+            'xp_earned', 'created_at', 'time_ago', 'quiz_score', 
+            'streak_count', 'level_achieved'
+        ]
+    
+    def get_time_ago(self, obj):
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        now = timezone.now()
+        diff = now - obj.created_at
+        
+        if diff < timedelta(minutes=1):
+            return "Just now"
+        elif diff < timedelta(hours=1):
+            minutes = int(diff.total_seconds() / 60)
+            return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+        elif diff < timedelta(days=1):
+            hours = int(diff.total_seconds() / 3600)
+            return f"{hours} hour{'s' if hours != 1 else ''} ago"
+        elif diff < timedelta(days=7):
+            days = diff.days
+            return f"{days} day{'s' if days != 1 else ''} ago"
+        else:
+            return obj.created_at.strftime("%b %d, %Y")

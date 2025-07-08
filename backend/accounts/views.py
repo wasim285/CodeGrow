@@ -8,11 +8,13 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.decorators import api_view, permission_classes
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import models
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserProgressSerializer, 
-    LessonSerializer, ProfileSerializer, StudySessionSerializer
+    LessonSerializer, ProfileSerializer, StudySessionSerializer, LessonWithSolutionSerializer,
+    QuizQuestionSerializer, QuizSubmitSerializer, UserActivitySerializer
 )
-from .models import CustomUser, UserProgress, Lesson, StudySession
+from .models import CustomUser, UserProgress, Lesson, StudySession, QuizQuestion, QuizAttempt, UserActivity
 import subprocess
 import sys
 from django.http import JsonResponse
@@ -65,6 +67,19 @@ class RegisterView(APIView):
                 # Create user if all validations pass
                 user = serializer.save()
                 token, _ = Token.objects.get_or_create(user=user)
+                
+                # Create welcome activity
+                UserActivity.create_activity(
+                    user=user,
+                    activity_type='account_created',
+                    title="Welcome to CodeGrow! 🎉",
+                    description="Your coding journey begins now",
+                    xp_earned=10
+                )
+                
+                # Give initial XP
+                progress, _ = UserProgress.objects.get_or_create(user=user)
+                progress.add_xp(10)
                 
                 return Response({
                     "token": token.key,
@@ -155,6 +170,7 @@ def complete_lesson(request, lesson_id):
 
         from datetime import date, timedelta
         today = date.today()
+        old_streak = progress.streak
 
         if progress.last_active == today - timedelta(days=1):
             progress.streak += 1
@@ -164,10 +180,37 @@ def complete_lesson(request, lesson_id):
         progress.last_active = today
         progress.save()
 
+        # Create lesson completion activity
+        UserActivity.create_activity(
+            user=user,
+            activity_type='lesson_completed',
+            title="Lesson Completed! ✅",
+            description=f"Completed: {lesson.title}",
+            xp_earned=25,
+            lesson=lesson
+        )
+
+        # Award XP for lesson completion  
+        leveled_up = progress.add_xp(25, create_activity=False)  # Don't create separate XP activity
+
+        # Check for streak milestones
+        if progress.streak > old_streak and progress.streak % 5 == 0:
+            streak_xp = progress.streak * 10
+            UserActivity.create_activity(
+                user=user,
+                activity_type='streak_milestone',
+                title=f"🔥 {progress.streak}-Day Streak!",
+                description=f"Maintained {progress.streak} days of consistent learning",
+                xp_earned=streak_xp,
+                streak_count=progress.streak
+            )
+            progress.add_xp(streak_xp, create_activity=False)  # Don't create separate XP activity
+
         return Response({
             "message": "Lesson marked as completed.",
             "lessons_completed": progress.lessons_completed,
             "streak": progress.streak,
+            "leveled_up": leveled_up,
             "progress": UserProgressSerializer(progress).data
         }, status=status.HTTP_200_OK)
 
@@ -216,12 +259,14 @@ class LessonDetailView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         lesson = self.get_object()
         return Response({
-            "title": lesson.title,
-            "description": lesson.description,
-            "step1_content": lesson.step1_content,
-            "step2_content": lesson.step2_content,
-            "step3_challenge": lesson.step3_challenge,
-            "code_snippet": lesson.code_snippet,
+            "title":            lesson.title,
+            "description":      lesson.description,
+            "step1_content":    lesson.step1_content,
+            "step2_content":    lesson.step2_content,
+            "step3_challenge":  lesson.step3_challenge,
+            "code_snippet":     lesson.code_snippet,
+            "expected_output":  lesson.expected_output,
+            "solution":         lesson.solution,                #  ← add this
         }, status=status.HTTP_200_OK)
 
 
@@ -292,14 +337,17 @@ class DashboardView(APIView):
 
         current_lesson = available_lessons.first()
         study_sessions = StudySession.objects.filter(user=user)
-
         recommended_lessons = available_lessons.exclude(id__in=progress.completed_lessons.all())[:3]
+        
+        # Get recent activities
+        recent_activities = UserActivity.objects.filter(user=user)[:5]
 
         return Response({
             "current_lesson": LessonSerializer(current_lesson).data if current_lesson else None,
             "recommended_lessons": LessonSerializer(recommended_lessons, many=True).data,
             "study_sessions": StudySessionSerializer(study_sessions, many=True).data,
             "progress": UserProgressSerializer(progress).data,
+            "recent_activities": UserActivitySerializer(recent_activities, many=True).data,
         })
 
 
@@ -311,7 +359,20 @@ class StudySessionListCreateView(generics.ListCreateAPIView):
         return StudySession.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user) 
+        session = serializer.save(user=self.request.user)
+        
+        # Get the lesson title from the related lesson object
+        lesson_title = session.lesson.title if session.lesson else 'Study Session'
+        
+        # Create study session activity (NO XP reward)
+        UserActivity.create_activity(
+            user=self.request.user,
+            activity_type='study_session_added',
+            title="Study Session Scheduled 📅",
+            description=f"Scheduled: {lesson_title} on {session.date}",
+            xp_earned=0  # Changed from 5 to 0
+        )
+        
 
 
 class StudySessionDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -734,3 +795,214 @@ Make sure to put your text inside quotes (single or double), and use commas to s
         
         # Default fallback
         return "I understand you're asking about Python programming. Could you provide more specific details about what you're trying to learn or which concept you're having trouble with?"
+
+
+class LessonSolutionView(generics.RetrieveAPIView):
+    serializer_class = LessonWithSolutionSerializer
+    queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated]
+
+
+class LessonQuizView(generics.ListAPIView):
+    """
+    GET /lessons/<lesson_id>/quiz/   →  list of questions (no answers)
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = QuizQuestionSerializer
+
+    def get_queryset(self):
+        lesson_id = self.kwargs["lesson_id"]
+        return QuizQuestion.objects.filter(lesson_id=lesson_id)
+
+class LessonQuizSubmitView(APIView):
+    """
+    POST /lessons/<lesson_id>/quiz/submit/
+      body: {"answers": {"12":"B","13":"D", ...}}
+    Returns score and per-question feedback.
+    Also awards XP (+10/correct) to UserProgress.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, lesson_id):
+        serializer = QuizSubmitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        answers = serializer.validated_data["answers"]
+
+        questions = QuizQuestion.objects.filter(lesson_id=lesson_id)
+        if not questions.exists():
+            return Response({"error": "No quiz for this lesson"}, 404)
+
+        correct, feedback = 0, []
+        for q in questions:
+            user_ans = answers.get(str(q.id))
+            is_correct = user_ans and user_ans.upper() == q.correct_option
+            feedback.append({
+                "id": q.id,
+                "question": q.question,
+                "your_answer": user_ans,
+                "correct_option": q.correct_option if is_correct else None,
+                "explanation": q.explanation if not is_correct else "Correct!"
+            })
+            if is_correct:
+                correct += 1
+
+        # Calculate score percentage
+        total_questions = questions.count()
+        score_percentage = int((correct / total_questions) * 100)
+
+        # Award XP
+        xp_earned = correct * 10
+        progress, _ = UserProgress.objects.get_or_create(user=request.user)
+        leveled_up = progress.add_xp(xp_earned)
+
+        # Create quiz activity - ONLY ONE ACTIVITY, NOT TWO
+        lesson = Lesson.objects.get(id=lesson_id)
+        if score_percentage >= 70:  # Passing grade
+            UserActivity.create_activity(
+                user=request.user,
+                activity_type='quiz_passed',
+                title=f"Quiz Passed! 🎯",
+                description=f"{lesson.title} Quiz - Score: {score_percentage}%",
+                xp_earned=xp_earned,
+                lesson=lesson,
+                quiz_score=score_percentage
+            )
+        else:
+            # Even for failed quizzes, create an activity but with different title
+            UserActivity.create_activity(
+                user=request.user,
+                activity_type='quiz_completed',
+                title=f"Quiz Completed 🎯",
+                description=f"{lesson.title} Quiz - Score: {score_percentage}%",
+                xp_earned=xp_earned,
+                lesson=lesson,
+                quiz_score=score_percentage
+            )
+
+        # DON'T create a separate xp_earned activity here
+        
+        return Response({
+            "total": total_questions,
+            "correct": correct,
+            "score_percentage": score_percentage,
+            "xp_earned": xp_earned,
+            "xp_total": progress.xp,
+            "level": progress.level,
+            "leveled_up": leveled_up,
+            "feedback": feedback
+        }, 200)
+
+class GeneralQuizView(generics.ListAPIView):
+    """
+    Returns 5 questions (in order) that match the user's learning goal and difficulty level.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = QuizQuestionSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = QuizQuestion.objects.filter(
+            lesson__learning_goal=user.learning_goal,
+            lesson__difficulty_level=user.difficulty_level
+        ).order_by("order", "id")  # Order by 'order' field, then id for stability
+        return qs[:5]  # Return the first 5 in order
+
+class GeneralQuizSubmitView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        answers = request.data.get("answers", {})
+        question_ids = list(map(int, answers.keys()))
+        questions = QuizQuestion.objects.filter(id__in=question_ids)
+
+        correct = 0
+        feedback = []
+        for q in questions:
+            user_pick = answers.get(str(q.id))
+            is_ok = user_pick == q.correct_option
+            if is_ok: correct += 1
+            feedback.append({
+                "id": q.id,
+                "question": q.question,
+                "your_answer": user_pick,
+                "correct": q.correct_option if is_ok else None,
+                "explanation": q.explanation if not is_ok else "✓ Correct"
+            })
+
+        total_questions = questions.count()
+        current_score = correct
+        score_percentage = int((current_score / total_questions) * 100)  # Add this line
+
+        # Get or create quiz attempt record
+        quiz_attempt, created = QuizAttempt.objects.get_or_create(
+            user=request.user,
+            quiz_type="general",
+            learning_goal=request.user.learning_goal,
+            difficulty_level=request.user.difficulty_level,
+            defaults={
+                'best_score': 0,
+                'total_questions': 0,
+                'max_xp_earned': 0
+            }
+        )
+
+        # Calculate XP to award
+        xp_to_award = 0
+        if current_score > quiz_attempt.best_score:
+            # They improved! Award XP for the improvement
+            previous_max_xp = quiz_attempt.best_score * 10
+            new_max_xp = current_score * 10
+            xp_to_award = new_max_xp - previous_max_xp
+            
+            # Update their best score
+            quiz_attempt.best_score = current_score
+            quiz_attempt.max_xp_earned = new_max_xp
+            quiz_attempt.save()
+        else:
+            # No improvement, no additional XP
+            xp_to_award = 0
+
+        # Award XP WITHOUT creating separate XP activity
+        user_progress, _ = UserProgress.objects.get_or_create(user=request.user)
+        if xp_to_award > 0:
+            user_progress.add_xp(xp_to_award, create_activity=False)  # Don't create XP activity
+
+        # CREATE QUIZ COMPLETION ACTIVITY (this was missing!)
+        if score_percentage >= 70:  # Passing grade
+            UserActivity.create_activity(
+                user=request.user,
+                activity_type='quiz_passed',
+                title=f"General Quiz Passed! 🎯",
+                description=f"Score: {current_score}/{total_questions} ({score_percentage}%)",
+                xp_earned=xp_to_award,
+                quiz_score=score_percentage
+            )
+        else:
+            # Even for failed attempts, create an activity
+            UserActivity.create_activity(
+                user=request.user,
+                activity_type='quiz_completed',
+                title=f"General Quiz Completed 🎯",
+                description=f"Score: {current_score}/{total_questions} ({score_percentage}%)",
+                xp_earned=xp_to_award,
+                quiz_score=score_percentage
+            )
+
+        return Response({
+            "total": total_questions,
+            "correct": current_score,
+            "best_score": quiz_attempt.best_score,
+            "xp_earned": xp_to_award,
+            "xp_total": user_progress.xp,
+            "level": user_progress.level,
+            "feedback": feedback,
+            "message": f"Best score: {quiz_attempt.best_score}/{total_questions}" if not created else "First attempt!"
+        }, status=status.HTTP_200_OK)
+
+
+class ActivityListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserActivitySerializer
+    
+    def get_queryset(self):
+        return UserActivity.objects.filter(user=self.request.user)
