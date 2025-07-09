@@ -1,29 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../styles/NewHomePage.css"; // Make sure this path is correct!
+import "../styles/NewHomePage.css";
 
 function HomePage() {
-  console.log("HomePage component rendering"); // Debug log
+  console.log("HomePage component rendering");
   
   return (
     <div className="homepage">
-      {/* Animated Background - Make sure this is the exact structure */}
-      <div className="animated-bg">
-        <span className="code-particle">&lt;div&gt;</span>
-        <span className="code-particle">function()</span>
-        <span className="code-particle">{"{}"}</span>
-        <span className="code-particle">return</span>
-        <span className="code-particle">import React</span>
-        <span className="leaf-particle">🍃</span>
-        <span className="leaf-particle">🌱</span>
-        <span className="leaf-particle">🌿</span>
-        <span className="code-particle">&lt;/&gt;</span>
-        <span className="code-particle">const app =</span>
-        <span className="leaf-particle">🌿</span>
-        <span className="leaf-particle">🍃</span>
-      </div>
-
       <nav className="navbar">
         <div className="logo">
           <span className="logo-icon">{"</>"}</span>
@@ -31,157 +15,165 @@ function HomePage() {
         </div>
       </nav>
 
-      <div className="container">
+      {/* Hero Section */}
+      <div className="hero-section">
         <motion.div
-          className="left-content"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1 }}
+          className="hero-content-card"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
-          <div className="text-box">
-            <h1 className="title">Master Python.<br />Level Up With AI.</h1>
-            <p className="subtitle">
-              Unlock personalised lessons, coding challenges, and real-world projects to grow your skills.
+          <div className="hero-content">
+            <h1 className="hero-title">
+              Welcome to <span className="highlight">CodeGrow</span>
+            </h1>
+            <p className="hero-subtitle">
+              Your friendly companion for learning Python programming. 
+              Start your coding journey today with interactive lessons, 
+              fun quizzes, and personalized learning paths!
             </p>
 
-            <div className="buttons">
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Link to="/register" className="btn btn-green">
-                  Get Started
+            <div className="hero-buttons">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link to="/register" className="btn btn-primary">
+                  Sign Up
                 </Link>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Link to="/login" className="login-button">
-                  Login
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link to="/login" className="btn btn-secondary">
+                  Log In
                 </Link>
               </motion.div>
             </div>
           </div>
         </motion.div>
 
-        <div className="right-content">
-          {/* Code Editor Preview */}
-          <motion.div 
-            className="code-editor"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="editor-header">
-              <div className="editor-title">main.py</div>
-              <div className="editor-actions">
-                <div className="action-dot dot-red"></div>
-                <div className="action-dot dot-yellow"></div>
-                <div className="action-dot dot-green"></div>
-              </div>
-            </div>
-            <div className="code-content">
-              <div className="code-line">
-                <span className="line-number">1</span>
-                <span className="keyword">def</span> <span className="function">learn_python</span>():
-              </div>
-              <div className="code-line">
-                <span className="line-number">2</span>
-                <span>  </span>skills = [<span className="string">"basics"</span>, <span className="string">"functions"</span>, <span className="string">"classes"</span>]
-              </div>
-              <div className="code-line">
-                <span className="line-number">3</span>
-                <span>  </span><span className="keyword">return</span> <span className="string">"Ready to grow!"</span>
-              </div>
-              <div className="code-line">
-                <span className="line-number">4</span>
-                <span className="comment"># Start your coding journey today</span>
-              </div>
-            </div>
-          </motion.div>
-          
-          <motion.div
-            className="lesson-box completed"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <div className="lesson-title">Lesson 1</div>
-            <div className="lesson-description">Introduction to Python Programming</div>
-            <div className="lesson-stats">
-              <span className="lesson-level">Beginner (School)</span>
-              <div className="completion-indicator">
-                <span className="completed-icon">✓</span> Completed
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="lesson-box in-progress"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 1 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <div className="lesson-title">Lesson 2</div>
-            <div className="lesson-description">Control Flow and Functions</div>
-            <div className="lesson-stats">
-              <span className="lesson-level">Beginner (School)</span>
-              <div className="completion-indicator">
-                <span className="in-progress-icon">●</span> In Progress
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="lesson-box"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 1.3 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <div className="lesson-title">Lesson 3</div>
-            <div className="lesson-description">Data Structures</div>
-            <div className="lesson-stats">
-              <span className="lesson-level">Beginner (School)</span>
-              <div className="completion-indicator">
-                <span className="locked-icon">🔒</span> Locked
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        {/* Welcome Animation */}
+        <motion.div
+          className="welcome-animation"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.3 }}
+        >
+          <div className="python-logo">🌳</div>
+          <div className="floating-elements">
+            <div className="float-item">💡</div>
+            <div className="float-item">⚡</div>
+            <div className="float-item">🎯</div>
+            <div className="float-item">🏆</div>
+          </div>
+        </motion.div>
       </div>
 
-      <motion.div 
-        className="stats-section"
-        initial={{ opacity: 0, y: 30 }}
+      {/* Features Section */}
+      <motion.section
+        className="features-section"
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 1.2 }}
+        transition={{ duration: 0.8, delay: 0.6 }}
       >
-        <div className="stat-item">
-          <div className="stat-number">5,000+</div>
-          <div className="stat-label">Active Learners</div>
+        <h2 className="section-title">Why Choose CodeGrow?</h2>
+        <div className="features-grid">
+          <motion.div
+            className="feature-card"
+            whileHover={{ y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="feature-icon">📚</div>
+            <h3>Interactive Lessons</h3>
+            <p>Learn Python step-by-step with hands-on coding exercises and real-world examples.</p>
+          </motion.div>
+
+          <motion.div
+            className="feature-card"
+            whileHover={{ y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="feature-icon">🎮</div>
+            <h3>Gamified Learning</h3>
+            <p>Earn XP, level up, and track your progress as you master Python programming.</p>
+          </motion.div>
+
+          <motion.div
+            className="feature-card"
+            whileHover={{ y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="feature-icon">🎯</div>
+            <h3>Smart Quizzes</h3>
+            <p>Test your knowledge with adaptive quizzes that help reinforce what you've learned.</p>
+          </motion.div>
         </div>
-        <div className="stat-item">
-          <div className="stat-number">200+</div>
-          <div className="stat-label">Coding Lessons</div>
-        </div>
-        <div className="stat-item">
-          <div className="stat-number">95%</div>
-          <div className="stat-label">Success Rate</div>
-        </div>
-      </motion.div>
-      
-      <motion.footer 
-        className="footer"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 1.5 }}
+      </motion.section>
+
+      {/* How It Works Section */}
+      <motion.section
+        className="how-it-works"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.9 }}
       >
-        <div className="footer-links">
-          <a href="#about" className="footer-link">About Us</a>
-          <a href="#privacy" className="footer-link">Privacy Policy</a>
-          <a href="#terms" className="footer-link">Terms of Service</a>
-          <a href="#contact" className="footer-link">Contact</a>
+        <h2 className="section-title">How It Works</h2>
+        <div className="steps-container">
+          <div className="step">
+            <div className="step-number">1</div>
+            <h3>Choose Your Path</h3>
+            <p>Select your learning goals and current skill level</p>
+          </div>
+          <div className="step-arrow">→</div>
+          <div className="step">
+            <div className="step-number">2</div>
+            <h3>Learn & Practice</h3>
+            <p>Complete interactive lessons and coding challenges</p>
+          </div>
+          <div className="step-arrow">→</div>
+          <div className="step">
+            <div className="step-number">3</div>
+            <h3>Track Progress</h3>
+            <p>Monitor your growth and celebrate achievements</p>
+          </div>
         </div>
-        <div className="copyright">© 2025 CodeGrow. All rights reserved.</div>
-      </motion.footer>
+      </motion.section>
+
+      {/* Call to Action Section */}
+      <motion.section
+        className="cta-section"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1.2 }}
+      >
+        <div className="cta-content">
+          <h2>Ready to Start Coding?</h2>
+          <p>Join CodeGrow today and begin your Python programming journey!</p>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link to="/register" className="btn btn-cta">
+              Get Started Free
+            </Link>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <div className="logo">
+              <span className="logo-icon">{"</>"}</span>
+              CodeGrow
+            </div>
+            <p>Learn Python, Grow Skills</p>
+          </div>
+          <div className="footer-links">
+            <a href="#about">About</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+            <a href="#contact">Contact</a>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; 2025 CodeGrow. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
