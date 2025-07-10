@@ -1,9 +1,9 @@
 from django.urls import path
 from . import views
 from .views import (
-    CodeFeedbackView, LessonFeedbackView, LessonAssistantView, LessonSolutionView,
+    CodeFeedbackView, LessonSolutionView,
     LessonQuizView, LessonQuizSubmitView,
-    GeneralQuizView, GeneralQuizSubmitView, DashboardView, ActivityListView  # <-- import your new quiz views
+    GeneralQuizView, GeneralQuizSubmitView, DashboardView, ActivityListView
 )
 
 urlpatterns = [
@@ -25,8 +25,6 @@ urlpatterns = [
     
     # AI feedback endpoints
     path("ai-feedback/", CodeFeedbackView.as_view(), name="ai-feedback"),
-    path("lesson-feedback/", LessonFeedbackView.as_view(), name="lesson-feedback"),
-    path("lesson-assistant/", LessonAssistantView.as_view(), name="lesson-assistant"),
     path("lessons/<int:pk>/solution/", LessonSolutionView.as_view(), name="lesson-solution"),
     path("lessons/<int:lesson_id>/quiz/", LessonQuizView.as_view(), name="lesson-quiz"),
     path("lessons/<int:lesson_id>/submit-quiz/", LessonQuizSubmitView.as_view(), name="submit-quiz"),

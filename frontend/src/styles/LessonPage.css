@@ -354,8 +354,8 @@
     font-size: 14px;
 }
 
-/* Reveal Solution Button - CodeGrow style */
-.reveal-solution-btn, .reveal-btn {
+/* Reveal Solution Button */
+.reveal-solution-btn {
     background: linear-gradient(135deg, #a259f7, #6f00ff 90%);
     color: #fff;
     font-weight: 700;
@@ -376,33 +376,32 @@
     font-size: 14px;
 }
 
-.reveal-solution-btn:hover, .reveal-solution-btn:focus,
-.reveal-btn:hover, .reveal-btn:focus {
+.reveal-solution-btn:hover, .reveal-solution-btn:focus {
     background: linear-gradient(135deg, #6f00ff, #a259f7 80%);
     box-shadow: 0 8px 28px rgba(162, 89, 247, 0.28), 0 0 18px 4px rgba(111, 0, 255, 0.22);
     transform: translateY(-2px) scale(1.03);
 }
 
-.reveal-solution-btn {
-  background-color: #7c3aed; /* purple-600 */
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
+.solution-block {
+    background-color: #1e293b;
+    color: #f8fafc;
+    font-family: "Fira Code", monospace;
+    font-size: 16px;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 16px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    border: 1px solid #334155;
 }
 
-.solution-block {
-  background-color: #1e293b; /* slate-800 */
-  color: #f8fafc; /* slate-50 */
-  font-family: "Fira Code", monospace;
-  font-size: 16px;
-  padding: 20px;
-  border-radius: 8px;
-  margin-top: 16px;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  line-height: 1.6;
-  border: 1px solid #334155;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

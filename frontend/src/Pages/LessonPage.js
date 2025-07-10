@@ -2,12 +2,11 @@ import React, { useState, useContext, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/Authcontext";
 import "../styles/LessonPage.css";
-import Navbar from "../components/navbar"; // ⬅️ FIXED: use lowercase 'navbar'
+import Navbar from "../components/navbar";
 import TreeLoader from "../components/TreeLoader";
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import api from "../utils/api";
-import AILearningAssistant from "../components/AILearningAssistant";
 
 const LessonPage = () => {
   const { user } = useContext(AuthContext);
@@ -194,7 +193,7 @@ const LessonPage = () => {
       } else {
         setCheckResult({
           correct: false,
-          message: "Incorrect. Your solution doesn't match the expected output. Try asking the AI Assistant for help.",
+          message: "Incorrect. Your solution doesn't match the expected output. Try again!",
         });
       }
     } catch {
@@ -315,7 +314,6 @@ const LessonPage = () => {
 
               {step === 3 && (
                 <div className="mini-challenge">
-                  <h3>Step 3: Mini Challenge</h3>
                   {lesson.step3_challenge ? (
                     <>
                       <p
@@ -395,15 +393,7 @@ const LessonPage = () => {
           )}
         </div>
       </div>
-      {lesson && (
-        <AILearningAssistant 
-          lessonId={lessonId}
-          lessonTitle={lesson.title}
-          currentStep={step}
-          userCode={userCode}
-          expectedOutput={expectedOutput}
-        />
-      )}
+      {/* Removed AILearningAssistant component */}
     </div>
   );
 };
